@@ -54,7 +54,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect('/checkEmail')
 }
 
 // logout method

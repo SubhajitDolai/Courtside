@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { signup } from '@/app/login/actions'
+import { signup } from '@/app/(auth)/login/actions'
 
 export function SignupForm({
   className,

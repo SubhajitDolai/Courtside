@@ -7,8 +7,7 @@ export default async function OnboardingPage() {
   await checkAuth()
 
   return (
-    <div className="max-w-md mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">Complete Your Profile</h1>
+    <div>
       <OnboardingForm />
     </div>
   )

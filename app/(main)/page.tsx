@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { logout } from "./login/actions";
+import { logout } from "../(auth)/login/actions";
 import { ModeToggle } from "@/components/modeToggle";
 
 export default function Home() {
