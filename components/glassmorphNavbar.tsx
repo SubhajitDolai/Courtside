@@ -14,8 +14,8 @@ import { useTheme } from "next-themes";
 
 export const navigationItems = [
   {
-    title: "Home",
-    href: "/",
+    title: "Profile",
+    href: "/private",
     items: [],
   },
   {
@@ -23,11 +23,11 @@ export const navigationItems = [
     href: "/sports",
     items: [],
   },
-  // {
-  //   title: "Onboarding",
-  //   href: "/onboarding",
-  //   items: [],
-  // },
+  {
+    title: "Onboarding",
+    href: "/onboarding",
+    items: [],
+  },
 ];
 
 export default function GlassmorphNavbar() {
@@ -51,7 +51,7 @@ export default function GlassmorphNavbar() {
 
           <div className="hidden gap-4 md:flex">
             {navigationItems.map((item) => (
-              <Link key={item.href} href={item.href} className="font-medium">
+              <Link key={item.href} href={item.href} className="font-bold">
                 {item.title}
               </Link>
             ))}
