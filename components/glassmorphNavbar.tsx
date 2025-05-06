@@ -24,8 +24,8 @@ export const navigationItems = [
     items: [],
   },
   {
-    title: "Onboarding",
-    href: "/onboarding",
+    title: "Home",
+    href: "/",
     items: [],
   },
 ];
