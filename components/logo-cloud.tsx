@@ -1,5 +1,6 @@
 import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { ProgressiveBlur } from '@/components/ui/progressive-blur'
+import Image from 'next/image'
 
 export default function LogoCloud() {
     return (
@@ -15,75 +16,131 @@ export default function LogoCloud() {
                             speed={40}
                             gap={112}>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/badminton.png"
                                     alt="Badminton Logo"
                                     height="20"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/badminton.png"
+                                    alt="Badminton Logo"
+                                    height={20}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/swimming.png"
                                     alt="Swimming Logo"
                                     height="16"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/swimming.png"
+                                    alt="Swimming Logo"
+                                    height={16}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/wrestling.png"
                                     alt="Wrestling Logo"
                                     height="16"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/wrestling.png"
+                                    alt="Wrestling Logo"
+                                    height={16}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/table-tennis.png"
                                     alt="Table Tennis Logo"
                                     height="20"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/table-tennis.png"
+                                    alt="Table Tennis Logo"
+                                    height={20}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/football.png"
                                     alt="Football Logo"
                                     height="20"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/football.png"
+                                    alt="Football Logo"
+                                    height={20}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/cricket.png"
                                     alt="Cricket Logo"
                                     height="16"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/cricket.png"
+                                    alt="Cricket Logo"
+                                    height={16}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/table-football.png"
                                     alt="Table Football Logo"
                                     height="28"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/table-football.png"
+                                    alt="Table Football Logo"
+                                    height={28}
+                                    width={0}
                                 />
                             </div>
                             <div className="flex">
-                                <img
+                                {/* <img
                                     className="mx-auto h-10 w-fit dark:invert"
                                     src="/sports_png/carrom.png"
                                     alt="Carror Logo"
                                     height="24"
                                     width="auto"
+                                /> */}
+                                <Image
+                                    className="mx-auto h-10 w-fit dark:invert"
+                                    src="/sports_png/carrom.png"
+                                    alt="Carror Logo"
+                                    height={24}
+                                    width={0}
                                 />
                             </div>
                         </InfiniteSlider>

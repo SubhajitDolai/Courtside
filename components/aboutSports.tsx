@@ -1,5 +1,6 @@
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 const sports = [
     {
@@ -57,7 +58,14 @@ export default function AboutSports() {
                     <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                         {sports.map((sport, index) => (
                             <div key={index} className="group overflow-hidden">
-                                <img className="h-96 w-full rounded-md object-cover object-top grayscale transition-all duration-500 hover:grayscale-0 group-hover:h-[22.5rem] group-hover:rounded-xl" src={sport.avatar} alt="team sport" width="826" height="1239" />
+                                {/* <img className="h-96 w-full rounded-md object-cover object-top grayscale transition-all duration-500 hover:grayscale-0 group-hover:h-[22.5rem] group-hover:rounded-xl" src={sport.avatar} alt="team sport" width="826" height="1239" /> */}
+                                <Image
+                                    className="h-96 w-full rounded-md object-cover object-top grayscale transition-all duration-500 hover:grayscale-0 group-hover:h-[22.5rem] group-hover:rounded-xl"
+                                    src={sport.avatar}
+                                    alt="team sport"
+                                    width={826}
+                                    height={1239}
+                                />
                                 <div className="px-2 pt-2 sm:pb-0 sm:pt-4">
                                     <div className="flex justify-between">
                                         <h3 className="text-title text-base font-medium transition-all duration-500 group-hover:tracking-wider">{sport.name}</h3>

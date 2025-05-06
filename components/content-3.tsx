@@ -1,12 +1,20 @@
 import { Button } from '@/components/ui/button'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ContentSection() {
     return (
         <section className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-12">
-                <img className="rounded-(--radius) grayscale" src="/mit.jpg" alt="team image" height="" width="" loading="lazy" />
+                {/* <img className="rounded-(--radius) grayscale" src="/mit.jpg" alt="team image" height="" width="" loading="lazy" /> */}
+                <Image
+                    src="/mit.jpg"
+                    alt="team image"
+                    width={1489}
+                    height={575}
+                    className="rounded-[var(--radius)] grayscale w-full h-auto"
+                />
 
                 <div className="grid gap-6 md:grid-cols-2 md:gap-12">
                     <h2 className="text-4xl font-medium">Dronacharya: Uniting sports, fitness, and community at MIT-WPU.</h2>

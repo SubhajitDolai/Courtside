@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LayoutGrid, Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";

@@ -11,7 +11,7 @@ export default function CheckMailPage() {
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold">Check Your Email 📩</h1>
         <p className="text-muted-foreground">
-          We've sent a confirmation link to your MIT-WPU email address.
+          We&apos;ve sent a confirmation link to your MIT-WPU email address.
         </p>
         <p className="text-muted-foreground">
           Please verify your email to activate your account.
