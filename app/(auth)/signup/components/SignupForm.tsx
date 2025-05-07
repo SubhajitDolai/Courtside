@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,11 +12,24 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signup } from '@/app/(auth)/login/actions'
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault() // Prevent the default full-page reload
+    setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    await signup(formData) // Call the server action(signup) manually
+    setIsLoading(false)
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -25,7 +40,7 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -43,8 +58,15 @@ export function SignupForm({
                 </div>
                 <Input id="password" name="password" type="password" placeholder="Password" required />
               </div>
-              <Button type="submit" formAction={signup} className="w-full">
-                Signup
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </>
+                ) : (
+                  'Signup'
+                )}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

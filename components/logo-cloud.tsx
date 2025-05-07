@@ -24,7 +24,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/badminton.png"
                                     alt="Badminton Logo"
                                     height={20}
@@ -40,7 +40,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/swimming.png"
                                     alt="Swimming Logo"
                                     height={20}
@@ -56,7 +56,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/wrestling.png"
                                     alt="Wrestling Logo"
                                     height={20}
@@ -72,7 +72,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/table-tennis.png"
                                     alt="Table Tennis Logo"
                                     height={20}
@@ -88,7 +88,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/football.png"
                                     alt="Football Logo"
                                     height={20}
@@ -104,7 +104,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/cricket.png"
                                     alt="Cricket Logo"
                                     height={20}
@@ -120,7 +120,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/table-football.png"
                                     alt="Table Football Logo"
                                     height={20}
@@ -136,7 +136,7 @@ export default function LogoCloud() {
                                     width="auto"
                                 /> */}
                                 <Image
-                                    className="mx-auto h-10 w-fit dark:invert"
+                                    className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/carrom.png"
                                     alt="Carror Logo"
                                     height={20}
