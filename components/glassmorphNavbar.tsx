@@ -24,8 +24,8 @@ export const navigationItems = [
     items: [],
   },
   {
-    title: "Home",
-    href: "/",
+    title: "Admin",
+    href: "/admin",
     items: [],
   },
 ];
