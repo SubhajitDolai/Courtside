@@ -1,26 +1,55 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Trophy, Clock, Calendar } from 'lucide-react'
 
 export default function AdminPage() {
   const router = useRouter()
 
+  const cards = [
+    {
+      title: 'Manage Sports',
+      description: 'Add or edit sports options',
+      icon: <Trophy className="h-8 w-8 text-primary" />,
+      href: '/admin/sports',
+    },
+    {
+      title: 'Manage Slots',
+      description: 'Set available time slots',
+      icon: <Clock className="h-8 w-8 text-primary" />,
+      href: '/admin/slots',
+    },
+    {
+      title: 'Manage Bookings',
+      description: 'View and manage user bookings',
+      icon: <Calendar className="h-8 w-8 text-primary" />,
+      href: '/admin/bookings',
+    },
+  ]
+
   return (
-    <div className="flex min-h-screen max-w-full items-center justify-center p-4">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">Admin Dashboard 🫠</h1>
-        <div className='flex items-center justify-center gap-5'>
-          <Button onClick={() => router.push("/admin/sports")} className="mt-4" variant='default'>
-            Manage Sports
-          </Button>
-          <Button onClick={() => router.push("/admin/slots")} className="mt-4" variant='default'>
-            Manage Slots
-          </Button>
-          <Button onClick={() => router.push("/admin/bookings")} className="mt-4" variant='default'>
-            Manage Bookings
-          </Button>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+        {cards.map((card, index) => (
+          <Card
+            key={index}
+            onClick={() => router.push(card.href)}
+            className="cursor-pointer transition hover:shadow-lg hover:bg-accent"
+          >
+            <CardHeader className="flex flex-col items-center space-y-2">
+              {card.icon}
+              <CardTitle className="text-xl font-semibold text-center">
+                {card.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground text-center">
+                {card.description}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   )

@@ -1,0 +1,151 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
+
+export default function SportSlotsPage() {
+  const params = useParams<{ id: string }>()
+  const router = useRouter()
+  const sportId = params.id
+  const supabase = createClient()
+
+  const [slots, setSlots] = useState<any[]>([])
+  const [userGender, setUserGender] = useState<string | null>(null)
+  const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // ✅ 1) Get user
+      const userRes = await supabase.auth.getUser()
+      const user = userRes.data.user
+
+      if (!user) {
+        setUserGender(null)
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('gender')
+          .eq('id', user.id)
+          .single()
+
+        setUserGender(profile?.gender || null)
+      }
+
+      // ✅ 2) Fetch slots
+      const { data } = await supabase
+        .from('slots')
+        .select('*')
+        .eq('sport_id', sportId)
+        .eq('is_active', true)
+
+      setSlots(data ?? [])
+    }
+
+    fetchData()
+  }, [sportId, supabase])
+
+  // ✅ Filter slot visibility by gender
+  const visibleSlots = slots.filter((slot) => {
+    if (slot.gender === 'any') return true
+    if (!userGender) return slot.gender === 'any'
+    return slot.gender === userGender
+  })
+
+  const getGenderBadgeColor = (gender: string) => {
+    switch (gender) {
+      case 'male':
+        return 'bg-blue-500 text-white'
+      case 'female':
+        return 'bg-pink-500 text-white'
+      case 'any':
+      default:
+        return 'bg-muted text-muted-foreground'
+    }
+  }
+
+  // ✅ Correct slot expiry check — expired only if end time has passed today
+  const isSlotPast = (slot: any) => {
+    const now = new Date()
+
+    // Slot end time today
+    const [hour, minute] = slot.end_time.split(':').map(Number)
+    const slotEnd = new Date()
+    slotEnd.setHours(hour, minute, 0, 0)
+
+    return now > slotEnd
+  }
+
+  // ✅ Handle view seats click with loading state
+  const handleViewSeats = (slotId: string) => {
+    setLoadingSlotId(slotId)
+    router.push(`/sports/${sportId}/slots/${slotId}/seats`)
+  }
+
+  return (
+    <div className="pt-30 p-6 min-h-screen bg-muted/40">
+      <h1 className="text-2xl font-bold mb-6 text-center">Available Slots</h1>
+
+      {visibleSlots.length === 0 && (
+        <p className="text-center text-muted-foreground">No slots available for the selected sport</p>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {visibleSlots.map((slot) => {
+          const past = isSlotPast(slot)
+
+          return (
+            <Card
+              key={slot.id}
+              className={`hover:shadow-md transition-shadow ${
+                past ? 'opacity-50 pointer-events-none' : ''
+              }`}
+            >
+              <CardHeader className="flex flex-col gap-2">
+                <div className="flex items-center justify-between w-full">
+                  <CardTitle className="text-lg font-semibold">
+                    {slot.start_time} – {slot.end_time}
+                  </CardTitle>
+                  <Badge
+                    className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${getGenderBadgeColor(slot.gender)}`}
+                  >
+                    {slot.gender === 'any'
+                      ? 'Open to All'
+                      : slot.gender.charAt(0).toUpperCase() + slot.gender.slice(1)}
+                  </Badge>
+                </div>
+
+                {/* ✅ Expired badge */}
+                {past && (
+                  <Badge variant="destructive" className="w-fit text-xs">
+                    Expired
+                  </Badge>
+                )}
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={() => handleViewSeats(slot.id)}
+                  className="w-full"
+                  disabled={past || loadingSlotId === slot.id}
+                >
+                  {loadingSlotId === slot.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'View Seats'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

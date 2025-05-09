@@ -18,7 +18,8 @@ export async function completeOnboarding(prevState: unknown, formData: FormData)
     prn: formData.get('prn'),
     email: user.email,
     course: formData.get('course'),
-    gender: formData.get('gender')
+    gender: formData.get('gender'),
+    phone_number: formData.get('phone_number')
   })
 
   if (error) {

@@ -6,6 +6,7 @@ import FooterSection from "@/components/footer";
 import HeroSection from "@/components/hero-section";
 import LogoCloud from "@/components/logo-cloud";
 import AboutSports from "@/components/aboutSports";
+import TeamSection from "@/components/team";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <AboutSports />
       <CallToAction />
       <FAQsThree />
+      <TeamSection />
       <FooterSection />
     </>
   );

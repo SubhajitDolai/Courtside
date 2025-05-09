@@ -27,6 +27,11 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // hit api without using auth using post http req
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    return NextResponse.next()  // No need for authentication, let it pass through
+  }
+
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
@@ -37,24 +42,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Redirect authenticated users away from /login, /signup, /error, /invalidEmail
+  // Redirect authenticated users away from these pages
   if (
     user &&
-    (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup') || request.nextUrl.pathname.startsWith('/error') || request.nextUrl.pathname.startsWith('/invalidEmail'))
+    (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
-  // Redirect unauthenticated users to /login, except for /login, /signup, and /auth
+  // Redirect unauthenticated users to /login and allow access to these pages
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/error') &&
-    !request.nextUrl.pathname.startsWith('/invalidEmail') &&
-    !request.nextUrl.pathname.startsWith('/checkEmail') &&
+    !request.nextUrl.pathname.startsWith('/forgot-password') &&
+    !request.nextUrl.pathname.startsWith('/reset-password') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {
     const url = request.nextUrl.clone()

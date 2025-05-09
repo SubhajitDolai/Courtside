@@ -16,6 +16,8 @@ export type ProgressiveBlurProps = {
   blurIntensity?: number;
 } & HTMLMotionProps<'div'>;
 
+const MotionDiv = motion.create('div');
+
 export function ProgressiveBlur({
   direction = 'bottom',
   blurLayers = 8,
@@ -45,7 +47,7 @@ export function ProgressiveBlur({
         )})`;
 
         return (
-          <motion.div
+          <MotionDiv
             key={index}
             className='pointer-events-none absolute inset-0 rounded-[inherit]'
             style={{

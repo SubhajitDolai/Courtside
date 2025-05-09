@@ -1,32 +1,35 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { ModeToggle } from '@/components/modeToggle';
+import AdminNavbar from '@/components/adminNavbar';
+import { Toaster } from 'sonner';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  
+  // Correctly destructure the user from the getUser() response
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (error || !user) {
+    // Redirect if no user or error occurred
     redirect('/login');
   }
 
-  // Fetch profile
+  // Fetch profile based on the user ID
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('id', session.user.id)
+    .eq('id', user.id)  // Use user.id
     .single();
 
   if (profile?.role !== 'admin') {
-    redirect('/');  // block non-admins
+    redirect('/');  // Block non-admins
   }
 
   return (
     <>
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-        <ModeToggle />
-      </div>
+      <AdminNavbar />
       <main>{children}</main>
+      <Toaster />
     </>
   );
 }

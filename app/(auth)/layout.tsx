@@ -1,4 +1,5 @@
 import { ModeToggle } from "@/components/modeToggle"
+import { Toaster } from "sonner"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <ModeToggle />
       </div>
       <main>{children}</main>
+      <Toaster />
     </>
   )
 }

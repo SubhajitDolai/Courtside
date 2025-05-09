@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
 export default function AddSportPage() {
   const [name, setName] = useState('')
@@ -32,38 +33,58 @@ export default function AddSportPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen max-w-md items-center justify-center p-4 mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Add New Sport</h1>
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-10">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Add New Sport</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label>Name</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt="Sport preview"
+                  className="mt-2 max-h-48 w-full object-cover rounded border"
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                />
+              )}
+            </div>
 
-        <div>
-          <Label>Image URL</Label>
-          <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="seatLimit">Seat Limit</Label>
+              <Input
+                id="seatLimit"
+                type="number"
+                value={Number.isNaN(seatLimit) ? '' : seatLimit}
+                onChange={(e) => setSeatLimit(parseInt(e.target.value))}
+                min={1}
+                required
+              />
+            </div>
 
-        <div>
-          <Label>Seat Limit</Label>
-          <Input
-            type="number"
-            value={Number.isNaN(seatLimit) ? '' : seatLimit}
-            onChange={(e) => setSeatLimit(parseInt(e.target.value))}
-            min={1}
-            required
-          />
-        </div>
+            <div className="flex items-center space-x-3">
+              <Switch checked={isActive} onCheckedChange={setIsActive} id="active" />
+              <Label htmlFor="active">Active</Label>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <Switch checked={isActive} onCheckedChange={setIsActive} />
-          <Label>Active</Label>
-        </div>
-
-        <Button type="submit">Add Sport</Button>
-      </form>
+            <Button type="submit" className="w-full">
+              Add Sport
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

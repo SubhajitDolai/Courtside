@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { useParams } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function EditSportPage() {
   const params = useParams<{ id: string }>()
@@ -65,63 +65,82 @@ export default function EditSportPage() {
   async function handleDelete() {
     const confirmed = confirm('Are you sure you want to delete this sport? This action cannot be undone.')
     if (!confirmed) return
-  
+
     const supabase = createClient()
     const { error } = await supabase
       .from('sports')
       .delete()
       .eq('id', sportId)
-  
+
     if (!error) {
       router.push('/admin/sports')
     } else {
       alert(error.message)
     }
-  }  
+  }
 
   return (
-    <div className="flex flex-col min-h-screen max-w-md items-center justify-center p-4 mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Edit Sport</h1>
+    <div className="flex min-h-screen items-center justify-center px-4 py-10 bg-muted">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Edit Sport</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label>Name</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt="Sport preview"
+                  className="mt-2 max-h-48 w-full object-cover rounded border"
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                />
+              )}
+            </div>
 
-        <div>
-          <Label>Image URL</Label>
-          <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="seatLimit">Seat Limit</Label>
+              <Input
+                id="seatLimit"
+                type="number"
+                value={Number.isNaN(seatLimit) ? '' : seatLimit}
+                onChange={(e) => setSeatLimit(parseInt(e.target.value))}
+                min={1}
+                required
+              />
+            </div>
 
-        <div>
-          <Label>Seat Limit</Label>
-          <Input
-            type="number"
-            value={Number.isNaN(seatLimit) ? '' : seatLimit}
-            onChange={(e) => setSeatLimit(parseInt(e.target.value))}
-            min={1}
-            required
-          />
-        </div>
+            <div className="flex items-center space-x-3">
+              <Switch checked={isActive} onCheckedChange={setIsActive} id="active" />
+              <Label htmlFor="active">Active</Label>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <Switch checked={isActive} onCheckedChange={setIsActive} />
-          <Label>Active</Label>
-        </div>
+            <Button type="submit" className="w-full">
+              Save Changes
+            </Button>
 
-        <Button type="submit">Save Changes</Button>
-
-        <Button 
-          type="button" 
-          variant="destructive" 
-          className="w-full mt-4" 
-          onClick={handleDelete}
-        >
-          Delete Sport
-        </Button>
-
-      </form>
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              onClick={handleDelete}
+            >
+              Delete Sport
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

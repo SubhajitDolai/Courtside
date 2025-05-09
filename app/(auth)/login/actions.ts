@@ -2,15 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
 import { createClient } from '@/utils/supabase/server'
 
-// login method
+// Login method
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -19,54 +16,43 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect('/error')
+    return { error: 'Invalid email or password' }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  return { success: true }
 }
 
-// signup method
+// Signup method
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  // const data = {
-  //   email: formData.get('email') as string,
-  //   password: formData.get('password') as string,
-  // }
-
-  // const { error } = await supabase.auth.signUp(data)
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  // Enforce mitwpu.edu.in domain
+  // Check mitwpu email
   if (!email.endsWith('@mitwpu.edu.in')) {
-    // Redirect or handle invalid domain
-    redirect('/invalidEmail')
+    return { error: 'Please use your college email (mitwpu.edu.in)' }
   }
 
   const { error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
-    redirect('/error')
+    return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/checkEmail')
+  return { success: true }
 }
 
-// logout method
+// Logout method
 export async function logout() {
   const supabase = await createClient()
-
   const { error } = await supabase.auth.signOut()
 
   if (error) {
-    redirect('/error')
+    console.error(error)
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  // ✅ Revalidate cache and redirect
+  revalidatePath('/', 'layout')  // clears session cache
+  redirect('/login')             // force redirect to login
 }

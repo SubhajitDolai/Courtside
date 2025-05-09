@@ -14,20 +14,30 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { login } from '../actions'
+import { Eye, EyeOff } from "lucide-react"
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault() // Prevent the default full-page reload
+    e.preventDefault()
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    await login(formData) // Call the server action(login) manually
+    const res = await login(formData) // 👈 await result from server action
+
     setIsLoading(false)
+
+    if (res.error) {
+      toast.error(res.error) // ❌ show error toast
+    } else {
+      toast.success('Logged in successfully') // ✅ success
+      router.push('/') // redirect
+    }
   }
 
   return (
@@ -36,7 +46,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your college email below to login to your account
+            Enter your college email to log in
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -55,14 +65,31 @@ export function LoginForm({
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  {/* <a
-                    href="#"
+                  <a
+                    href="/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
-                  </a> */}
+                  </a>
                 </div>
-                <Input id="password" name="password" type="password" placeholder="Password" required />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-2/4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
