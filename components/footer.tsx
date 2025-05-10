@@ -4,8 +4,8 @@ import Logo from './logo'
 
 const links = [
     {
-        title: 'Features',
-        href: '#',
+        title: 'Developer',
+        href: 'https://www.linkedin.com/in/subhajit-dolai/',
     },
     {
         title: 'Solution',

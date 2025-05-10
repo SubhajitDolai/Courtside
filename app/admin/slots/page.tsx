@@ -11,6 +11,14 @@ export default async function AdminSlotsPage() {
     .select("*, sports(name)")
     .order("created_at", { ascending: false });
 
+  // ✅ Convert 24hr "HH:MM" to 12hr "h:mm AM/PM"
+  const formatTime12hr = (time24: string) => {
+    const [hour, minute] = time24.split(":");
+    const date = new Date();
+    date.setHours(Number(hour), Number(minute));
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true });
+  };
+
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
@@ -40,7 +48,7 @@ export default async function AdminSlotsPage() {
                 >
                   <td className="p-3">{slot.sports?.name}</td>
                   <td className="p-3">
-                    {slot.start_time} – {slot.end_time}
+                    {formatTime12hr(slot.start_time)} – {formatTime12hr(slot.end_time)}
                   </td>
                   <td className="p-3 capitalize">{slot.gender}</td>
                   <td className="p-3">{slot.is_active ? "✅" : "❌"}</td>

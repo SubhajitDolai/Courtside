@@ -31,67 +31,80 @@ export default function SeatsPage() {
   const [isBooking, setIsBooking] = useState(false)
 
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // ✅ Protect page by gender
+  // ✅ Protect + initial fetch
   useEffect(() => {
-    const checkGenderAndFetch = async () => {
-      setLoading(true)
+    checkGenderAndFetch()
+  }, [])
 
-      const userRes = await supabase.auth.getUser()
-      const user = userRes.data.user
+  // ✅ Auto-refresh bookings every 5 sec
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshBookings()
+    }, 5000)
 
-      if (!user) {
-        alert('Please login to continue')
-        return router.push('/login')
-      }
+    return () => clearInterval(interval)
+  }, [])
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('gender')
-        .eq('id', user.id)
-        .single()
+  const checkGenderAndFetch = async () => {
+    setLoading(true)
 
-      if (!profile) {
-        return alert('Profile not found')
-      }
+    const userRes = await supabase.auth.getUser()
+    const user = userRes.data.user
 
-      const { data: slot } = await supabase
-        .from('slots')
-        .select('gender')
-        .eq('id', slotId)
-        .single()
-
-      if (!slot) {
-        return alert('Slot not found')
-      }
-
-      if (slot.gender !== 'any' && profile.gender !== slot.gender) {
-        alert(`This slot is only for ${slot.gender} users`)
-        return router.push(`/sports/${sportId}/slots`)
-      }
-
-      const { data: sport } = await supabase
-        .from('sports')
-        .select('seat_limit')
-        .eq('id', sportId)
-        .single()
-
-      setSeatLimit(sport?.seat_limit || 0)
-
-      const today = new Date().toISOString().split('T')[0]
-      const { data: bookingsData } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('sport_id', sportId)
-        .eq('slot_id', slotId)
-        .eq('booking_date', today)
-
-      setBookings(bookingsData || [])
-      setLoading(false)
+    if (!user) {
+      return router.push('/login')
     }
 
-    checkGenderAndFetch()
-  }, [sportId, slotId, supabase, router])
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('gender')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      return router.push('/onboarding')
+    }
+
+    const { data: slot } = await supabase
+      .from('slots')
+      .select('gender')
+      .eq('id', slotId)
+      .single()
+
+    if (!slot) {
+      return router.push(`/sports/${sportId}/slots`)
+    }
+
+    if (slot.gender !== 'any' && profile.gender !== slot.gender) {
+      alert(`This slot is only for ${slot.gender} users`)
+      return router.push(`/sports/${sportId}/slots`)
+    }
+
+    const { data: sport } = await supabase
+      .from('sports')
+      .select('seat_limit')
+      .eq('id', sportId)
+      .single()
+
+    setSeatLimit(sport?.seat_limit || 0)
+    await refreshBookings()
+    setLoading(false)
+  }
+
+  // ✅ Re-fetch current slot bookings
+  const refreshBookings = async () => {
+    const today = new Date().toISOString().split('T')[0]
+    const { data: bookingsData } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('sport_id', sportId)
+      .eq('slot_id', slotId)
+      .eq('booking_date', today)
+
+    setBookings(bookingsData || [])
+  }
 
   const getSeatStatus = (seatNumber: number) => {
     const booking = bookings.find((b) => b.seat_number === seatNumber)
@@ -101,20 +114,22 @@ export default function SeatsPage() {
   }
 
   const handleConfirmBooking = async () => {
-    if (!selectedSeat) return
-    setIsBooking(true)
+    if (!selectedSeat) return;
+    setIsBooking(true);
+    setErrorMessage(null);
 
-    const userRes = await supabase.auth.getUser()
-    const user = userRes.data.user
+    const userRes = await supabase.auth.getUser();
+    const user = userRes.data.user;
 
     if (!user) {
-      alert('Please login to book')
-      setIsBooking(false)
-      return router.push('/login')
+      setErrorMessage('Please login to continue');
+      setIsBooking(false);
+      return;
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0];
 
+    // ✅ Check if user already booked this slot today
     const { data: existing } = await supabase
       .from('bookings')
       .select('*')
@@ -122,15 +137,15 @@ export default function SeatsPage() {
       .eq('sport_id', sportId)
       .eq('slot_id', slotId)
       .eq('booking_date', today)
-      .maybeSingle()
+      .maybeSingle();
 
     if (existing) {
-      alert('You already booked this slot today')
-      setSelectedSeat(null)
-      setIsBooking(false)
-      return
+      setErrorMessage('You already booked this slot today 🚫');
+      setIsBooking(false);
+      return;
     }
 
+    // ✅ Try to insert booking (db constraint will prevent double seat booking)
     const { data, error } = await supabase
       .from('bookings')
       .insert({
@@ -142,22 +157,26 @@ export default function SeatsPage() {
         status: 'booked',
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error(error)
-      alert('Booking failed')
-      setSelectedSeat(null)
-      setIsBooking(false)
-      return
+      console.error(error);
+
+      // ✅ If it's unique violation → show seat already booked
+      if (error.code === '23505') {
+        setErrorMessage('Sorry, this seat was just booked by someone else. Please pick another seat.');
+        await refreshBookings(); // ✅ Refresh seats UI
+      } else {
+        setErrorMessage('Booking failed. Please try again.');
+      }
+
+      setIsBooking(false);
+      return;
     }
 
-    // ✅ Prefetch page for smooth load
-    router.prefetch(`/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`)
-
-    // ✅ Do full page redirect so dialog stays until browser switches
-    window.location.href = `/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`
-  }
+    router.prefetch(`/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`);
+    window.location.href = `/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`;
+  };
 
   if (loading || seatLimit === null) {
     return (
@@ -213,17 +232,24 @@ export default function SeatsPage() {
 
       {/* ✅ Booking Confirm Dialog */}
       <AlertDialog open={selectedSeat !== null || isBooking} onOpenChange={(open) => {
-        if (!isBooking && !open) setSelectedSeat(null)
+        if (!isBooking && !open) {
+          setSelectedSeat(null)
+          setErrorMessage(null)
+        }
       }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
               {isBooking ? 'Booking your seat...' : 'Confirm booking'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="space-y-2">
               {isBooking
                 ? `Please wait while we book the seat for you...`
                 : `Are you sure you want to book seat #${selectedSeat}? This action cannot be undone.`}
+
+              {errorMessage && (
+                <span className="text-red-500 font-medium">{errorMessage}</span>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

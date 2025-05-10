@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import Image from 'next/image'
 
 export default function AddSportPage() {
   const [name, setName] = useState('')
@@ -53,12 +54,18 @@ export default function AddSportPage() {
                 onChange={(e) => setImageUrl(e.target.value)}
               />
               {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Sport preview"
-                  className="mt-2 max-h-48 w-full object-cover rounded border"
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                />
+                <div className="mt-2 relative w-full h-48 rounded border overflow-hidden">
+                  <Image
+                    src={imageUrl}
+                    alt="Sport preview"
+                    fill
+                    className="object-cover rounded"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
+                  />
+                </div>
               )}
             </div>
 

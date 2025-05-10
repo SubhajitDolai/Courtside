@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Image from 'next/image'
 
 export default function EditSportPage() {
   const params = useParams<{ id: string }>()
@@ -18,7 +19,6 @@ export default function EditSportPage() {
   const [isActive, setIsActive] = useState(true)
   const router = useRouter()
 
-  // Loads existing sport data
   useEffect(() => {
     async function fetchSport() {
       const supabase = createClient()
@@ -40,7 +40,6 @@ export default function EditSportPage() {
     fetchSport()
   }, [sportId])
 
-  // handle submit function to update the parameter
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const supabase = createClient()
@@ -61,7 +60,6 @@ export default function EditSportPage() {
     }
   }
 
-  // handle delete function to delete the sport
   async function handleDelete() {
     const confirmed = confirm('Are you sure you want to delete this sport? This action cannot be undone.')
     if (!confirmed) return
@@ -100,12 +98,18 @@ export default function EditSportPage() {
                 onChange={(e) => setImageUrl(e.target.value)}
               />
               {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Sport preview"
-                  className="mt-2 max-h-48 w-full object-cover rounded border"
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                />
+                <div className="mt-2 relative w-full h-48 rounded border overflow-hidden">
+                  <Image
+                    src={imageUrl}
+                    alt="Sport preview"
+                    fill
+                    className="object-cover rounded"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
+                  />
+                </div>
               )}
             </div>
 

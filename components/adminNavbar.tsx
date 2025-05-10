@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useTransition } from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "./ui/button";
 import { logout } from "@/app/(auth)/login/actions";
@@ -12,50 +13,32 @@ import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 export const navigationItems = [
-  {
-    title: "Dashboard",
-    href: "/admin/",
-    items: [],
-  },
-  {
-    title: "Sports",
-    href: "/admin/sports",
-    items: [],
-  },
-  {
-    title: "Slots",
-    href: "/admin/slots",
-    items: [],
-  },
-  {
-    title: "Bookings",
-    href: "/admin/bookings",
-    items: [],
-  },
+  { title: "Dashboard", href: "/admin/" },
+  { title: "Sports", href: "/admin/sports" },
+  { title: "Slots", href: "/admin/slots" },
+  { title: "Bookings", href: "/admin/bookings" },
 ];
 
 export default function AdminNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname(); // ✅ get current route
 
   // ✅ handle pending logout
   const [isPending, startTransition] = useTransition();
 
-  // ✅ handle logout click
   const handleLogout = () => {
     startTransition(async () => {
       toast.info("Logging out...");
-      await logout(); // this will redirect & clear session
+      await logout();
     });
   };
 
-  // Set the mounted state to true once the component has mounted on the client side
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Prevent rendering until the component has mounted on the client side
   if (!mounted) return null;
 
   return (
@@ -63,20 +46,35 @@ export default function AdminNavbar() {
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-5">
           <Link href="/">
-            <Image
-              src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
-              alt="Logo"
-              width={100}
-              height={50}
-            />
+            {resolvedTheme && (
+              <Image
+                src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
+                alt="Logo"
+                width={100}
+                height={50}
+              />
+            )}
           </Link>
 
           <div className="hidden gap-4 md:flex">
-            {navigationItems.map((item) => (
-              <Link key={item.href} href={item.href} className="font-bold">
-                {item.title}
-              </Link>
-            ))}
+            {navigationItems.map((item) => {
+              const isDashboard = item.href === "/admin/";
+              const isActive = isDashboard
+                ? pathname === "/admin" || pathname === "/admin/"
+                : pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`font-bold transition ${
+                    isActive ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {item.title}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -98,11 +96,25 @@ export default function AdminNavbar() {
 
       {isOpen && (
         <div className="flex flex-col items-center justify-center gap-3 px-5 py-3 md:hidden">
-          {navigationItems.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
-              {item.title}
-            </Link>
-          ))}
+          {navigationItems.map((item) => {
+            const isDashboard = item.href === "/admin/";
+            const isActive = isDashboard
+              ? pathname === "/admin" || pathname === "/admin/"
+              : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`font-bold transition ${
+                  isActive ? "text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {item.title}
+              </Link>
+            );
+          })}
         </div>
       )}
     </nav>

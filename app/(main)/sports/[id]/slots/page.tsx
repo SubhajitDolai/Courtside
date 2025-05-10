@@ -16,43 +16,47 @@ export default function SportSlotsPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [slots, setSlots] = useState<any[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userGender, setUserGender] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      // ✅ 1) Get user
-      const userRes = await supabase.auth.getUser()
-      const user = userRes.data.user
-
-      if (!user) {
-        setUserGender(null)
-      } else {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('gender')
-          .eq('id', user.id)
-          .single()
-
-        setUserGender(profile?.gender || null)
-      }
-
-      // ✅ 2) Fetch slots
-      const { data } = await supabase
-        .from('slots')
-        .select('*')
-        .eq('sport_id', sportId)
-        .eq('is_active', true)
-
-      setSlots(data ?? [])
-    }
-
     fetchData()
+
+    // ✅ Auto-refresh every 5 sec
+    const interval = setInterval(() => {
+      fetchData()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [sportId, supabase])
 
-  // ✅ Filter slot visibility by gender
+  // ✅ Fetch user + slots
+  const fetchData = async () => {
+    const userRes = await supabase.auth.getUser()
+    const user = userRes.data.user
+
+    if (!user) {
+      setUserGender(null)
+    } else {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gender')
+        .eq('id', user.id)
+        .single()
+
+      setUserGender(profile?.gender || null)
+    }
+
+    const { data } = await supabase
+      .from('slots')
+      .select('*')
+      .eq('sport_id', sportId)
+      .eq('is_active', true)
+
+    setSlots(data ?? [])
+  }
+
+  // ✅ Gender filter logic
   const visibleSlots = slots.filter((slot) => {
     if (slot.gender === 'any') return true
     if (!userGender) return slot.gender === 'any'
@@ -71,20 +75,24 @@ export default function SportSlotsPage() {
     }
   }
 
-  // ✅ Correct slot expiry check — expired only if end time has passed today
+  // ✅ Check if slot expired
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const isSlotPast = (slot: any) => {
     const now = new Date()
-
-    // Slot end time today
     const [hour, minute] = slot.end_time.split(':').map(Number)
     const slotEnd = new Date()
     slotEnd.setHours(hour, minute, 0, 0)
-
     return now > slotEnd
   }
 
-  // ✅ Handle view seats click with loading state
+  // ✅ Convert to 12hr (eg: 5:30 PM)
+  const formatTime12hr = (time24: string) => {
+    const [hour, minute] = time24.split(':')
+    const date = new Date()
+    date.setHours(Number(hour), Number(minute))
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+  }
+
   const handleViewSeats = (slotId: string) => {
     setLoadingSlotId(slotId)
     router.push(`/sports/${sportId}/slots/${slotId}/seats`)
@@ -112,7 +120,7 @@ export default function SportSlotsPage() {
               <CardHeader className="flex flex-col gap-2">
                 <div className="flex items-center justify-between w-full">
                   <CardTitle className="text-lg font-semibold">
-                    {slot.start_time} – {slot.end_time}
+                    {formatTime12hr(slot.start_time)} – {formatTime12hr(slot.end_time)}
                   </CardTitle>
                   <Badge
                     className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${getGenderBadgeColor(slot.gender)}`}

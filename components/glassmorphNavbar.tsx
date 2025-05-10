@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition, useEffect } from "react";
+import { usePathname } from "next/navigation"; // ✅ get current path
 
 import { Button } from "./ui/button";
 import { toast } from "sonner";
@@ -21,31 +22,28 @@ export const navigationItems = [
 export default function GlassmorphNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false); // To track client-side mounting
-
-  // ✅ handle pending logout
+  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname(); // ✅ get current page path
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     startTransition(async () => {
       toast.info("Logging out...");
-      await logout(); // server action → redirects
+      await logout();
     });
   };
 
-  // Set mounted to true once the component has mounted on the client
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // Prevent rendering during SSR
+  if (!mounted) return null;
 
   return (
     <nav className="fixed left-1/2 top-0 z-50 mt-7 flex w-11/12 max-w-7xl -translate-x-1/2 flex-col items-center rounded-md bg-background/20 p-3 backdrop-blur-lg md:rounded-md outline">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-5">
           <Link href="/">
-            {/* Render Image only when theme is resolved */}
             {resolvedTheme && (
               <Image
                 src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
@@ -56,12 +54,23 @@ export default function GlassmorphNavbar() {
             )}
           </Link>
 
+          {/* ✅ Desktop Nav */}
           <div className="hidden gap-4 md:flex">
-            {navigationItems.map((item) => (
-              <Link key={item.href} href={item.href} className="font-bold">
-                {item.title}
-              </Link>
-            ))}
+            {navigationItems.map((item) => {
+              // ✅ highlight if current path starts with item's href
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`font-bold transition ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}
+                >
+                  {item.title}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -81,13 +90,24 @@ export default function GlassmorphNavbar() {
         </div>
       </div>
 
+      {/* ✅ Mobile Nav */}
       {isOpen && (
         <div className="flex flex-col items-center justify-center gap-3 px-5 py-3 md:hidden">
-          {navigationItems.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
-              {item.title}
-            </Link>
-          ))}
+          {navigationItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`font-bold transition ${
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                {item.title}
+              </Link>
+            );
+          })}
         </div>
       )}
     </nav>

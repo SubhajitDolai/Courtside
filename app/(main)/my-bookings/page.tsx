@@ -85,6 +85,14 @@ export default function MyBookingsPage() {
     return currentTime >= slotStartTime
   }
 
+  // ✅ Convert "HH:MM" → "h:mm AM/PM"
+  const formatTime12hr = (time24: string) => {
+    const [hour, minute] = time24.split(':');
+    const date = new Date();
+    date.setHours(Number(hour), Number(minute));
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
@@ -119,7 +127,7 @@ export default function MyBookingsPage() {
                       <td className="p-3">{b.id.slice(0, 6)}...</td>
                       <td className="p-3">{b.sports?.name}</td>
                       <td className="p-3">
-                        {b.slots?.start_time} – {b.slots?.end_time}{' '}
+                        {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}{' '}
                         {slotStarted && <span className="text-xs text-red-500 ml-2">Started</span>}
                       </td>
                       <td className="p-3">{b.booking_date}</td>

@@ -1,4 +1,4 @@
-// Do a quality photoshoot upload the images on plexel and place the link here
+import Image from 'next/image'
 
 const members = [
     {
@@ -7,14 +7,14 @@ const members = [
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
-        name: 'Dr. Vaibhav Balasaheb Wagh',
+        name: 'Dr. Vaibhav Wagh',
         role: 'Director of Sports',
         avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
     },
     {
         name: 'Om Jawanjal',
         role: 'Manager',
-        avatar: 'https://media.licdn.com/dms/image/v2/D5603AQFIeIxC2CoKpg/profile-displayphoto-shrink_800_800/B56ZQr5cIBHQAc-/0/1735903269167?e=1752105600&v=beta&t=lup5tOuecW1L_mXLuWJC7f93Zc9a7ysej-_vJ1n03nc',
+        avatar: 'https://media.licdn.com/dms/image/v2/D5603AQGLmDWHGeIbFw/profile-displayphoto-shrink_800_800/B56Za5oi07GgAc-/0/1746871137057?e=1752105600&v=beta&t=PVXytCsiCRnJVWzol151xziwoeM8NHpfq0xFtjozYsc',
     },
     {
         name: 'Abhay Kachare',
@@ -27,22 +27,22 @@ const leaders = [
     {
         name: 'Subhajit Dolai',
         role: 'System Design',
-        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Devops',
-        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Cyber security',
-        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Full Stack developer',
-        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
 ]
 
@@ -80,8 +80,13 @@ export default function TeamSection() {
                     <div className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {members.map((member, index) => (
                             <div key={index}>
-                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5">
-                                    <img className="aspect-square rounded-full object-cover" src={member.avatar} alt={member.name} height="460" width="460" loading="lazy" />
+                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+                                    <Image
+                                        src={member.avatar}
+                                        alt={member.name}
+                                        fill
+                                        className="aspect-square rounded-full object-cover"
+                                    />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
                                 <span className="text-muted-foreground block text-xs">{member.role}</span>
@@ -95,8 +100,13 @@ export default function TeamSection() {
                     <div data-rounded="full" className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {leaders.map((member, index) => (
                             <div key={index}>
-                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5">
-                                    <img className="aspect-square rounded-full object-cover" src={member.avatar} alt={member.name} height="460" width="460" loading="lazy" />
+                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+                                    <Image
+                                        src={member.avatar}
+                                        alt={member.name}
+                                        fill
+                                        className="aspect-square rounded-full object-cover"
+                                    />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
                                 <span className="text-muted-foreground block text-xs">{member.role}</span>
@@ -110,8 +120,13 @@ export default function TeamSection() {
                     <div data-rounded="full" className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {workers.map((member, index) => (
                             <div key={index}>
-                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5">
-                                    <img className="aspect-square rounded-full object-cover" src={member.avatar} alt={member.name} height="460" width="460" loading="lazy" />
+                                <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+                                    <Image
+                                        src={member.avatar}
+                                        alt={member.name}
+                                        fill
+                                        className="aspect-square rounded-full object-cover"
+                                    />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
                                 <span className="text-muted-foreground block text-xs">{member.role}</span>
