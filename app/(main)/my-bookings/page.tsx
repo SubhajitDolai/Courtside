@@ -15,6 +15,20 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(false)
   const [canceling, setCanceling] = useState<string | null>(null)
 
+  // ✅ Profile protection
+  useEffect(() => {
+    const checkProfile = async () => {
+      const res = await fetch('/api/check-profile')
+      const data = await res.json()
+
+      if (data.redirect) {
+        window.location.href = data.redirect
+      }
+    }
+
+    checkProfile()
+  }, [])
+
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true)
