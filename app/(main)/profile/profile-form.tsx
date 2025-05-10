@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { createClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProfileForm({ profile }: { profile: any }) {
   const [form, setForm] = useState({
     first_name: profile.first_name || '',

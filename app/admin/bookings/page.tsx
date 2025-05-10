@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export default function AdminBookingsPage() {
   const supabase = createClient()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)

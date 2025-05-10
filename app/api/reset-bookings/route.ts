@@ -8,6 +8,7 @@ const supabase = createClient(
 )
 
 // 1) Validate the secret key
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isValidSecret(secret: string | null): boolean {
   return secret === process.env.BACKUP_CRON_SECRET
 }
@@ -20,6 +21,7 @@ async function fetchBookings() {
 }
 
 // 3) Archive into bookings_history
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function archiveBookings(bookings: any[]) {
   const { error } = await supabase.from('bookings_history').insert(bookings)
   if (error) throw new Error(`Failed to insert into bookings_history: ${error.message}`)
@@ -56,8 +58,10 @@ export async function POST(req: NextRequest) {
         ? `Archived ${count} bookings and cleared table.`
         : 'No bookings to archive.',
     })
-  } catch (err: any) {
-    console.error(err)
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    console.error(err);
+    const message =
+      err instanceof Error ? err.message : 'An unknown error occurred';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

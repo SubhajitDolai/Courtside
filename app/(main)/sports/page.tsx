@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 
 export default function SportsPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sports, setSports] = useState<any[]>([])
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const router = useRouter()

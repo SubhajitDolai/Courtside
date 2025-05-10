@@ -25,6 +25,7 @@ export default function SeatsPage() {
   const slotId = params.slotId as string
 
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)

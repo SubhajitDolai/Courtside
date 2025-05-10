@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react'
 export default function MyBookingsPage() {
   const supabase = createClient()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [canceling, setCanceling] = useState<string | null>(null)

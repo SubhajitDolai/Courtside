@@ -14,8 +14,11 @@ export default function SportSlotsPage() {
   const sportId = params.id
   const supabase = createClient()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [slots, setSlots] = useState<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userGender, setUserGender] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -69,6 +72,7 @@ export default function SportSlotsPage() {
   }
 
   // ✅ Correct slot expiry check — expired only if end time has passed today
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const isSlotPast = (slot: any) => {
     const now = new Date()
 
