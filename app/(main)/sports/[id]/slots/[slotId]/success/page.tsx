@@ -31,34 +31,39 @@ export default function BookingSuccessPage() {
   }
 
   return (
-    <div className="pt-30 p-4 text-center space-y-6">
-      <h2 className="text-2xl font-bold text-green-600">✅ Booking Successful!</h2>
+    <div className="p-6 min-h-screen flex flex-col items-center justify-center space-y-6">
 
-      <p className="text-lg">Your booking number is shown below:</p>
-
-      <div className="flex justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex justify-between items-center p-4">
-            <span className="text-xl font-mono">{bookingId}</span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopy}
-              className="ml-4"
-            >
-              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            </Button>
-          </CardContent>
-        </Card>
+      {/* ✅ Subtle success icon */}
+      <div className="rounded-full bg-green-100 p-3">
+        <Check className="w-6 h-6 text-green-600" />
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Please copy this number and save it somewhere like your notes app. You’ll need it at the check-in counter.
+      <h2 className="text-2xl font-bold text-green-700">Booking Confirmed</h2>
+
+      <p className="text-muted-foreground text-center max-w-md">
+        Your booking is successful. Please keep your booking number safe — you’ll need it at check-in.
       </p>
 
-      <Button asChild>
-        <Link href="/sports">Go Home</Link>
+      {/* ✅ Booking ID Card */}
+      <Card className="w-full max-w-md border border-green-200 shadow-sm">
+        <CardContent className="flex justify-between items-center p-4">
+          <span className="text-lg font-mono text-green-700">{bookingId}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleCopy}
+            className="ml-2"
+            title="Copy booking ID"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Button asChild size="lg" className="mt-2">
+        <Link href="/sports">Go to Home</Link>
       </Button>
+
     </div>
   )
 }

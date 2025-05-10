@@ -9,6 +9,17 @@ import { Select, SelectTrigger, SelectItem, SelectContent, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/utils/supabase/client'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
 export default function EditSportPage() {
   const params = useParams<{ id: string }>()
@@ -21,7 +32,9 @@ export default function EditSportPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sports, setSports] = useState<any[]>([])
 
-  // Fetch slot + sports data
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   useEffect(() => {
     const fetchData = async () => {
       const { data: slotData } = await supabase.from('slots').select('*').eq('id', slotId).single()
@@ -38,7 +51,24 @@ export default function EditSportPage() {
 
     await supabase.from('slots').update(slot).eq('id', slotId)
 
-    router.push('/admin/slots') // Redirect to slots list
+    toast.success('Slot updated ✅')
+    router.push('/admin/slots')
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+
+    const { error } = await supabase.from('slots').delete().eq('id', slotId)
+
+    if (!error) {
+      toast.success('Slot deleted ❌')
+      router.push('/admin/slots')
+    } else {
+      toast.error('Failed to delete')
+    }
+
+    setDeleting(false)
+    setDeleteDialog(false)
   }
 
   if (!slot) return <p>Loading...</p>
@@ -50,9 +80,10 @@ export default function EditSportPage() {
           <CardTitle className="text-xl font-bold">Edit Slot</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
+
             {/* Sport Dropdown */}
-            <div>
+            <div className="space-y-2">
               <Label>Sport</Label>
               <Select
                 value={slot.sport_id}
@@ -71,7 +102,7 @@ export default function EditSportPage() {
 
             {/* Time Fields */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Start Time</Label>
                 <Input
                   type="time"
@@ -79,7 +110,7 @@ export default function EditSportPage() {
                   onChange={(e) => setSlot({ ...slot, start_time: e.target.value })}
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label>End Time</Label>
                 <Input
                   type="time"
@@ -90,14 +121,14 @@ export default function EditSportPage() {
             </div>
 
             {/* Gender Dropdown */}
-            <div>
+            <div className="space-y-2">
               <Label>Gender</Label>
               <Select
                 value={slot.gender}
                 onValueChange={(val) => setSlot({ ...slot, gender: val })}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">Male</SelectItem>
@@ -124,23 +155,34 @@ export default function EditSportPage() {
             {/* Delete Button */}
             <Button
               variant="destructive"
-              onClick={async () => {
-                const confirmDelete = confirm("Are you sure you want to delete this slot?")
-                if (!confirmDelete) return
-
-                // Delete from Supabase
-                await supabase.from('slots').delete().eq('id', slotId)
-
-                // Redirect back
-                router.push('/admin/slots')
-              }}
-              className="w-full"
+              type="button"
+              onClick={() => setDeleteDialog(true)}
+              className="w-full mt-2"
             >
               Delete Slot
             </Button>
           </form>
         </CardContent>
       </Card>
+
+      {/* ✅ Delete Dialog */}
+      <AlertDialog open={deleteDialog} onOpenChange={(open) => !deleting && setDeleteDialog(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this slot?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. All bookings in this slot will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Yes, delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   )
 }

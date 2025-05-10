@@ -8,20 +8,37 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import Image from 'next/image'
 
 export default function EditSportPage() {
   const params = useParams<{ id: string }>()
   const sportId = params.id
+
   const [name, setName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [seatLimit, setSeatLimit] = useState<number>(0)
   const [isActive, setIsActive] = useState(true)
+
+  const [loading, setLoading] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [saveOpen, setSaveOpen] = useState(false)
+
   const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchSport() {
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('sports')
         .select('*')
@@ -34,15 +51,15 @@ export default function EditSportPage() {
         setSeatLimit(data.seat_limit)
         setIsActive(data.is_active)
       } else {
-        alert(error?.message)
+        toast.error(error?.message)
       }
     }
     fetchSport()
   }, [sportId])
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const supabase = createClient()
+  async function handleSave() {
+    setLoading(true)
+
     const { error } = await supabase
       .from('sports')
       .update({
@@ -54,37 +71,49 @@ export default function EditSportPage() {
       .eq('id', sportId)
 
     if (!error) {
+      toast.success('Sport updated ✅')
       router.push('/admin/sports')
     } else {
-      alert(error.message)
+      toast.error(error.message)
     }
+
+    setLoading(false)
+    setSaveOpen(false)
   }
 
   async function handleDelete() {
-    const confirmed = confirm('Are you sure you want to delete this sport? This action cannot be undone.')
-    if (!confirmed) return
+    setLoading(true)
 
-    const supabase = createClient()
     const { error } = await supabase
       .from('sports')
       .delete()
       .eq('id', sportId)
 
     if (!error) {
+      toast.success('Sport deleted ❌')
       router.push('/admin/sports')
     } else {
-      alert(error.message)
+      toast.error(error.message)
     }
+
+    setLoading(false)
+    setDeleteOpen(false)
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10 bg-muted">
+    <div className="flex min-h-screen items-center justify-center px-4 py-10 bg-muted/40">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Edit Sport</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              setSaveOpen(true)
+            }}
+            className="space-y-6"
+          >
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -138,13 +167,49 @@ export default function EditSportPage() {
               type="button"
               variant="destructive"
               className="w-full"
-              onClick={handleDelete}
+              onClick={() => setDeleteOpen(true)}
             >
               Delete Sport
             </Button>
           </form>
         </CardContent>
       </Card>
+
+      {/* ✅ Confirm Save Dialog */}
+      <AlertDialog open={saveOpen} onOpenChange={(open) => !loading && setSaveOpen(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save Changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will update the sport details. Are you sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave} disabled={loading}>
+              {loading ? 'Saving...' : 'Yes, Save'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ✅ Confirm Delete Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={(open) => !loading && setDeleteOpen(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Sport?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the sport.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={loading}>
+              {loading ? 'Deleting...' : 'Yes, Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

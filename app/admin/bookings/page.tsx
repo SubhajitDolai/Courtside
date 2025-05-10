@@ -16,10 +16,12 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 
 export default function AdminBookingsPage() {
   const supabase = createClient()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -49,17 +51,14 @@ export default function AdminBookingsPage() {
 
   useEffect(() => {
     fetchBookings()
-
     const interval = setInterval(() => {
       fetchBookings()
     }, 5000)
-
     return () => clearInterval(interval)
   }, [])
 
   const handleCheckIn = async (bookingId: string) => {
     setLoading(true)
-
     const { error } = await supabase
       .from('bookings')
       .update({ status: 'checked-in' })
@@ -73,15 +72,12 @@ export default function AdminBookingsPage() {
       )
       toast.success('Checked-in ✅')
     }
-
     setLoading(false)
   }
 
   const handleDelete = async () => {
     if (!deleteId) return
-
     setDeleting(true)
-
     const { error } = await supabase
       .from('bookings')
       .delete()
@@ -93,12 +89,10 @@ export default function AdminBookingsPage() {
     } else {
       toast.error('Failed to delete')
     }
-
     setDeleting(false)
     setDeleteId(null)
   }
 
-  // ✅ Convert 24hr "HH:MM" to 12hr "h:mm AM/PM"
   const formatTime12hr = (time24: string) => {
     const [hour, minute] = time24.split(':')
     const date = new Date()
@@ -106,10 +100,8 @@ export default function AdminBookingsPage() {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()
   }
 
-  // ✅ Search: by name, sport, slot (24hr & 12hr), date
   const filteredBookings = bookings.filter((b) => {
     const query = search.toLowerCase()
-
     const startTime12hr = formatTime12hr(b.slots?.start_time || '')
     const endTime12hr = formatTime12hr(b.slots?.end_time || '')
 
@@ -118,11 +110,11 @@ export default function AdminBookingsPage() {
       b.profiles?.first_name?.toLowerCase().includes(query) ||
       b.profiles?.last_name?.toLowerCase().includes(query) ||
       b.sports?.name?.toLowerCase().includes(query) ||
-      b.slots?.start_time?.toLowerCase().includes(query) ||  // 24hr
-      b.slots?.end_time?.toLowerCase().includes(query) ||    // 24hr
-      startTime12hr.includes(query) ||                       // 12hr
-      endTime12hr.includes(query) ||                         // 12hr
-      b.booking_date?.toLowerCase().includes(query)          // date search
+      b.slots?.start_time?.toLowerCase().includes(query) ||
+      b.slots?.end_time?.toLowerCase().includes(query) ||
+      startTime12hr.includes(query) ||
+      endTime12hr.includes(query) ||
+      b.booking_date?.toLowerCase().includes(query)
     )
   })
 
@@ -131,7 +123,6 @@ export default function AdminBookingsPage() {
       <Card>
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="text-2xl font-bold">Manage Bookings</CardTitle>
-
           <Input
             placeholder="Search booking #, name, sport, slot or date"
             value={search}
@@ -156,7 +147,10 @@ export default function AdminBookingsPage() {
             </thead>
             <tbody>
               {filteredBookings.map((b) => (
-                <tr key={b.id} className="border-t hover:bg-accent transition-colors">
+                <tr
+                  key={b.id}
+                  className="border-t hover:bg-accent/50 transition-colors"
+                >
                   <td className="p-3">{b.id.slice(0, 6)}...</td>
                   <td className="p-3">{b.profiles?.first_name} {b.profiles?.last_name}</td>
                   <td className="p-3">{b.sports?.name}</td>
@@ -167,9 +161,11 @@ export default function AdminBookingsPage() {
                   <td className="p-3">{b.seat_number}</td>
                   <td className="p-3">
                     {b.status === 'booked' ? (
-                      <span className="text-yellow-600">Booked</span>
+                      <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                        Booked
+                      </Badge>
                     ) : (
-                      <span className="text-green-600">Checked-in</span>
+                      <Badge variant="default">Checked-in</Badge>
                     )}
                   </td>
                   <td className="p-3 space-x-2">
@@ -178,7 +174,6 @@ export default function AdminBookingsPage() {
                         size="sm"
                         onClick={() => handleCheckIn(b.id)}
                         disabled={loading}
-                        className="bg-green-500 text-white hover:bg-green-600 dark:bg-green-700 dark:hover:bg-green-800"
                       >
                         {loading ? 'Please wait...' : 'Check-in ✅'}
                       </Button>
@@ -210,9 +205,9 @@ export default function AdminBookingsPage() {
       <AlertDialog open={deleteId !== null} onOpenChange={(open) => !deleting && setDeleteId(open ? deleteId : null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The booking will be permanently removed.
+              This action cannot be undone. This booking will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -223,7 +218,6 @@ export default function AdminBookingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   )
 }

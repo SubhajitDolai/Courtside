@@ -8,6 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import Image from 'next/image'
 
 export default function AddSportPage() {
@@ -15,32 +26,53 @@ export default function AddSportPage() {
   const [imageUrl, setImageUrl] = useState('')
   const [seatLimit, setSeatLimit] = useState<number>(2)
   const [isActive, setIsActive] = useState(true)
-  const router = useRouter()
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const supabase = createClient()
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
+  const supabase = createClient()
+
+  const handleSubmit = async () => {
+    if (!name || !seatLimit) {
+      toast.error('Please fill all fields')
+      return
+    }
+
+    setLoading(true)
+
     const { error } = await supabase.from('sports').insert({
       name,
       image_url: imageUrl,
       seat_limit: seatLimit,
       is_active: isActive,
     })
+
     if (!error) {
+      toast.success('Sport added ✅')
       router.push('/admin/sports')
     } else {
-      alert(error.message)
+      toast.error(error.message)
     }
+
+    setLoading(false)
+    setConfirmOpen(false)
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Add New Sport</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              setConfirmOpen(true)
+            }}
+            className="space-y-6"
+          >
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -92,6 +124,24 @@ export default function AddSportPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* ✅ Confirm Dialog */}
+      <AlertDialog open={confirmOpen} onOpenChange={(open) => !loading && setConfirmOpen(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Add Sport?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will add a new sport to the system. Are you sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmit} disabled={loading}>
+              {loading ? 'Adding...' : 'Yes, Add'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

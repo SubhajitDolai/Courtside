@@ -2,36 +2,42 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 export default async function AdminSportsPage() {
   const supabase = await createClient()
   const { data: sports } = await supabase.from('sports').select('*')
 
   return (
-    <div className="flex flex-col min-h-screen items-center px-4 py-30 bg-muted">
-      <div className="w-full max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col min-h-screen items-center px-4 py-30 bg-muted/40">
+      <div className="w-full max-w-4xl space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Manage Sports</h1>
-          <Link href="/admin/sports/add">
-            <Button>+ Add Sport</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/admin/sports/add">+ Add Sport</Link>
+          </Button>
         </div>
 
+        {/* Sports List */}
         <div className="grid gap-4">
           {sports?.map((sport) => (
             <Card key={sport.id} className="hover:shadow-md transition">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>{sport.name}</CardTitle>
-                <Link
-                  href={`/admin/sports/edit/${sport.id}`}
-                  className="text-sm font-medium text-blue-600 hover:underline"
-                >
-                  Edit
-                </Link>
+                <div className="space-y-1">
+                  <CardTitle>{sport.name}</CardTitle>
+                  <Badge variant={sport.is_active ? 'default' : 'destructive'}>
+                    {sport.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/admin/sports/edit/${sport.id}`}>Edit</Link>
+                </Button>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
+
+              <CardContent className="text-sm text-muted-foreground space-y-1">
                 <p>Seats: {sport.seat_limit}</p>
-                <p>Status: {sport.is_active ? 'Active' : 'Inactive'}</p>
               </CardContent>
             </Card>
           ))}
