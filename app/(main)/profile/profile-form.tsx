@@ -44,39 +44,39 @@ export function ProfileForm({ profile }: { profile: any }) {
 
   return (
     <Card className="p-6 space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Names */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-2">
             <Label>First Name</Label>
             <Input name="first_name" value={form.first_name} onChange={handleChange} required />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label>Last Name</Label>
             <Input name="last_name" value={form.last_name} onChange={handleChange} required />
           </div>
         </div>
 
         {/* PRN + Course */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-2">
             <Label>PRN</Label>
             <Input name="prn" value={form.prn} onChange={handleChange} required />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label>Course</Label>
             <Input name="course" value={form.course} onChange={handleChange} required />
           </div>
         </div>
 
         {/* Phone */}
-        <div>
+        <div className="space-y-2">
           <Label>Phone Number</Label>
           <Input name="phone_number" value={form.phone_number} onChange={handleChange} required />
         </div>
 
         {/* Gender */}
-        <div>
+        <div className="space-y-2">
           <Label>Gender</Label>
           <select
             name="gender"

@@ -7,19 +7,19 @@ const members = [
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
-        name: 'Subhajit Dolai',
-        role: 'UI UX',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        name: 'Dr. Vaibhav Balasaheb Wagh',
+        role: 'Director of Sports',
+        avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
     },
     {
-        name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        name: 'Om Jawanjal',
+        role: 'Manager',
+        avatar: 'https://media.licdn.com/dms/image/v2/D5603AQFIeIxC2CoKpg/profile-displayphoto-shrink_800_800/B56ZQr5cIBHQAc-/0/1735903269167?e=1752105600&v=beta&t=lup5tOuecW1L_mXLuWJC7f93Zc9a7ysej-_vJ1n03nc',
     },
     {
-        name: 'Subhajit Dolai',
-        role: 'Backend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        name: 'Abhay Kachare',
+        role: 'Asst. Director of Sports',
+        avatar: 'https://media.licdn.com/dms/image/v2/C5103AQG6lUPH7_kIPA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1549575983482?e=1752105600&v=beta&t=AnRpJjTEnrmevUi-lKUUJ0rdoyQBq3RNh8Yt97RkNi4',
     },
 ]
 
@@ -27,29 +27,29 @@ const leaders = [
     {
         name: 'Subhajit Dolai',
         role: 'System Design',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Devops',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Cyber security',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
     },
     {
         name: 'Subhajit Dolai',
         role: 'Full Stack developer',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        avatar: 'https://scontent.fpnq17-1.fna.fbcdn.net/v/t39.30808-6/464985143_1764090614409165_8482199827497054081_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=hcFh6mMBKLQQ7kNvwGIF_it&_nc_oc=AdkucNZt0i2moF2BnGaqBJiJnDtPV3PVO_u8i7c-bi2glHGT0mac5WRqwFGoQ__Euhw&_nc_zt=23&_nc_ht=scontent.fpnq17-1.fna&_nc_gid=9zs2txauvKR0diGBehmqxA&oh=00_AfLIv-IEye0FJMe78134CNb-i5Uy7AkrnItPL_7MOS7MlQ&oe=6824CD7D',
     },
 ]
 
 const workers = [
     {
         name: 'Subhajit Dolai',
-        role: 'Creator',
+        role: 'Frontend Dev',
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
