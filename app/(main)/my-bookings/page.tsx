@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { Loader2, Copy, Check } from 'lucide-react'
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -223,9 +222,9 @@ export default function MyBookingsPage() {
             </Button>
           </div>
 
-          {/* <DialogFooter>
+          <DialogFooter>
             <Button onClick={() => setShowBookingId(null)}>Close</Button>
-          </DialogFooter> */}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

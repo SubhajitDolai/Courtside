@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2 } from "lucide-react"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 import { login } from '../actions'
-import { Eye, EyeOff } from "lucide-react"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client' // ✅ import supabase client
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
@@ -28,7 +28,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const res = await login(formData) // 👈 await result from server action
+    const res = await login(formData) // 👈 server action login
 
     setIsLoading(false)
 
@@ -36,7 +36,27 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       toast.error(res.error) // ❌ show error toast
     } else {
       toast.success('Logged in successfully') // ✅ success
-      router.push('/') // redirect
+
+      // ✅ Check user role after login
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        // ✅ Redirect based on role
+        if (profile?.role === 'ban') {
+          router.push('/banned') // 😂 banned user
+        } else if (profile?.role === 'admin') {
+          router.push('/admin') // 🗿 admin
+        } else {
+          router.push('/') // ✅ normal user
+        }
+      }
     }
   }
 
@@ -52,6 +72,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
+
+              {/* Email */}
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -62,6 +84,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   required
                 />
               </div>
+
+              {/* Password */}
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
@@ -91,6 +115,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   </button>
                 </div>
               </div>
+
+              {/* Submit */}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -101,7 +127,10 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   'Login'
                 )}
               </Button>
+
             </div>
+
+            {/* Signup link */}
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <a href="/signup" className="underline underline-offset-4">

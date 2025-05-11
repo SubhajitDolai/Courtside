@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 // ✅ Define type
@@ -15,47 +15,38 @@ interface Sport {
   image_url: string | null
 }
 
-export default function SportsList() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [sports, setSports] = useState<Sport[]>([])
-  const [loadingId, setLoadingId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
+export default function SportsList({ sports: initialSports }: { sports: Sport[] }) {
   const router = useRouter()
+  const [sports, setSports] = useState(initialSports)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+
   const supabase = createClient()
 
-  // ✅ Fetch sports from Supabase
-  const fetchSports = async () => {
-    const { data } = await supabase
-      .from('sports')
-      .select('*')
-      .eq('is_active', true)
-      .order('name', { ascending: true }) // Optional: sorted alphabetically
-    setSports(data ?? [])
-    setLoading(false)
-  }
-
+  // ✅ Auto-refresh sports list
   useEffect(() => {
-    fetchSports()
+    const fetchSports = async () => {
+      const { data } = await supabase
+        .from('sports')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true })
 
-    // ✅ Auto-refresh every 5 sec
-    const interval = setInterval(() => {
-      fetchSports()
-    }, 5000)
+      if (data) setSports(data)
+    }
 
+    const interval = setInterval(fetchSports, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [supabase])
 
   const handleViewSlots = (sportId: string) => {
     setLoadingId(sportId)
     router.push(`/sports/${sportId}/slots`)
   }
 
-  // ✅ Loading UI while fetching
-  if (loading) {
+  if (!sports.length) {
     return (
       <p className="col-span-full text-center text-muted-foreground">
-        Loading sports...
+        No sports available at the moment.
       </p>
     )
   }
@@ -93,11 +84,6 @@ export default function SportsList() {
           </CardContent>
         </Card>
       ))}
-      {!sports.length && (
-        <p className="col-span-full text-center text-muted-foreground">
-          No sports available at the moment.
-        </p>
-      )}
     </div>
   )
 }

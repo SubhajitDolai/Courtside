@@ -18,9 +18,10 @@ export default function SportSlotsPage() {
   const [slots, setSlots] = useState<any[]>([])
   const [userGender, setUserGender] = useState<string | null>(null)
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
-  const [sportName, setSportName] = useState<string>('') // ✅ sport name
+  const [sportName, setSportName] = useState<string>('')
 
   useEffect(() => {
+    checkProfile() // ✅ ban check
     fetchData()
 
     // ✅ Auto-refresh every 5 sec
@@ -31,7 +32,25 @@ export default function SportSlotsPage() {
     return () => clearInterval(interval)
   }, [sportId, supabase])
 
-  // ✅ Fetch user + slots
+  // ✅ Ban check on mount
+  const checkProfile = async () => {
+    const { data: userData } = await supabase.auth.getUser()
+    const user = userData?.user
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role === 'ban') {
+        router.push('/banned')
+      }
+    }
+  }
+
+  // ✅ Fetch slots + sport name
   const fetchData = async () => {
     const userRes = await supabase.auth.getUser()
     const user = userRes.data.user

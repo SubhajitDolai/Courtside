@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function SlotsTable({ slots }: { slots: any[] }) {
   const [search, setSearch] = useState("");
 

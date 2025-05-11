@@ -11,18 +11,24 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  // ✅ 2) Get user profile
+  // ✅ 2) Get user profile (fetch role too)
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userData.user.id)
     .single()
 
-  // If no profile found, redirect to onboarding
+  // ❌ No profile ➔ go to onboarding
   if (!profile) {
     redirect('/onboarding')
   }
 
+  // ❌ If banned ➔ kick to banned page
+  if (profile.role === 'ban') {
+    redirect('/banned')
+  }
+
+  // ✅ All good ➔ show profile form
   return (
     <main className="py-30 px-4 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">My Profile</h1>
