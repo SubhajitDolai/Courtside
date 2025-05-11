@@ -19,6 +19,14 @@ import { Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 
+// ✅ Convert 24hr time to 12hr format
+const formatTime12hr = (time24: string) => {
+  const [hour, minute] = time24.split(':')
+  const date = new Date()
+  date.setHours(Number(hour), Number(minute))
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
 export default function SeatsPage() {
   const params = useParams()
   const router = useRouter()
@@ -27,20 +35,24 @@ export default function SeatsPage() {
   const sportId = params.id as string
   const slotId = params.slotId as string
 
+  // ✅ Seat limit from sports table
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
-  // Seat bookings fetched from Supabase
+  // ✅ Seat bookings fetched from Supabase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
 
-  // Loading states
+  // ✅ Loading states
   const [loading, setLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)
 
-  // Seat user has clicked
+  // ✅ Seat user has clicked
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
 
-  // Terms & Conditions checkbox
+  // ✅ Terms & Conditions checkbox
   const [agreed, setAgreed] = useState(false)
+
+  // ✅ Slot details (start time, end time, gender)
+  const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string } | null>(null)
 
   // ✅ Initial fetch (with gender check)
   useEffect(() => {
@@ -55,16 +67,16 @@ export default function SeatsPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // ✅ Checks user gender & loads seats
+  // ✅ Checks user gender & loads seats & slot details
   const checkGenderAndFetch = async () => {
     setLoading(true)
 
-    // Check user login
+    // ✅ Check user login
     const userRes = await supabase.auth.getUser()
     const user = userRes.data.user
     if (!user) return router.push('/login')
 
-    // Check profile gender
+    // ✅ Check profile gender
     const { data: profile } = await supabase
       .from('profiles')
       .select('gender')
@@ -72,10 +84,10 @@ export default function SeatsPage() {
       .single()
     if (!profile) return router.push('/onboarding')
 
-    // Fetch slot's gender rule
+    // ✅ Fetch slot's gender rule & timings
     const { data: slot } = await supabase
       .from('slots')
-      .select('gender')
+      .select('gender, start_time, end_time')
       .eq('id', slotId)
       .single()
     if (!slot) return router.push(`/sports/${sportId}/slots`)
@@ -85,6 +97,8 @@ export default function SeatsPage() {
       toast.error(`This slot is only for ${slot.gender} users`)
       return router.push(`/sports/${sportId}/slots`)
     }
+
+    setSlotDetails(slot) // ✅ Save slot details
 
     // ✅ Load seat limit
     const { data: sport } = await supabase
@@ -128,7 +142,7 @@ export default function SeatsPage() {
 
     setIsBooking(true)
 
-    // Check user
+    // ✅ Check user
     const userRes = await supabase.auth.getUser()
     const user = userRes.data.user
     if (!user) {
@@ -201,7 +215,15 @@ export default function SeatsPage() {
 
   return (
     <div className="pt-30 p-4">
-      <h2 className="text-2xl font-bold mb-6">Seats</h2>
+      <h2 className="text-2xl font-bold mb-2">Seats</h2>
+
+      {/* ✅ Slot details */}
+      {slotDetails && (
+        <div className="mb-6 text-sm text-muted-foreground">
+          Slot Time: <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span> • 
+          Gender: <span className="font-medium capitalize">{slotDetails.gender}</span>
+        </div>
+      )}
 
       {/* ✅ Seat Legend */}
       <div className="flex gap-6 mb-6 text-sm">

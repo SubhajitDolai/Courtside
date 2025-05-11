@@ -5,7 +5,16 @@ import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Copy, Check } from 'lucide-react'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 export default function MyBookingsPage() {
   const supabase = createClient()
@@ -14,6 +23,10 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [canceling, setCanceling] = useState<string | null>(null)
+
+  // ✅ Booking ID Dialog states
+  const [showBookingId, setShowBookingId] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   // ✅ Profile protection
   useEffect(() => {
@@ -49,7 +62,8 @@ export default function MyBookingsPage() {
           slots ( start_time, end_time )
         `)
         .eq('user_id', userData.user.id)
-        .order('created_at', { ascending: false })
+        .order('booking_date', { ascending: false }) // ✅ Sorted latest date first
+        .order('created_at', { ascending: false })  // ✅ If same date, latest created shows first
       console.log(data)
 
       if (error) {
@@ -93,6 +107,13 @@ export default function MyBookingsPage() {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
+  // ✅ Copy Booking #
+  const handleCopy = (id: string) => {
+    navigator.clipboard.writeText(id)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
@@ -124,7 +145,15 @@ export default function MyBookingsPage() {
 
                   return (
                     <tr key={b.id} className="border-t hover:bg-accent transition-colors">
-                      <td className="p-3">{b.id.slice(0, 6)}...</td>
+                      <td className="p-3">
+                        {/* ✅ Booking ID click */}
+                        <button
+                          onClick={() => setShowBookingId(b.id)}
+                          className="underline text-emerald-400 hover:text-emerald-300"
+                        >
+                          {b.id.slice(0, 6)}...
+                        </button>
+                      </td>
                       <td className="p-3">{b.sports?.name}</td>
                       <td className="p-3">
                         {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}{' '}
@@ -167,6 +196,38 @@ export default function MyBookingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ✅ Booking ID Dialog */}
+      <Dialog open={showBookingId !== null} onOpenChange={(open) => {
+        if (!open) {
+          setShowBookingId(null)
+          setCopied(false)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Booking Number</DialogTitle>
+            <DialogDescription>
+              This is your full booking ID. Show this at the check-in counter.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="bg-muted rounded-md p-4 flex items-center justify-between font-mono text-sm">
+            <span className="break-all">{showBookingId}</span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleCopy(showBookingId!)}
+            >
+              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setShowBookingId(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

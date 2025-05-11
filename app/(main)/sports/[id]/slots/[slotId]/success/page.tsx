@@ -14,7 +14,7 @@ export default function BookingSuccessPage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Ensure the component is mounted on the client-side
+    // ✅ Ensure the component is mounted on the client-side
     setMounted(true)
   }, [])
 
@@ -27,7 +27,7 @@ export default function BookingSuccessPage() {
   }
 
   if (!mounted) {
-    return null; // Ensure nothing is rendered on the server before the client is ready
+    return null // ✅ Ensure nothing is rendered on the server before the client is ready
   }
 
   return (
@@ -38,10 +38,11 @@ export default function BookingSuccessPage() {
         <Check className="w-6 h-6 text-green-600" />
       </div>
 
-      <h2 className="text-2xl font-bold text-green-700">Booking Confirmed</h2>
+      <h2 className="text-2xl font-bold text-green-700">Booking Confirmed!</h2>
 
+      {/* ✅ Better success text */}
       <p className="text-muted-foreground text-center max-w-md">
-        Your booking is successful. Please keep your booking number safe — you’ll need it at check-in.
+        Your seat has been successfully booked. Show your booking number at the check-in counter to confirm your entry.
       </p>
 
       {/* ✅ Booking ID Card */}

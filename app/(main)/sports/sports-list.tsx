@@ -1,26 +1,63 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
 
-// ✅ Define the type properly (goodbye `any[]`)
+// ✅ Define type
 interface Sport {
   id: string
   name: string
   image_url: string | null
 }
 
-export default function SportsList({ sports }: { sports: Sport[] }) {
+export default function SportsList() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [sports, setSports] = useState<Sport[]>([])
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
   const router = useRouter()
+  const supabase = createClient()
+
+  // ✅ Fetch sports from Supabase
+  const fetchSports = async () => {
+    const { data } = await supabase
+      .from('sports')
+      .select('*')
+      .eq('is_active', true)
+      .order('name', { ascending: true }) // Optional: sorted alphabetically
+    setSports(data ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchSports()
+
+    // ✅ Auto-refresh every 5 sec
+    const interval = setInterval(() => {
+      fetchSports()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleViewSlots = (sportId: string) => {
     setLoadingId(sportId)
     router.push(`/sports/${sportId}/slots`)
+  }
+
+  // ✅ Loading UI while fetching
+  if (loading) {
+    return (
+      <p className="col-span-full text-center text-muted-foreground">
+        Loading sports...
+      </p>
+    )
   }
 
   return (

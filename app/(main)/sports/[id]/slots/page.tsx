@@ -52,6 +52,7 @@ export default function SportSlotsPage() {
       .select('*')
       .eq('sport_id', sportId)
       .eq('is_active', true)
+      .order('start_time', { ascending: true }) // ✅ Order by time
 
     setSlots(data ?? [])
   }
