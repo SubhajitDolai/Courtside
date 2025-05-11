@@ -20,6 +20,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
+import { Loader2 } from 'lucide-react'
 
 export default function EditSportPage() {
   const params = useParams<{ id: string }>()
@@ -71,7 +72,17 @@ export default function EditSportPage() {
     setDeleteDialog(false)
   }
 
-  if (!slot) return <p>Loading...</p>
+  // ✅ Smooth centered loading spinner
+  if (!slot) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-muted/40">
+        <div className="flex flex-col items-center space-y-2">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading slot...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/40 p-4">

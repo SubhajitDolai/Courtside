@@ -18,6 +18,7 @@ export default function SportSlotsPage() {
   const [slots, setSlots] = useState<any[]>([])
   const [userGender, setUserGender] = useState<string | null>(null)
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
+  const [sportName, setSportName] = useState<string>('') // ✅ sport name
 
   useEffect(() => {
     fetchData()
@@ -47,14 +48,24 @@ export default function SportSlotsPage() {
       setUserGender(profile?.gender || null)
     }
 
-    const { data } = await supabase
+    // ✅ Fetch slots
+    const { data: slotData } = await supabase
       .from('slots')
       .select('*')
       .eq('sport_id', sportId)
       .eq('is_active', true)
-      .order('start_time', { ascending: true }) // ✅ Order by time
+      .order('start_time', { ascending: true })
 
-    setSlots(data ?? [])
+    setSlots(slotData ?? [])
+
+    // ✅ Fetch sport name
+    const { data: sport } = await supabase
+      .from('sports')
+      .select('name')
+      .eq('id', sportId)
+      .single()
+
+    setSportName(sport?.name || '')
   }
 
   // ✅ Gender filter logic
@@ -101,7 +112,12 @@ export default function SportSlotsPage() {
 
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
-      <h1 className="text-2xl font-bold mb-6 text-center">Available Slots</h1>
+      <h1 className="text-2xl font-bold mb-2 text-center">Available Slots</h1>
+
+      {/* ✅ Sport name */}
+      {sportName && (
+        <p className="text-center text-muted-foreground mb-6 text-lg">{sportName}</p>
+      )}
 
       {visibleSlots.length === 0 && (
         <p className="text-center text-muted-foreground">No slots available for the selected sport</p>

@@ -6,7 +6,12 @@ import { Badge } from '@/components/ui/badge'
 
 export default async function AdminSportsPage() {
   const supabase = await createClient()
-  const { data: sports } = await supabase.from('sports').select('*')
+
+  // ✅ Fetch & sort sports by name
+  const { data: sports } = await supabase
+    .from('sports')
+    .select('*')
+    .order('name', { ascending: true })
 
   return (
     <div className="flex flex-col min-h-screen items-center px-4 py-30 bg-muted/40">

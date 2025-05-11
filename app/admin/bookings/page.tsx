@@ -17,6 +17,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { Copy, Check } from 'lucide-react'
 
 export default function AdminBookingsPage() {
   const supabase = createClient()
@@ -26,8 +27,17 @@ export default function AdminBookingsPage() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // ✅ For delete dialog
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // ✅ For check-in/out confirm dialog
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [actionType, setActionType] = useState<'check-in' | 'check-out'>('check-in')
+
+  // ✅ For Booking ID dialog
+  const [showBookingId, setShowBookingId] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const fetchBookings = async () => {
     const { data, error } = await supabase
@@ -57,22 +67,30 @@ export default function AdminBookingsPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleCheckIn = async (bookingId: string) => {
+  const handleStatusChange = async () => {
+    if (!confirmId) return
     setLoading(true)
+
+    const newStatus = actionType === 'check-in' ? 'checked-in' : 'booked'
+
     const { error } = await supabase
       .from('bookings')
-      .update({ status: 'checked-in' })
-      .eq('id', bookingId)
+      .update({ status: newStatus })
+      .eq('id', confirmId)
 
     if (!error) {
       setBookings((prev) =>
         prev.map((b) =>
-          b.id === bookingId ? { ...b, status: 'checked-in' } : b
+          b.id === confirmId ? { ...b, status: newStatus } : b
         )
       )
-      toast.success('Checked-in ✅')
+      toast.success(`${actionType === 'check-in' ? 'Checked-in' : 'Checked-out'} ✅`)
+    } else {
+      toast.error('Failed to update status')
     }
+
     setLoading(false)
+    setConfirmId(null)
   }
 
   const handleDelete = async () => {
@@ -118,6 +136,14 @@ export default function AdminBookingsPage() {
     )
   })
 
+  const handleCopy = () => {
+    if (showBookingId) {
+      navigator.clipboard.writeText(showBookingId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
@@ -132,77 +158,108 @@ export default function AdminBookingsPage() {
         </CardHeader>
 
         <CardContent className="overflow-x-auto">
-          <table className="w-full text-sm border rounded-md">
-            <thead className="bg-muted text-muted-foreground">
-              <tr>
-                <th className="p-3 text-left">Booking #</th>
-                <th className="p-3 text-left">User</th>
-                <th className="p-3 text-left">Sport</th>
-                <th className="p-3 text-left">Slot</th>
-                <th className="p-3 text-left">Date</th>
-                <th className="p-3 text-left">Seat #</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.map((b) => (
-                <tr
-                  key={b.id}
-                  className="border-t hover:bg-accent/50 transition-colors"
-                >
-                  <td className="p-3">{b.id.slice(0, 6)}...</td>
-                  <td className="p-3">{b.profiles?.first_name} {b.profiles?.last_name}</td>
-                  <td className="p-3">{b.sports?.name}</td>
-                  <td className="p-3">
-                    {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}
-                  </td>
-                  <td className="p-3">{b.booking_date}</td>
-                  <td className="p-3">{b.seat_number}</td>
-                  <td className="p-3">
-                    {b.status === 'booked' ? (
-                      <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-                        Booked
-                      </Badge>
-                    ) : (
-                      <Badge variant="default">Checked-in</Badge>
-                    )}
-                  </td>
-                  <td className="p-3 space-x-2">
-                    {b.status === 'booked' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleCheckIn(b.id)}
-                        disabled={loading}
-                      >
-                        {loading ? 'Please wait...' : 'Check-in ✅'}
-                      </Button>
-                    )}
-
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setDeleteId(b.id)}
-                    >
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {!filteredBookings.length && (
+          <div className="min-w-fit">
+            <table className="w-full text-sm border rounded-md">
+              <thead className="bg-muted text-muted-foreground">
                 <tr>
-                  <td colSpan={8} className="p-4 text-center text-muted-foreground">
-                    No bookings found.
-                  </td>
+                  <th className="p-3 text-left whitespace-nowrap">Booking #</th>
+                  <th className="p-3 text-left whitespace-nowrap">User</th>
+                  <th className="p-3 text-left whitespace-nowrap">Sport</th>
+                  <th className="p-3 text-left whitespace-nowrap">Slot</th>
+                  <th className="p-3 text-left whitespace-nowrap">Date</th>
+                  <th className="p-3 text-left whitespace-nowrap">Seat #</th>
+                  <th className="p-3 text-left whitespace-nowrap">Status</th>
+                  <th className="p-3 text-left whitespace-nowrap">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredBookings.map((b) => {
+                  // ✅ Disable logic if slot end time is passed
+                  const now = new Date()
+                  const [hour, minute] = (b.slots?.end_time || '00:00').split(':').map(Number)
+                  const slotEnd = new Date()
+                  slotEnd.setHours(hour, minute, 0, 0)
+                  const slotOver = now > slotEnd
+
+                  return (
+                    <tr
+                      key={b.id}
+                      className="border-t hover:bg-accent/50 transition-colors"
+                    >
+                      <td className="p-3 whitespace-nowrap">
+                        <button
+                          onClick={() => setShowBookingId(b.id)}
+                          className="underline underline-offset-4 text-primary"
+                        >
+                          {b.id.slice(0, 6)}...
+                        </button>
+                      </td>
+                      <td className="p-3 whitespace-nowrap">{b.profiles?.first_name} {b.profiles?.last_name}</td>
+                      <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
+                      <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        {b.status === 'booked' ? (
+                          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                            Booked
+                          </Badge>
+                        ) : (
+                          <Badge variant="default">Checked-in</Badge>
+                        )}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <div className="flex gap-2 flex-nowrap">
+                          <Button
+                            size="sm"
+                            variant={b.status === 'booked' ? 'default' : 'outline'}
+                            onClick={() => {
+                              setActionType(b.status === 'booked' ? 'check-in' : 'check-out')
+                              setConfirmId(b.id)
+                            }}
+                            disabled={loading || slotOver}
+                            className={`${b.status === 'booked' ? '' : 'opacity-50'} ${slotOver ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {b.status === 'booked' ? 'Check-in ✅' : 'Check-out'}
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setDeleteId(b.id)}
+                            disabled={slotOver}
+                            className={`${slotOver ? 'opacity-50 cursor-not-allowed' : ''} whitespace-nowrap`}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {!filteredBookings.length && (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="p-4 text-center text-muted-foreground whitespace-nowrap"
+                    >
+                      No bookings found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 
-      {/* ✅ Delete Confirm Dialog */}
-      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !deleting && setDeleteId(open ? deleteId : null)}>
+      {/* ✅ Delete Dialog */}
+      <AlertDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => !deleting && setDeleteId(open ? deleteId : null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
@@ -215,6 +272,60 @@ export default function AdminBookingsPage() {
             <AlertDialogAction onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Deleting...' : 'Yes, delete'}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ✅ Check-in/out Dialog */}
+      <AlertDialog
+        open={confirmId !== null}
+        onOpenChange={(open) => !loading && setConfirmId(open ? confirmId : null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actionType === 'check-in' ? 'Check-in User?' : 'Check-out User?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === 'check-in'
+                ? 'Mark this booking as checked-in?'
+                : 'Mark this booking back to booked?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleStatusChange} disabled={loading}>
+              {loading ? 'Please wait...' : 'Yes, confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ✅ Booking ID Dialog */}
+      <AlertDialog
+        open={showBookingId !== null}
+        onOpenChange={(open) => {
+          setShowBookingId(open ? showBookingId : null)
+          setCopied(false)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Booking Number</AlertDialogTitle>
+            <AlertDialogDescription className="flex items-center justify-between mt-2 font-mono text-sm bg-muted p-2 rounded-md">
+              {showBookingId}
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={handleCopy}
+                className="ml-2"
+              >
+                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowBookingId(null)}>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
