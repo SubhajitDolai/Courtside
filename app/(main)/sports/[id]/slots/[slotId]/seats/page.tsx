@@ -15,7 +15,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 
@@ -215,6 +215,13 @@ export default function SeatsPage() {
 
   return (
     <div className="pt-30 p-4">
+      {/* ✅ Booking loader */}
+      {isBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <Loader className="w-8 h-8 animate-spin text-white" />
+        </div>
+      )}
+
       <h2 className="text-2xl font-bold mb-2">Seats</h2>
 
       {/* ✅ Slot details */}
@@ -300,7 +307,7 @@ export default function SeatsPage() {
             <AlertDialogAction onClick={handleConfirmBooking} disabled={isBooking}>
               {isBooking ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Booking...
                 </div>
               ) : 'Confirm'}

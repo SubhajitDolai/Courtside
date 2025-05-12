@@ -1,13 +1,17 @@
 'use client'
 
 import { completeOnboarding } from '../actions'
-import { useActionState } from 'react'
+import { useActionState, useTransition } from 'react' // ✅ added transition
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react' // ✅ loader icon
 
 export function OnboardingForm() {
   const [state, formAction] = useActionState(completeOnboarding, null)
+
+  // ✅ loader state
+  const [pending, startTransition] = useTransition()
 
   return (
     <section className="py-32">
@@ -18,7 +22,7 @@ export function OnboardingForm() {
         </p>
 
         <Card className="mx-auto mt-12 max-w-lg p-8 shadow-md sm:p-16">
-          <form action={formAction} className="space-y-6">
+          <form action={(formData) => startTransition(() => formAction(formData))} className="space-y-6">
             {/* Names */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input name="first_name" placeholder="First Name" required />
@@ -40,8 +44,15 @@ export function OnboardingForm() {
             </select>
 
             {/* Submit */}
-            <Button type="submit" className="w-full">
-              Save & Continue
+            <Button type="submit" className="w-full" disabled={pending}>
+              {pending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save & Continue'
+              )}
             </Button>
 
             {state?.error && <p className="text-red-500 text-center">{state.error}</p>}

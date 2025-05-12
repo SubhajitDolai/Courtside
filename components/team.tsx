@@ -7,14 +7,14 @@ const members = [
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {
-        name: 'Dr. Vaibhav Wagh',
-        role: 'Director of Sports',
-        avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
-    },
-    {
         name: 'Om Jawanjal',
         role: 'Manager',
         avatar: 'https://media.licdn.com/dms/image/v2/D5603AQGLmDWHGeIbFw/profile-displayphoto-shrink_800_800/B56Za5oi07GgAc-/0/1746871137057?e=1752105600&v=beta&t=PVXytCsiCRnJVWzol151xziwoeM8NHpfq0xFtjozYsc',
+    },
+    {
+        name: 'Dr. Vaibhav Wagh',
+        role: 'Director of Sports',
+        avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
     },
     {
         name: 'Abhay Kachare',
@@ -24,6 +24,11 @@ const members = [
 ]
 
 const leaders = [
+    {
+        name: 'Subhajit Dolai',
+        role: 'Full Stack developer',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+    },
     {
         name: 'Subhajit Dolai',
         role: 'System Design',
@@ -39,11 +44,6 @@ const leaders = [
         role: 'Cyber security',
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Full Stack developer',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
 ]
 
 const workers = [
@@ -54,17 +54,17 @@ const workers = [
     },
     {
         name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
         role: 'Backend Dev',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+    },
+    {
+        name: 'Subhajit Dolai',
+        role: 'Frontend Dev',
+        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+    },
+    {
+        name: 'Subhajit Dolai',
+        role: 'Frontend Dev',
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
 ]
@@ -76,7 +76,7 @@ export default function TeamSection() {
                 <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
 
                 <div>
-                    <h3 className="mb-6 text-lg font-medium">Leadership</h3>
+                    <h3 className="mb-6 text-lg font-medium">Core Team</h3>
                     <div className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {members.map((member, index) => (
                             <div key={index}>
@@ -95,7 +95,7 @@ export default function TeamSection() {
                     </div>
                 </div>
 
-                <div className="mt-6">
+                {/* <div className="mt-6">
                     <h3 className="mb-6 text-lg font-medium">Engineering</h3>
                     <div data-rounded="full" className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {leaders.map((member, index) => (
@@ -133,7 +133,7 @@ export default function TeamSection() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> */}
             </div>
         </section>
     )

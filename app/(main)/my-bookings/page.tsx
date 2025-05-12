@@ -41,42 +41,50 @@ export default function MyBookingsPage() {
     checkProfile()
   }, [])
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      setLoading(true)
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData?.user) {
-        toast.error('Please login')
-        return
-      }
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .select(`
-          id, 
-          booking_date, 
-          status, 
-          seat_number,
-          sports ( name ),
-          slots ( start_time, end_time )
-        `)
-        .eq('user_id', userData.user.id)
-        .order('booking_date', { ascending: false }) // ✅ Sorted latest date first
-        .order('created_at', { ascending: false })  // ✅ If same date, latest created shows first
-      console.log(data)
-
-      if (error) {
-        console.error(error)
-        toast.error('Failed to load bookings')
-      } else {
-        setBookings(data || [])
-      }
-
-      setLoading(false)
+  // ✅ Booking fetcher (reusable)
+  const fetchBookings = async () => {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) {
+      toast.error('Please login')
+      return
     }
 
-    fetchBookings()
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(`
+        id, 
+        booking_date, 
+        status, 
+        seat_number,
+        sports ( name ),
+        slots ( start_time, end_time )
+      `)
+      .eq('user_id', userData.user.id)
+      .order('booking_date', { ascending: false }) // ✅ Sorted latest date first
+      .order('created_at', { ascending: false })  // ✅ If same date, latest created shows first
+
+    if (error) {
+      console.error(error)
+      toast.error('Failed to load bookings')
+    } else {
+      setBookings(data || [])
+    }
+  }
+
+  // ✅ Initial load
+  useEffect(() => {
+    setLoading(true)
+    fetchBookings().finally(() => setLoading(false))
   }, [supabase])
+
+  // ✅ Auto-refresh bookings every 10 sec
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchBookings()
+    }, 10000) // 10 sec
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleCancel = async (bookingId: string) => {
     setCanceling(bookingId)
@@ -91,19 +99,22 @@ export default function MyBookingsPage() {
     setCanceling(null)
   }
 
-  // ✅ Simple logic → current time > slot start time = slot started
+  // ✅ Now disables 15 min before slot start
   const isSlotStarted = (slotStartTime: string) => {
     const now = new Date()
-    const currentTime = now.toTimeString().slice(0, 5) // "HH:MM"
-    return currentTime >= slotStartTime
+    const [hour, minute] = slotStartTime.split(':').map(Number)
+    const slotStart = new Date()
+    slotStart.setHours(hour, minute, 0, 0)
+    slotStart.setMinutes(slotStart.getMinutes() - 15) // Subtract 15 min
+    return now >= slotStart
   }
 
   // ✅ Convert "HH:MM" → "h:mm AM/PM"
   const formatTime12hr = (time24: string) => {
-    const [hour, minute] = time24.split(':');
-    const date = new Date();
-    date.setHours(Number(hour), Number(minute));
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    const [hour, minute] = time24.split(':')
+    const date = new Date()
+    date.setHours(Number(hour), Number(minute))
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
   }
 
   // ✅ Copy Booking #

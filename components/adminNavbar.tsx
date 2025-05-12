@@ -1,10 +1,10 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, Loader2 } from "lucide-react"; // ✅ Loader
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useTransition } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // ✅ router for push
 
 import { Button } from "./ui/button";
 import { logout } from "@/app/(auth)/login/actions";
@@ -24,6 +24,10 @@ export default function AdminNavbar() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname(); // ✅ get current route
+  const router = useRouter();
+
+  // ✅ loader state for nav
+  const [navLoading, setNavLoading] = useState(false);
 
   // ✅ handle pending logout
   const [isPending, startTransition] = useTransition();
@@ -39,24 +43,79 @@ export default function AdminNavbar() {
     setMounted(true);
   }, []);
 
+  // ✅ stop loader when route changes
+  useEffect(() => {
+    setNavLoading(false);
+  }, [pathname]);
+
   if (!mounted) return null;
 
   return (
-    <nav className="fixed left-1/2 top-0 z-50 mt-7 flex w-11/12 max-w-7xl -translate-x-1/2 flex-col items-center rounded-md bg-background/20 p-3 backdrop-blur-lg md:rounded-md outline">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-5">
-          <Link href="/">
-            {resolvedTheme && (
-              <Image
-                src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
-                alt="Logo"
-                width={100}
-                height={50}
-              />
-            )}
-          </Link>
+    <>
+      {/* ✅ Page loader */}
+      {navLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <Loader2 className="w-8 h-8 animate-spin text-white" />
+        </div>
+      )}
 
-          <div className="hidden gap-4 md:flex">
+      <nav className="fixed left-1/2 top-0 z-50 mt-7 flex w-11/12 max-w-7xl -translate-x-1/2 flex-col items-center rounded-md bg-background/20 p-3 backdrop-blur-lg md:rounded-md outline">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-5">
+            <Link href="/">
+              {resolvedTheme && (
+                <Image
+                  src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
+                  alt="Logo"
+                  width={100}
+                  height={50}
+                />
+              )}
+            </Link>
+
+            <div className="hidden gap-4 md:flex">
+              {navigationItems.map((item) => {
+                const isDashboard = item.href === "/admin/";
+                const isActive = isDashboard
+                  ? pathname === "/admin" || pathname === "/admin/"
+                  : pathname.startsWith(item.href);
+
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => {
+                      setNavLoading(true); // ✅ show loader
+                      router.push(item.href);
+                    }}
+                    className={`font-bold transition ${
+                      isActive ? "text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex gap-3 flex-row items-end">
+            <div className="flex gap-3 items-center flex-row">
+              <ModeToggle />
+              <Button type="button" onClick={handleLogout} variant="default" disabled={isPending}>
+                {isPending ? "Logging out..." : "Logout"}
+              </Button>
+            </div>
+
+            <div className="md:hidden">
+              <Button onClick={() => setIsOpen(!isOpen)}>
+                <Menu className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {isOpen && (
+          <div className="flex flex-col items-center justify-center gap-3 px-5 py-3 md:hidden">
             {navigationItems.map((item) => {
               const isDashboard = item.href === "/admin/";
               const isActive = isDashboard
@@ -64,59 +123,24 @@ export default function AdminNavbar() {
                 : pathname.startsWith(item.href);
 
               return (
-                <Link
+                <button
                   key={item.href}
-                  href={item.href}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setNavLoading(true); // ✅ show loader
+                    router.push(item.href);
+                  }}
                   className={`font-bold transition ${
                     isActive ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
                   {item.title}
-                </Link>
+                </button>
               );
             })}
           </div>
-        </div>
-
-        <div className="flex gap-3 flex-row items-end">
-          <div className="flex gap-3 items-center flex-row">
-            <ModeToggle />
-            <Button type="button" onClick={handleLogout} variant="default">
-              {isPending ? "Logging out..." : "Logout"}
-            </Button>
-          </div>
-
-          <div className="md:hidden">
-            <Button onClick={() => setIsOpen(!isOpen)}>
-              <Menu className="size-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {isOpen && (
-        <div className="flex flex-col items-center justify-center gap-3 px-5 py-3 md:hidden">
-          {navigationItems.map((item) => {
-            const isDashboard = item.href === "/admin/";
-            const isActive = isDashboard
-              ? pathname === "/admin" || pathname === "/admin/"
-              : pathname.startsWith(item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`font-bold transition ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`}
-              >
-                {item.title}
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </nav>
+        )}
+      </nav>
+    </>
   );
 }
