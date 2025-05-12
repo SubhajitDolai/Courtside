@@ -39,7 +39,13 @@ export default function AdminBookingsPage() {
   const [showBookingId, setShowBookingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  const [page, setPage] = useState(1)
+  const perPage = 50
+
   const fetchBookings = async () => {
+    const from = (page - 1) * perPage
+    const to = from + perPage - 1
+
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -49,6 +55,8 @@ export default function AdminBookingsPage() {
         slots ( start_time, end_time )
       `)
       .order('created_at', { ascending: false })
+      .range(from, to)
+
     if (!error) setBookings(data || [])
   }
 
@@ -56,7 +64,12 @@ export default function AdminBookingsPage() {
     fetchBookings()
     const interval = setInterval(() => fetchBookings(), 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [page])
+
+  // ✅ Reset page to 1 when search changes
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
   const handleStatusChange = async () => {
     if (!confirmId) return
@@ -149,7 +162,7 @@ export default function AdminBookingsPage() {
                   <th className="p-3 text-left">Sport</th>
                   <th className="p-3 text-left">Slot</th>
                   <th className="p-3 text-left">Date</th>
-                  <th className="p-3 text-left">Seat #</th>
+                  <th className="p-3 text-left">Spot #</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 text-left">Actions</th>
                 </tr>
@@ -180,42 +193,25 @@ export default function AdminBookingsPage() {
                       <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
                       <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
                       <td className="p-3 whitespace-nowrap">
-                        <Badge variant="outline">{b.status.replace('-', ' ')}</Badge>
+                        <Badge variant="outline" className={
+                          b.status === 'booked' ? 'bg-yellow-200 text-yellow-800' :
+                            b.status === 'checked-in' ? 'bg-green-200 text-green-800' :
+                              b.status === 'checked-out' ? 'bg-gray-200 text-gray-800' :
+                                ''
+                        }>
+                          {b.status.replace('-', ' ')}
+                        </Badge>
                       </td>
                       <td className="p-3 whitespace-nowrap flex gap-2 flex-wrap">
-
-                        {/* ✅ Check-in */}
-                        <Button
-                          size="sm"
-                          onClick={() => { setActionType('check-in'); setConfirmId(b.id) }}
-                          disabled={loading || disableCheckIn}
-                          className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
+                        <Button size="sm" onClick={() => { setActionType('check-in'); setConfirmId(b.id) }} disabled={loading || disableCheckIn} className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}>
                           Check-in ✅
                         </Button>
-
-                        {/* ✅ Check-out */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => { setActionType('check-out'); setConfirmId(b.id) }}
-                          disabled={loading || disableCheckOut}
-                          className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => { setActionType('check-out'); setConfirmId(b.id) }} disabled={loading || disableCheckOut} className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}>
                           Check-out
                         </Button>
-
-                        {/* ✅ Delete */}
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setDeleteId(b.id)}
-                          disabled={disableDelete}
-                          className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
+                        <Button size="sm" variant="destructive" onClick={() => setDeleteId(b.id)} disabled={disableDelete} className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}>
                           Delete
                         </Button>
-
                       </td>
                     </tr>
                   )
@@ -227,6 +223,14 @@ export default function AdminBookingsPage() {
                 )}
               </tbody>
             </table>
+
+            {/* ✅ Pagination buttons */}
+            <div className="flex justify-between items-center mt-4">
+              <Button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>Previous</Button>
+              <span>Page {page}</span>
+              <Button onClick={() => setPage((p) => p + 1)} disabled={bookings.length < perPage}>Next</Button>
+            </div>
+
           </div>
         </CardContent>
       </Card>

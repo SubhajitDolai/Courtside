@@ -42,7 +42,7 @@ export default function BookingSuccessPage() {
 
       {/* ✅ Better success text */}
       <p className="text-muted-foreground text-center max-w-md">
-        Your seat has been successfully booked. Show your booking number at the check-in counter to confirm your entry.
+        Your spot has been successfully booked. Show your booking number at the check-in counter at the sports complex to confirm your entry.
       </p>
 
       {/* ✅ Booking ID Card */}

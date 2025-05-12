@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Loader } from "lucide-react"; // ✅ Loader icon
+import { Menu, Loader2 } from "lucide-react"; // ✅ Loader icon
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition, useEffect } from "react";
@@ -52,7 +52,7 @@ export default function GlassmorphNavbar() {
       {/* ✅ Page loader overlay */}
       {navLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader className="w-8 h-8 animate-spin text-white" />
+          <Loader2 className="w-8 h-8 animate-spin text-white" />
         </div>
       )}
 

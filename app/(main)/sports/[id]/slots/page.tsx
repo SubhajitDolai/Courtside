@@ -193,7 +193,7 @@ export default function SportSlotsPage() {
                       Loading...
                     </>
                   ) : (
-                    'View Seats'
+                    'Book now'
                   )}
                 </Button>
               </CardContent>

@@ -15,7 +15,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Loader } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 
@@ -196,7 +196,7 @@ export default function SeatsPage() {
 
       // ✅ Seat already booked
       if (error.code === '23505') {
-        toast.error('Sorry, this seat was just booked by someone else. Pick another.')
+        toast.error('Sorry, this spot was just booked by someone else. Pick another.')
         await refreshBookings()
       } else {
         toast.error('Booking failed. Please try again.')
@@ -216,7 +216,7 @@ export default function SeatsPage() {
   if (loading || seatLimit === null) {
     return (
       <div className="flex flex-row min-h-screen items-center justify-center p-4">
-        <p>Loading seats...</p>
+        <p>Loading spots...</p>
       </div>
     )
   }
@@ -226,11 +226,11 @@ export default function SeatsPage() {
       {/* ✅ Booking loader */}
       {isBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader className="w-8 h-8 animate-spin text-white" />
+          <Loader2 className="w-8 h-8 animate-spin text-white" />
         </div>
       )}
 
-      <h2 className="text-2xl font-bold mb-2">Seats</h2>
+      <h2 className="text-2xl font-bold mb-2">Spots</h2>
 
       {/* ✅ Slot details */}
       {slotDetails && (
@@ -280,7 +280,7 @@ export default function SeatsPage() {
                 setSelectedSeat(seatNumber)
                 setAgreed(false) // ✅ Reset checkbox
               }}
-              title={`Seat #${seatNumber}`}
+              title={`Spot #${seatNumber}`}
             >
               {seatNumber}
             </Button>
@@ -309,7 +309,7 @@ export default function SeatsPage() {
             <AlertDialogTitle>Confirm booking</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div>
-                Are you sure you want to book seat #{selectedSeat}? This action cannot be undone.
+                Are you sure you want to book spot #{selectedSeat}? This action cannot be undone.
 
                 {/* ✅ Terms Checkbox */}
                 <div className="flex items-center space-x-2 pt-2">
@@ -329,7 +329,7 @@ export default function SeatsPage() {
             <AlertDialogAction onClick={handleConfirmBooking} disabled={isBooking}>
               {isBooking ? (
                 <div className="flex items-center gap-2">
-                  <Loader className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Booking...
                 </div>
               ) : 'Confirm'}

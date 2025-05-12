@@ -42,7 +42,7 @@ export default async function AdminSportsPage() {
               </CardHeader>
 
               <CardContent className="text-sm text-muted-foreground space-y-1">
-                <p>Seats: {sport.seat_limit}</p>
+                <p>Spots: {sport.seat_limit}</p>
               </CardContent>
             </Card>
           ))}

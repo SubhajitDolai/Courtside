@@ -143,7 +143,7 @@ export default function EditSportPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="seatLimit">Seat Limit</Label>
+              <Label htmlFor="seatLimit">Spot Limit</Label>
               <Input
                 id="seatLimit"
                 type="number"
