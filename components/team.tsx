@@ -23,51 +23,51 @@ const members = [
     },
 ]
 
-const leaders = [
-    {
-        name: 'Subhajit Dolai',
-        role: 'Full Stack developer',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'System Design',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Devops',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Cyber security',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-]
+// const leaders = [
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Full Stack developer',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'System Design',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Devops',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Cyber security',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+// ]
 
-const workers = [
-    {
-        name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Backend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-    {
-        name: 'Subhajit Dolai',
-        role: 'Frontend Dev',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-    },
-]
+// const workers = [
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Frontend Dev',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Backend Dev',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Frontend Dev',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+//     {
+//         name: 'Subhajit Dolai',
+//         role: 'Frontend Dev',
+//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+//     },
+// ]
 
 export default function TeamSection() {
     return (
