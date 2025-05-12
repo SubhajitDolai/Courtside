@@ -17,6 +17,7 @@ export default function SportSlotsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [slots, setSlots] = useState<any[]>([])
   const [userGender, setUserGender] = useState<string | null>(null)
+  const [userType, setUserType] = useState<string | null>(null)
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
   const [sportName, setSportName] = useState<string>('')
 
@@ -57,14 +58,16 @@ export default function SportSlotsPage() {
 
     if (!user) {
       setUserGender(null)
+      setUserType(null)
     } else {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('gender')
+        .select('gender, user_type') // ✅ fetch user_type also
         .eq('id', user.id)
         .single()
 
       setUserGender(profile?.gender || null)
+      setUserType(profile?.user_type || null)
     }
 
     // ✅ Fetch slots
@@ -87,11 +90,15 @@ export default function SportSlotsPage() {
     setSportName(sport?.name || '')
   }
 
-  // ✅ Gender filter logic
+  // ✅ Gender + user_type filter logic
   const visibleSlots = slots.filter((slot) => {
-    if (slot.gender === 'any') return true
-    if (!userGender) return slot.gender === 'any'
-    return slot.gender === userGender
+    // ✅ Gender filter
+    const genderOk = slot.gender === 'any' || slot.gender === userGender
+
+    // ✅ User type filter
+    const userTypeOk = slot.allowed_user_type === 'any' || slot.allowed_user_type === userType
+
+    return genderOk && userTypeOk
   })
 
   const getGenderBadgeColor = (gender: string) => {

@@ -126,72 +126,74 @@ export default function MyBookingsPage() {
               <Loader2 className="animate-spin w-6 h-6" />
             </div>
           ) : (
-            <table className="w-full text-sm border rounded-md">
-              <thead className="bg-muted text-muted-foreground">
-                <tr>
-                  <th className="p-3 text-left">Booking #</th>
-                  <th className="p-3 text-left">Sport</th>
-                  <th className="p-3 text-left">Slot</th>
-                  <th className="p-3 text-left">Date</th>
-                  <th className="p-3 text-left">Seat #</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((b) => {
-                  const slotStarted = isSlotStarted(b.slots?.start_time)
+            <div className="min-w-fit"> {/* ✅ Fix for mobile view */}
+              <table className="w-full text-sm border rounded-md">
+                <thead className="bg-muted text-muted-foreground">
+                  <tr>
+                    <th className="p-3 text-left whitespace-nowrap">Booking #</th>
+                    <th className="p-3 text-left whitespace-nowrap">Sport</th>
+                    <th className="p-3 text-left whitespace-nowrap">Slot</th>
+                    <th className="p-3 text-left whitespace-nowrap">Date</th>
+                    <th className="p-3 text-left whitespace-nowrap">Seat #</th>
+                    <th className="p-3 text-left whitespace-nowrap">Status</th>
+                    <th className="p-3 text-left whitespace-nowrap">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.map((b) => {
+                    const slotStarted = isSlotStarted(b.slots?.start_time)
 
-                  return (
-                    <tr key={b.id} className="border-t hover:bg-accent transition-colors">
-                      <td className="p-3">
-                        {/* ✅ Booking ID click */}
-                        <button
-                          onClick={() => setShowBookingId(b.id)}
-                          className="underline text-emerald-400 hover:text-emerald-300"
-                        >
-                          {b.id.slice(0, 6)}...
-                        </button>
-                      </td>
-                      <td className="p-3">{b.sports?.name}</td>
-                      <td className="p-3">
-                        {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}{' '}
-                        {slotStarted && <span className="text-xs text-red-500 ml-2">Started</span>}
-                      </td>
-                      <td className="p-3">{b.booking_date}</td>
-                      <td className="p-3">{b.seat_number}</td>
-                      <td className="p-3">
-                        {b.status === 'booked' ? (
-                          <span className="text-yellow-600">Booked</span>
-                        ) : (
-                          <span className="text-green-600">Checked-in</span>
-                        )}
-                      </td>
-                      <td className="p-3 space-x-2">
-                        {b.status === 'booked' && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            disabled={canceling === b.id || slotStarted}
-                            onClick={() => handleCancel(b.id)}
-                            className={slotStarted ? 'opacity-50 cursor-not-allowed' : ''}
+                    return (
+                      <tr key={b.id} className="border-t hover:bg-accent transition-colors">
+                        <td className="p-3 whitespace-nowrap">
+                          {/* ✅ Booking ID click */}
+                          <button
+                            onClick={() => setShowBookingId(b.id)}
+                            className="underline text-emerald-400 hover:text-emerald-300"
                           >
-                            {canceling === b.id ? 'Cancelling...' : 'Cancel'}
-                          </Button>
-                        )}
+                            {b.id.slice(0, 6)}...
+                          </button>
+                        </td>
+                        <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
+                        <td className="p-3 whitespace-nowrap">
+                          {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}{' '}
+                          {slotStarted && <span className="text-xs text-red-500 ml-2">Started</span>}
+                        </td>
+                        <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
+                        <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
+                        <td className="p-3 whitespace-nowrap">
+                          {b.status === 'booked' ? (
+                            <span className="text-yellow-600">Booked</span>
+                          ) : (
+                            <span className="text-green-600">Checked-in</span>
+                          )}
+                        </td>
+                        <td className="p-3 whitespace-nowrap space-x-2">
+                          {b.status === 'booked' && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              disabled={canceling === b.id || slotStarted}
+                              onClick={() => handleCancel(b.id)}
+                              className={slotStarted ? 'opacity-50 cursor-not-allowed' : ''}
+                            >
+                              {canceling === b.id ? 'Cancelling...' : 'Cancel'}
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {!bookings.length && (
+                    <tr>
+                      <td colSpan={7} className="p-4 text-center text-muted-foreground whitespace-nowrap">
+                        No bookings found.
                       </td>
                     </tr>
-                  )
-                })}
-                {!bookings.length && (
-                  <tr>
-                    <td colSpan={7} className="p-4 text-center text-muted-foreground">
-                      No bookings found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>

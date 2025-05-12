@@ -149,6 +149,24 @@ export default function EditSportPage() {
               </Select>
             </div>
 
+            {/* ✅ Allowed User Type Dropdown */}
+            <div className="space-y-2">
+              <Label>Allowed User Type</Label>
+              <Select
+                value={slot.allowed_user_type || 'any'}
+                onValueChange={(val) => setSlot({ ...slot, allowed_user_type: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student Only</SelectItem>
+                  <SelectItem value="faculty">Faculty Only</SelectItem>
+                  <SelectItem value="any">Anyone</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Active Toggle */}
             <div className="flex items-center gap-2">
               <Switch

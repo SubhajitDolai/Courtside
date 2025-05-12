@@ -29,7 +29,13 @@ import {
 export default function AddSlotPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sports, setSports] = useState<any[]>([])
-  const [form, setForm] = useState({ sport_id: "", start_time: "", end_time: "", gender: "" })
+  const [form, setForm] = useState({ 
+    sport_id: "", 
+    start_time: "", 
+    end_time: "", 
+    gender: "", 
+    allowed_user_type: "student"
+  })
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -46,7 +52,7 @@ export default function AddSlotPage() {
   })
 
   const handleSubmit = async () => {
-    if (!form.sport_id || !form.start_time || !form.end_time || !form.gender) {
+    if (!form.sport_id || !form.start_time || !form.end_time || !form.gender || !form.allowed_user_type) {
       toast.error("Please fill all fields")
       return
     }
@@ -138,6 +144,24 @@ export default function AddSlotPage() {
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
                   <SelectItem value="any">Any</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* ✅ Allowed User Type Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="allowed_user_type">Allowed Users</Label>
+              <Select
+                value={form.allowed_user_type}
+                onValueChange={(val) => setForm({ ...form, allowed_user_type: val })}
+              >
+                <SelectTrigger id="allowed_user_type">
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Students Only</SelectItem>
+                  <SelectItem value="faculty">Faculty Only</SelectItem>
+                  <SelectItem value="any">Anyone</SelectItem>
                 </SelectContent>
               </Select>
             </div>
