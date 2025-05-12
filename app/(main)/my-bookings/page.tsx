@@ -99,13 +99,13 @@ export default function MyBookingsPage() {
     setCanceling(null)
   }
 
-  // ✅ Now disables 15 min before slot start
+  // ✅ Now disables 30 min before slot start
   const isSlotStarted = (slotStartTime: string) => {
     const now = new Date()
     const [hour, minute] = slotStartTime.split(':').map(Number)
     const slotStart = new Date()
     slotStart.setHours(hour, minute, 0, 0)
-    slotStart.setMinutes(slotStart.getMinutes() - 15) // Subtract 15 min
+    slotStart.setMinutes(slotStart.getMinutes() - 30) // Subtract 30 min
     return now >= slotStart
   }
 
@@ -173,11 +173,9 @@ export default function MyBookingsPage() {
                         <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
                         <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
                         <td className="p-3 whitespace-nowrap">
-                          {b.status === 'booked' ? (
-                            <span className="text-yellow-600">Booked</span>
-                          ) : (
-                            <span className="text-green-600">Checked-in</span>
-                          )}
+                          {b.status === 'booked' && <span className="text-yellow-600">Booked</span>}
+                          {b.status === 'checked-in' && <span className="text-green-600">Checked-in</span>}
+                          {b.status === 'checked-out' && <span className="text-gray-600">Checked-out</span>}
                         </td>
                         <td className="p-3 whitespace-nowrap space-x-2">
                           {b.status === 'booked' && (

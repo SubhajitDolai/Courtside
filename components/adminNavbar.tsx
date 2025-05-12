@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Loader2 } from "lucide-react"; // ✅ Loader
+import { Menu, Loader } from "lucide-react"; // ✅ Loader
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useTransition } from "react";
@@ -55,7 +55,7 @@ export default function AdminNavbar() {
       {/* ✅ Page loader */}
       {navLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader2 className="w-8 h-8 animate-spin text-white" />
+          <Loader className="w-8 h-8 animate-spin text-white" />
         </div>
       )}
 

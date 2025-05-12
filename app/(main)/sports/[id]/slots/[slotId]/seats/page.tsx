@@ -54,6 +54,13 @@ export default function SeatsPage() {
   // ✅ Slot details (start time, end time, gender)
   const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string } | null>(null)
 
+  // ✅ Count seats summary safely
+  const totalSeats = seatLimit || 0
+  const availableSeats = totalSeats - bookings.length
+  const bookedSeats = bookings.filter((b) => b.status === 'booked').length
+  const checkedInSeats = bookings.filter((b) => b.status === 'checked-in').length
+  const checkedOutSeats = bookings.filter((b) => b.status === 'checked-out').length
+
   // ✅ Initial fetch (with gender check)
   useEffect(() => {
     checkGenderAndFetch()
@@ -128,6 +135,7 @@ export default function SeatsPage() {
   const getSeatStatus = (seatNumber: number) => {
     const booking = bookings.find((b) => b.seat_number === seatNumber)
     if (booking?.status === 'checked-in') return 'occupied'
+    if (booking?.status === 'checked-out') return 'checkedout'
     if (booking?.status === 'booked') return 'booked'
     return 'free'
   }
@@ -193,7 +201,7 @@ export default function SeatsPage() {
       } else {
         toast.error('Booking failed. Please try again.')
       }
-
+      
       setIsBooking(false)
       return
     }
@@ -233,7 +241,7 @@ export default function SeatsPage() {
       )}
 
       {/* ✅ Seat Legend */}
-      <div className="flex gap-6 mb-6 text-sm">
+      <div className="flex gap-4 mb-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded-sm" />
           Available
@@ -246,6 +254,10 @@ export default function SeatsPage() {
           <div className="w-4 h-4 bg-red-500 rounded-sm" />
           Checked-in
         </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-gray-400 rounded-sm" />
+          Checked-out
+        </div>
       </div>
 
       {/* ✅ Seats Grid */}
@@ -257,6 +269,7 @@ export default function SeatsPage() {
           let bgColor = 'bg-green-500'
           if (status === 'booked') bgColor = 'bg-yellow-500'
           if (status === 'occupied') bgColor = 'bg-red-500'
+          if (status === 'checkedout') bgColor = 'bg-gray-400'
 
           return (
             <Button
@@ -273,6 +286,15 @@ export default function SeatsPage() {
             </Button>
           )
         })}
+      </div>
+
+      {/* ✅ Live Seat Analytics */}
+      <div className="font-bold text-sm text-muted-foreground flex gap-4 flex-wrap mt-6">
+        <div>Total: <span className="font-medium">{totalSeats}</span></div>
+        <div>Available: <span className="font-medium text-green-600">{availableSeats}</span></div>
+        <div>Booked: <span className="font-medium text-yellow-600">{bookedSeats}</span></div>
+        <div>Checked-in: <span className="font-medium text-red-600">{checkedInSeats}</span></div>
+        <div>Checked-out: <span className="font-medium text-gray-600">{checkedOutSeats}</span></div>
       </div>
 
       {/* ✅ Booking Confirm Dialog */}

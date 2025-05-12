@@ -1,11 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, Calendar } from 'lucide-react'
+import { Trophy, Clock, Calendar, Loader } from 'lucide-react'
 
 export default function AdminPage() {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
   const cards = [
     {
@@ -28,13 +30,26 @@ export default function AdminPage() {
     },
   ]
 
+  const handleCardClick = (href: string) => {
+    setLoading(true)
+    router.push(href)
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-8 relative">
+
+      {/* ✅ Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <Loader className="w-8 h-8 animate-spin text-white" />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {cards.map((card, index) => (
           <Card
             key={index}
-            onClick={() => router.push(card.href)}
+            onClick={() => handleCardClick(card.href)}
             className="cursor-pointer transition hover:shadow-lg hover:bg-accent"
           >
             <CardHeader className="flex flex-col items-center space-y-2">
