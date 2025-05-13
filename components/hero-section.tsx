@@ -64,7 +64,7 @@ export default function HeroSection() {
                             }}
                             className="absolute inset-0 -z-20">
                             <Image
-                                src="/mit.jpg"
+                                src="/mit.webp"
                                 alt="background"
                                 // className="absolute inset-x-0 top-56 -z-20 hidden lg:top-32 dark:block"
                                 className="absolute inset-x-0 top-56 -z-20 lg:top-32 dark:block w-full h-auto object-cover 
@@ -148,7 +148,7 @@ export default function HeroSection() {
                                     <Image
                                         // className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
                                         className="bg-background relative hidden rounded-2xl dark:block"
-                                        src="/mit.jpg"
+                                        src="/mit.webp"
                                         alt="app screen"
                                         width="2700"
                                         height="1440"
@@ -156,7 +156,7 @@ export default function HeroSection() {
                                     <Image
                                         // className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
                                         className="z-2 border-border/25 relative rounded-2xl border dark:hidden"
-                                        src="/mit.jpg"
+                                        src="/mit.webp"
                                         alt="app screen"
                                         width="2700"
                                         height="1440"

@@ -62,7 +62,7 @@ export default function GlassmorphNavbar() {
             <Link href="/">
               {resolvedTheme && (
                 <Image
-                  src={resolvedTheme === "light" ? "/logo-dark.png" : "/logo-light.png"}
+                  src={resolvedTheme === "light" ? "/logo-dark.webp" : "/logo-light.webp"}
                   alt="Logo"
                   width={100}
                   height={50}

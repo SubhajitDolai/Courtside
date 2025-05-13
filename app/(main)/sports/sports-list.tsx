@@ -61,7 +61,7 @@ export default function SportsList({ sports: initialSports }: { sports: Sport[] 
           <CardContent className="flex flex-col gap-4">
             <div className="w-full h-48 relative rounded-md overflow-hidden">
               <Image
-                src={sport.image_url || '/mit.jpg'}
+                src={sport.image_url || '/mit.webp'}
                 alt={sport.name}
                 fill
                 className="object-cover"

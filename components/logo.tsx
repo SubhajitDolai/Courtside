@@ -19,7 +19,7 @@ export default function Logo() {
     return (
         <div className='flex items-center space-x-2'>
             <Image
-                src={resolvedTheme === 'light' ? '/logo-dark.png' : '/logo-light.png'}
+                src={resolvedTheme === 'light' ? '/logo-dark.webp' : '/logo-light.webp'}
                 alt="Logo"
                 width={100}
                 height={50}

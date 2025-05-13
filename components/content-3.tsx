@@ -7,9 +7,8 @@ export default function ContentSection() {
     return (
         <section className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-12">
-                {/* <img className="rounded-(--radius) grayscale" src="/mit.jpg" alt="team image" height="" width="" loading="lazy" /> */}
                 <Image
-                    src="/mit.jpg"
+                    src="/mit.webp"
                     alt="team image"
                     width={1489}
                     height={575}

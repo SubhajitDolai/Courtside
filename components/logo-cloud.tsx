@@ -16,128 +16,72 @@ export default function LogoCloud() {
                             speed={40}
                             gap={112}>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/badminton.png"
-                                    alt="Badminton Logo"
-                                    height="20"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/badminton.png"
+                                    src="/sports_png/badminton.webp"
                                     alt="Badminton Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/swimming.png"
-                                    alt="Swimming Logo"
-                                    height="16"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/swimming.png"
+                                    src="/sports_png/swimming.webp"
                                     alt="Swimming Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/wrestling.png"
-                                    alt="Wrestling Logo"
-                                    height="16"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/wrestling.png"
+                                    src="/sports_png/wrestling.webp"
                                     alt="Wrestling Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/table-tennis.png"
-                                    alt="Table Tennis Logo"
-                                    height="20"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/table-tennis.png"
+                                    src="/sports_png/table-tennis.webp"
                                     alt="Table Tennis Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/football.png"
-                                    alt="Football Logo"
-                                    height="20"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/football.png"
+                                    src="/sports_png/football.webp"
                                     alt="Football Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/cricket.png"
-                                    alt="Cricket Logo"
-                                    height="16"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/cricket.png"
+                                    src="/sports_png/cricket.webp"
                                     alt="Cricket Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/table-football.png"
-                                    alt="Table Football Logo"
-                                    height="28"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/table-football.png"
+                                    src="/sports_png/table-football.webp"
                                     alt="Table Football Logo"
                                     height={20}
                                     width={40}
                                 />
                             </div>
                             <div className="flex">
-                                {/* <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="/sports_png/carrom.png"
-                                    alt="Carror Logo"
-                                    height="24"
-                                    width="auto"
-                                /> */}
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/carrom.png"
+                                    src="/sports_png/carrom.webp"
                                     alt="Carror Logo"
                                     height={20}
                                     width={40}

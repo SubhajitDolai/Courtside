@@ -6,37 +6,37 @@ const sports = [
     {
         name: 'Swimming',
         // role: 'Founder - CEO',
-        avatar: '/sports_img/swimming.jpg',
+        avatar: '/sports_img/swimming.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
         name: 'Badminton',
         // role: 'Co-Founder - CTO',
-        avatar: '/sports_img/badminton.jpg',
+        avatar: '/sports_img/badminton.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
         name: 'Wrestling',
         // role: 'Sales Manager',
-        avatar: '/sports_img/wrestling.jpeg',
+        avatar: '/sports_img/wrestling.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
         name: 'Table Tennis',
         // role: 'UX Engeneer',
-        avatar: '/sports_img/tableTennis.jpeg',
+        avatar: '/sports_img/tableTennis.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
         name: 'Foosball',
         // role: 'Interaction Designer',
-        avatar: '/sports_img/foosball.jpeg',
+        avatar: '/sports_img/foosball.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
         name: 'Chess',
         // role: 'Visual Designer',
-        avatar: '/sports_img/chess.jpeg',
+        avatar: '/sports_img/chess.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
 ]
