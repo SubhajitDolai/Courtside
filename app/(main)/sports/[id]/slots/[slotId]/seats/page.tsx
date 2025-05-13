@@ -15,7 +15,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Clock, Users, CheckCircle, XCircle, Calendar, Trophy } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -38,6 +38,7 @@ export default function SeatsPage() {
 
   // ✅ Seat limit from sports table
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
+  const [sportName, setSportName] = useState<string>('')
   // ✅ Seat bookings fetched from Supabase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([])
@@ -111,11 +112,12 @@ export default function SeatsPage() {
     // ✅ Load seat limit
     const { data: sport } = await supabase
       .from('sports')
-      .select('seat_limit')
+      .select('seat_limit, name')
       .eq('id', sportId)
       .single()
 
     setSeatLimit(sport?.seat_limit || 0)
+    setSportName(sport?.name || '')
     await refreshBookings()
     setLoading(false)
   }
@@ -160,6 +162,7 @@ export default function SeatsPage() {
       return
     }
 
+    // booking_date logic broken coz of time zone issue fix-later
     const today = new Date().toISOString().split('T')[0]
 
     // ✅ Prevent multiple booking by user
@@ -216,103 +219,150 @@ export default function SeatsPage() {
   // ✅ Loading UI
   if (loading || seatLimit === null) {
     return (
-      <div className="pt-30 p-4">
-        <h2 className="text-3xl font-bold mb-4">Spots</h2>
-
-        <div className="mb-4">
-          <Skeleton className="h-5 w-2/3 mb-2" />
-          <Skeleton className="h-4 w-1/3" />
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-md" />
-          ))}
-        </div>
-
-        <div className="mt-6 space-y-2">
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-1/3" />
+      <div className="min-h-screen flex flex-col items-center pt-30 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div className="w-full">
+          <Skeleton className="h-10 w-32 mx-auto mb-6" />
+          <div className="mb-8 space-y-2 max-w-lg mx-auto">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-4 w-4/5 mx-auto" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-6 max-w-2xl mx-auto">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-xl" />
+            ))}
+          </div>
+          <div className="mt-10 space-y-2 max-w-lg mx-auto">
+            <Skeleton className="h-4 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="pt-30 p-4">
+    <div className="min-h-screen flex flex-col items-center pt-30 pb-10 px-4 sm:px-6 max-w-4xl mx-auto">
       {/* ✅ Booking loader */}
       {isBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader2 className="w-8 h-8 animate-spin text-white" />
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-white" />
+            <p className="text-white text-md">Booking your spot...</p>
+          </div>
         </div>
       )}
 
-      <h2 className="text-3xl font-bold mb-2">Spots</h2>
+      <div className="w-full text-center mb-8">
+        <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          Select Your Spot
+        </h1>
 
-      {/* ✅ Slot details */}
-      {slotDetails && (
-        <div className="my-6 text-md text-muted-foreground">
-          Slot Time: <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span> •
-          Gender: <span className="font-medium capitalize">{slotDetails.gender}</span>
-        </div>
-      )}
-
-      {/* ✅ Seat Legend */}
-      <div className="flex gap-4 mb-8 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500 rounded-sm" />
-          Available
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-yellow-500 rounded-sm" />
-          Booked
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded-sm" />
-          Checked-in
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-400 rounded-sm" />
-          Checked-out
-        </div>
+        {slotDetails && (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-base text-muted-foreground mt-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              <span className="font-medium">{sportName}</span>
+            </div>
+            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span>
+            </div>
+            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="font-medium capitalize">{slotDetails.gender}</span>
+            </div>
+            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span className="font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ✅ Seats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-        {Array.from({ length: seatLimit }, (_, i) => {
-          const seatNumber = i + 1
-          const status = getSeatStatus(seatNumber)
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-800 w-full max-w-3xl mx-auto mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm text-center">
+          <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+            <div className="w-4 h-4 bg-green-500 rounded-full mb-2" />
+            <span>Available</span>
+          </div>
+          <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+            <div className="w-4 h-4 bg-yellow-500 rounded-full mb-2" />
+            <span>Booked</span>
+          </div>
+          <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+            <div className="w-4 h-4 bg-rose-500 rounded-full mb-2" />
+            <span>Checked-in</span>
+          </div>
+          <div className="flex flex-col items-center bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+            <div className="w-4 h-4 bg-gray-400 rounded-full mb-2" />
+            <span>Checked-out</span>
+          </div>
+        </div>
 
-          let bgColor = 'bg-green-500'
-          if (status === 'booked') bgColor = 'bg-yellow-500'
-          if (status === 'occupied') bgColor = 'bg-red-500'
-          if (status === 'checkedout') bgColor = 'bg-gray-400'
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 max-w-2xl mx-auto">
+          {Array.from({ length: seatLimit }, (_, i) => {
+            const seatNumber = i + 1
+            const status = getSeatStatus(seatNumber)
+            let bgColor = 'bg-green-500 hover:bg-green-600'
+            let icon = null
 
-          return (
-            <Button
-              key={seatNumber}
-              className={`h-16 text-white font-semibold ${bgColor} hover:opacity-90 transition rounded-md`}
-              disabled={status !== 'free'}
-              onClick={() => {
-                setSelectedSeat(seatNumber)
-                setAgreed(false) // ✅ Reset checkbox
-              }}
-              title={`Spot #${seatNumber}`}
-            >
-              {seatNumber}
-            </Button>
-          )
-        })}
+            if (status === 'booked') {
+              bgColor = 'bg-yellow-400'
+              icon = <CheckCircle className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
+            }
+            if (status === 'occupied') {
+              bgColor = 'bg-rose-500'
+              icon = <Users className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
+            }
+            if (status === 'checkedout') {
+              bgColor = 'bg-gray-400'
+              icon = <XCircle className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
+            }
+
+            return (
+              <Button
+                key={seatNumber}
+                className={`h-16 text-white font-semibold ${bgColor} hover:brightness-105 transition rounded-xl relative flex items-center justify-center`}
+                disabled={status !== 'free'}
+                onClick={() => {
+                  setSelectedSeat(seatNumber)
+                  setAgreed(false)
+                }}
+                title={`Spot #${seatNumber}`}
+              >
+                {icon}
+                <span className="text-lg">{seatNumber}</span>
+              </Button>
+            )
+          })}
+        </div>
       </div>
 
       {/* ✅ Live Seat Analytics */}
-      <div className="font-bold text-md text-muted-foreground flex gap-4 flex-wrap mt-8">
-        <div>Total: <span className="font-medium">{totalSeats}</span></div>
-        <div>Available: <span className="font-medium text-green-600">{availableSeats}</span></div>
-        <div>Booked: <span className="font-medium text-yellow-600">{bookedSeats}</span></div>
-        <div>Checked-in: <span className="font-medium text-red-600">{checkedInSeats}</span></div>
-        <div>Checked-out: <span className="font-medium text-gray-600">{checkedOutSeats}</span></div>
+      <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 grid grid-cols-2 sm:grid-cols-5 gap-4 text-center w-full max-w-2xl mx-auto">
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="text-xl font-bold">{totalSeats}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Available</span>
+          <span className="text-xl font-bold text-green-600">{availableSeats}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Booked</span>
+          <span className="text-xl font-bold text-yellow-600">{bookedSeats}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Checked-in</span>
+          <span className="text-xl font-bold text-red-600">{checkedInSeats}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Checked-out</span>
+          <span className="text-xl font-bold text-gray-600">{checkedOutSeats}</span>
+        </div>
       </div>
 
       {/* ✅ Booking Confirm Dialog */}
@@ -322,19 +372,30 @@ export default function SeatsPage() {
           setAgreed(false)
         }
       }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md border bg-white dark:bg-neutral-900 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm booking</AlertDialogTitle>
+            <AlertDialogTitle className="text-center text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+              Confirm Your Booking
+            </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div>
-                Are you sure you want to book spot #{selectedSeat}? This action cannot be undone.
+              <div className="text-center text-neutral-700 dark:text-neutral-300">
+                <div className="bg-[#F6F5F4] dark:bg-neutral-800 p-4 rounded-lg mb-4 border border-muted">
+                  <p className="text-lg font-medium text-neutral-900 dark:text-white">
+                    Spot <span className="text-primary text-2xl">{selectedSeat}</span>
+                  </p>
+                  {slotDetails && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)} • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">Cancellation allowed up to 30 minutes prior.</p>
 
-                {/* ✅ Terms Checkbox */}
-                <div className="flex items-center space-x-2 pt-2">
+                <div className="flex items-start sm:items-center space-x-2 pt-4 justify-center text-left">
                   <Checkbox id="terms" checked={agreed} onCheckedChange={(checked) => setAgreed(!!checked)} />
-                  <label htmlFor="terms" className="text-sm">
+                  <label htmlFor="terms" className="text-sm leading-snug">
                     I agree to the{' '}
-                    <Link href="/terms" target="_blank" className="underline underline-offset-4">
+                    <Link href="/terms" target="_blank" className="text-blue-600 dark:text-blue-400 underline underline-offset-4">
                       Terms & Conditions
                     </Link>
                   </label>
@@ -342,9 +403,16 @@ export default function SeatsPage() {
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isBooking}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmBooking} disabled={isBooking}>
+
+          <AlertDialogFooter className="sm:justify-center gap-3 pt-4">
+            <AlertDialogCancel disabled={isBooking} className="sm:w-32 border text-neutral-700 dark:text-neutral-300">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBooking}
+              disabled={isBooking || !agreed}
+              className={`sm:w-32 ${!agreed ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               {isBooking ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />

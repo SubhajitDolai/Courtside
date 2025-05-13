@@ -56,6 +56,7 @@ export default function MyBookingsPage() {
         booking_date, 
         status, 
         seat_number,
+        created_at,
         sports ( name ),
         slots ( start_time, end_time )
       `)
@@ -147,6 +148,7 @@ export default function MyBookingsPage() {
                     <th className="p-3 text-left whitespace-nowrap">Date</th>
                     <th className="p-3 text-left whitespace-nowrap">Seat #</th>
                     <th className="p-3 text-left whitespace-nowrap">Status</th>
+                    <th className="p-3 text-left whitespace-nowrap">Booked At</th>
                     <th className="p-3 text-left whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
@@ -177,6 +179,16 @@ export default function MyBookingsPage() {
                           {b.status === 'checked-in' && <span className="text-green-600">Checked-in</span>}
                           {b.status === 'checked-out' && <span className="text-gray-600">Checked-out</span>}
                         </td>
+                        <td className="p-3 whitespace-nowrap">
+                          {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          }) : ''}
+                        </td>
                         <td className="p-3 whitespace-nowrap space-x-2">
                           {b.status === 'booked' && (
                             <Button
@@ -195,7 +207,7 @@ export default function MyBookingsPage() {
                   })}
                   {!bookings.length && (
                     <tr>
-                      <td colSpan={7} className="p-4 text-center text-muted-foreground whitespace-nowrap">
+                      <td colSpan={8} className="p-4 text-center text-muted-foreground whitespace-nowrap">
                         No bookings found.
                       </td>
                     </tr>

@@ -162,6 +162,7 @@ export default function AdminBookingsPage() {
                   <th className="p-3 text-left">Sport</th>
                   <th className="p-3 text-left">Slot</th>
                   <th className="p-3 text-left">Date</th>
+                  <th className="p-3 text-left">Booked At</th>
                   <th className="p-3 text-left">Spot #</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 text-left">Actions</th>
@@ -191,6 +192,16 @@ export default function AdminBookingsPage() {
                       <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
                       <td className="p-3 whitespace-nowrap">{formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}</td>
                       <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                        }) : ''}
+                      </td>
                       <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
                       <td className="p-3 whitespace-nowrap">
                         <Badge variant="outline" className={
@@ -218,7 +229,7 @@ export default function AdminBookingsPage() {
                 })}
                 {!filteredBookings.length && (
                   <tr>
-                    <td colSpan={8} className="p-4 text-center text-muted-foreground">No bookings found.</td>
+                    <td colSpan={9} className="p-4 text-center text-muted-foreground">No bookings found.</td>
                   </tr>
                 )}
               </tbody>
