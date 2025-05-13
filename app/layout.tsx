@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Courtside: Book Badminton Courts & Swimming Sessions",
-  description: "Easily book badminton courts and swimming pool sessions at your convenience. Simple, fast, and hassle-free sports booking with Courtside.",
+  title: "Courtside: Book Sports Courts & Sessions Online",
+  description: "Seamlessly book courts, fields, and sessions for various sports and games. Quick, easy, and hassle-free sports booking with Courtside."
 };
 
 export default function RootLayout({
@@ -29,10 +29,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
           {children}
         </ThemeProvider>
