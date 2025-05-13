@@ -18,6 +18,7 @@ import {
 import { Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // ✅ Convert 24hr time to 12hr format
 const formatTime12hr = (time24: string) => {
@@ -201,13 +202,13 @@ export default function SeatsPage() {
       } else {
         toast.error('Booking failed. Please try again.')
       }
-      
+
       setIsBooking(false)
       return
     }
 
     // ✅ Success!
-    toast.success('Booking successful ✅')
+    toast.success('Booking successful')
     router.prefetch(`/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`)
     window.location.href = `/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`
   }
@@ -215,8 +216,25 @@ export default function SeatsPage() {
   // ✅ Loading UI
   if (loading || seatLimit === null) {
     return (
-      <div className="flex flex-row min-h-screen items-center justify-center p-4">
-        <p>Loading spots...</p>
+      <div className="pt-30 p-4">
+        <h2 className="text-3xl font-bold mb-4">Spots</h2>
+
+        <div className="mb-4">
+          <Skeleton className="h-5 w-2/3 mb-2" />
+          <Skeleton className="h-4 w-1/3" />
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-md" />
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/3" />
+        </div>
       </div>
     )
   }
@@ -230,18 +248,18 @@ export default function SeatsPage() {
         </div>
       )}
 
-      <h2 className="text-2xl font-bold mb-2">Spots</h2>
+      <h2 className="text-3xl font-bold mb-2">Spots</h2>
 
       {/* ✅ Slot details */}
       {slotDetails && (
-        <div className="mb-6 text-sm text-muted-foreground">
-          Slot Time: <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span> • 
+        <div className="my-6 text-md text-muted-foreground">
+          Slot Time: <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span> •
           Gender: <span className="font-medium capitalize">{slotDetails.gender}</span>
         </div>
       )}
 
       {/* ✅ Seat Legend */}
-      <div className="flex gap-4 mb-6 text-sm">
+      <div className="flex gap-4 mb-8 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded-sm" />
           Available
@@ -289,7 +307,7 @@ export default function SeatsPage() {
       </div>
 
       {/* ✅ Live Seat Analytics */}
-      <div className="font-bold text-sm text-muted-foreground flex gap-4 flex-wrap mt-6">
+      <div className="font-bold text-md text-muted-foreground flex gap-4 flex-wrap mt-8">
         <div>Total: <span className="font-medium">{totalSeats}</span></div>
         <div>Available: <span className="font-medium text-green-600">{availableSeats}</span></div>
         <div>Booked: <span className="font-medium text-yellow-600">{bookedSeats}</span></div>

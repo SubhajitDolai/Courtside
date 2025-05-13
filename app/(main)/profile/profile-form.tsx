@@ -38,7 +38,7 @@ export function ProfileForm({ profile }: { profile: any }) {
       console.error(error)
       toast.error('Update failed')
     } else {
-      toast.success('Profile updated successfully ✅')
+      toast.success('Profile updated successfully.')
     }
   }
 

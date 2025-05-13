@@ -31,7 +31,7 @@ export default async function ProfilePage() {
   // ✅ All good ➔ show profile form
   return (
     <main className="py-30 px-4 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">My Profile</h1>
 
       {/* ✅ Profile Edit Form */}
       <ProfileForm profile={profile} />

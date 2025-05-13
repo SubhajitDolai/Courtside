@@ -89,7 +89,7 @@ export default function AdminBookingsPage() {
 
     if (!error) {
       setBookings((prev) => prev.map((b) => (b.id === confirmId ? { ...b, status: newStatus } : b)))
-      toast.success(`Status updated to "${newStatus}" ✅`)
+      toast.success(`Status updated to "${newStatus}"`)
     } else {
       toast.error('Failed to update status')
     }
@@ -104,7 +104,7 @@ export default function AdminBookingsPage() {
     const { error } = await supabase.from('bookings').delete().eq('id', deleteId)
     if (!error) {
       setBookings((prev) => prev.filter((b) => b.id !== deleteId))
-      toast.success('Booking deleted ❌')
+      toast.success('Booking deleted')
     } else {
       toast.error('Failed to delete')
     }
@@ -202,9 +202,9 @@ export default function AdminBookingsPage() {
                           {b.status.replace('-', ' ')}
                         </Badge>
                       </td>
-                      <td className="p-3 whitespace-nowrap flex gap-2 flex-wrap">
+                      <td className="p-3 whitespace-nowrap flex gap-4">
                         <Button size="sm" onClick={() => { setActionType('check-in'); setConfirmId(b.id) }} disabled={loading || disableCheckIn} className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}>
-                          Check-in ✅
+                          Check-in
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => { setActionType('check-out'); setConfirmId(b.id) }} disabled={loading || disableCheckOut} className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}>
                           Check-out

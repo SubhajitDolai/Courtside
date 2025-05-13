@@ -71,7 +71,7 @@ export default function EditSportPage() {
       .eq('id', sportId)
 
     if (!error) {
-      toast.success('Sport updated ✅')
+      toast.success('Sport updated')
       router.push('/admin/sports')
     } else {
       toast.error(error.message)
@@ -90,7 +90,7 @@ export default function EditSportPage() {
       .eq('id', sportId)
 
     if (!error) {
-      toast.success('Sport deleted ❌')
+      toast.success('Sport deleted')
       router.push('/admin/sports')
     } else {
       toast.error(error.message)

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function SportSlotsPage() {
   const params = useParams<{ id: string }>()
@@ -20,6 +21,7 @@ export default function SportSlotsPage() {
   const [userType, setUserType] = useState<string | null>(null)
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
   const [sportName, setSportName] = useState<string>('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     checkProfile() // ✅ ban check
@@ -31,7 +33,7 @@ export default function SportSlotsPage() {
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [sportId, supabase])
+  }, [sportId])
 
   // ✅ Ban check on mount
   const checkProfile = async () => {
@@ -53,13 +55,11 @@ export default function SportSlotsPage() {
 
   // ✅ Fetch slots + sport name
   const fetchData = async () => {
+    setLoading((prev) => prev === true) // Only show skeleton on first load
     const userRes = await supabase.auth.getUser()
     const user = userRes.data.user
 
-    if (!user) {
-      setUserGender(null)
-      setUserType(null)
-    } else {
+    if (user) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('gender, user_type') // ✅ fetch user_type also
@@ -88,6 +88,7 @@ export default function SportSlotsPage() {
       .single()
 
     setSportName(sport?.name || '')
+    setLoading(false)
   }
 
   // ✅ Gender + user_type filter logic
@@ -103,13 +104,9 @@ export default function SportSlotsPage() {
 
   const getGenderBadgeColor = (gender: string) => {
     switch (gender) {
-      case 'male':
-        return 'bg-blue-500 text-white'
-      case 'female':
-        return 'bg-pink-500 text-white'
-      case 'any':
-      default:
-        return 'bg-muted text-muted-foreground'
+      case 'male': return 'bg-blue-500 text-white'
+      case 'female': return 'bg-pink-500 text-white'
+      default: return 'bg-muted text-muted-foreground'
     }
   }
 
@@ -138,69 +135,66 @@ export default function SportSlotsPage() {
 
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
-      <h1 className="text-2xl font-bold mb-2 text-center">Available Slots</h1>
+      <h1 className="text-3xl font-bold mb-2 text-center">Available Slots</h1>
 
       {/* ✅ Sport name */}
       {sportName && (
         <p className="text-center text-muted-foreground mb-6 text-lg">{sportName}</p>
       )}
 
-      {visibleSlots.length === 0 && (
-        <p className="text-center text-muted-foreground">No slots available for the selected sport</p>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {visibleSlots.map((slot) => {
-          const past = isSlotPast(slot)
-
-          return (
-            <Card
-              key={slot.id}
-              className={`hover:shadow-md transition-shadow ${
-                past ? 'opacity-50 pointer-events-none' : ''
-              }`}
-            >
-              <CardHeader className="flex flex-col gap-2">
-                <div className="flex items-center justify-between w-full">
-                  <CardTitle className="text-lg font-semibold">
-                    {formatTime12hr(slot.start_time)} – {formatTime12hr(slot.end_time)}
-                  </CardTitle>
-                  <Badge
-                    className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${getGenderBadgeColor(slot.gender)}`}
-                  >
-                    {slot.gender === 'any'
-                      ? 'Open to All'
-                      : slot.gender.charAt(0).toUpperCase() + slot.gender.slice(1)}
-                  </Badge>
-                </div>
-
-                {/* ✅ Expired badge */}
-                {past && (
-                  <Badge variant="destructive" className="w-fit text-xs">
-                    Expired
-                  </Badge>
-                )}
+      {loading ? (
+        <div className="pt-13 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-2/3 mb-2" />
+                <Skeleton className="h-4 w-1/3" />
               </CardHeader>
               <CardContent>
-                <Button
-                  onClick={() => handleViewSeats(slot.id)}
-                  className="w-full"
-                  disabled={past || loadingSlotId === slot.id}
-                >
-                  {loadingSlotId === slot.id ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Book now'
-                  )}
-                </Button>
+                <Skeleton className="h-10 w-full" />
               </CardContent>
             </Card>
-          )
-        })}
-      </div>
+          ))}
+        </div>
+      ) : visibleSlots.length === 0 ? (
+        <p className="text-center text-muted-foreground">No slots available for the selected sport</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {visibleSlots.map((slot) => {
+            const past = isSlotPast(slot)
+
+            return (
+              <Card key={slot.id} className={`hover:shadow-md transition-shadow ${past ? 'opacity-50 pointer-events-none' : ''}`}>
+                <CardHeader className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between w-full">
+                    <CardTitle className="text-lg font-semibold">
+                      {formatTime12hr(slot.start_time)} – {formatTime12hr(slot.end_time)}
+                    </CardTitle>
+                    <Badge className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${getGenderBadgeColor(slot.gender)}`}>
+                      {slot.gender === 'any' ? 'Open to All' : slot.gender.charAt(0).toUpperCase() + slot.gender.slice(1)}
+                    </Badge>
+                  </div>
+                  {past && (
+                    <Badge variant="destructive" className="w-fit text-xs">
+                      Ended
+                    </Badge>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => handleViewSeats(slot.id)} className="w-full" disabled={past || loadingSlotId === slot.id}>
+                    {loadingSlotId === slot.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : 'Book now'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

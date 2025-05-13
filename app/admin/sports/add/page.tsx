@@ -49,7 +49,7 @@ export default function AddSportPage() {
     })
 
     if (!error) {
-      toast.success('Sport added ✅')
+      toast.success('Sport added')
       router.push('/admin/sports')
     } else {
       toast.error(error.message)

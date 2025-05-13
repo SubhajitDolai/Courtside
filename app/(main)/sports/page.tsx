@@ -27,7 +27,7 @@ export default async function SportsPage() {
 
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
-      <h2 className="text-2xl font-bold mb-6 text-center">Available Sports</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center">Available Sports</h2>
       <SportsList sports={sports ?? []} />
     </div>
   )

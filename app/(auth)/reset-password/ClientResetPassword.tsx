@@ -40,7 +40,7 @@ export default function ClientResetPassword() {
     setLoading(false);
 
     if (result.status === 'success') {
-      toast.success('Password reset successfully ✅');
+      toast.success('Password reset successfully.');
       router.push('/login');
     } else {
       toast.error(result.status);

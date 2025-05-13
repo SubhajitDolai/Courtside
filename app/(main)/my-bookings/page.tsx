@@ -93,7 +93,7 @@ export default function MyBookingsPage() {
       console.error(error)
       toast.error('Cancellation failed')
     } else {
-      toast.success('Booking cancelled ✅')
+      toast.success('Booking cancelled.')
       setBookings((prev) => prev.filter((b) => b.id !== bookingId))
     }
     setCanceling(null)
@@ -128,7 +128,7 @@ export default function MyBookingsPage() {
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">My Bookings</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">My Bookings</CardTitle>
         </CardHeader>
 
         <CardContent className="overflow-x-auto">

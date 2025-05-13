@@ -52,7 +52,7 @@ export default function EditSportPage() {
 
     await supabase.from('slots').update(slot).eq('id', slotId)
 
-    toast.success('Slot updated ✅')
+    toast.success('Slot updated')
     router.push('/admin/slots')
   }
 
@@ -62,7 +62,7 @@ export default function EditSportPage() {
     const { error } = await supabase.from('slots').delete().eq('id', slotId)
 
     if (!error) {
-      toast.success('Slot deleted ❌')
+      toast.success('Slot deleted')
       router.push('/admin/slots')
     } else {
       toast.error('Failed to delete')

@@ -62,7 +62,7 @@ export default function AddSlotPage() {
     const { error } = await supabase.from("slots").insert([form])
 
     if (!error) {
-      toast.success("Slot added ✅")
+      toast.success("Slot added")
       router.push("/admin/slots")
     } else {
       toast.error("Failed to add slot")
