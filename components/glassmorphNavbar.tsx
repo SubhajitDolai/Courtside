@@ -15,7 +15,7 @@ export const navigationItems = [
   { title: "Profile", href: "/profile", items: [] },
   { title: "Sports", href: "/sports", items: [] },
   { title: "My Bookings", href: "/my-bookings", items: [] },
-  { title: "Admin", href: "/admin", items: [] },
+  // { title: "Admin", href: "/admin", items: [] },
 ];
 
 export default function GlassmorphNavbar() {

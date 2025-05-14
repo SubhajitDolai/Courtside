@@ -389,6 +389,55 @@ export default function SeatsPage() {
                     </p>
                   )}
                 </div>
+
+                <div className="text-left text-sm border rounded-xl bg-white dark:bg-neutral-800 border-muted p-4 h-48 overflow-y-auto mb-4 space-y-4">
+                  <h4 className="text-lg font-semibold text-neutral-900 dark:text-white">Terms & Conditions</h4>
+
+                  <div>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">General Facility Rules</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      <li>Usage is permitted only during designated hours under supervision (if applicable).</li>
+                      <li>Proper sports attire or swimwear must be worn at all times.</li>
+                      <li>Users must shower before entering swimming facilities.</li>
+                      <li>No running, rough play, pushing, wrestling, or reckless actions.</li>
+                      <li>Chewing gum and shoes are not allowed on the pool deck.</li>
+                      <li>Personal belongings are the user's responsibility.</li>
+                      <li>Follow staff instructions; misconduct may lead to action.</li>
+                      <li>Disturbances or indecent behavior may lead to immediate removal.</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Medical Declaration</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      <li>I am medically fit and have no known health conditions that may endanger myself or others.</li>
+                      <li>I authorize the university to take action in a medical emergency.</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Penalties & Disciplinary Actions</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      <li>Temporary suspension (up to 1 month) for violations.</li>
+                      <li>Permanent or year-long bans for serious or repeated offenses.</li>
+                      <li>Intentional or negligent damage will be charged to the user.</li>
+                      <li>The university's decision is final and binding.</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Liability Waiver</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      <li>Facility usage is at your own risk.</li>
+                      <li>The university/staff are not responsible for any injury, loss, or damage.</li>
+                    </ul>
+                  </div>
+
+                  <p className="text-muted-foreground">
+                    By booking and using the facility, you agree to these terms and conditions.
+                  </p>
+                </div>
+
                 <p className="text-sm text-muted-foreground">Cancellation allowed up to 30 minutes prior.</p>
 
                 <div className="flex items-start sm:items-center space-x-2 pt-4 justify-center text-left">
