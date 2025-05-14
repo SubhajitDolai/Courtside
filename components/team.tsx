@@ -3,7 +3,7 @@ import Image from 'next/image'
 const members = [
     {
         name: 'Subhajit Dolai',
-        role: 'Creator',
+        role: 'Creator & Developer',
         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
     },
     {

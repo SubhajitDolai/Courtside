@@ -401,7 +401,7 @@ export default function SeatsPage() {
                       <li>Users must shower before entering swimming facilities.</li>
                       <li>No running, rough play, pushing, wrestling, or reckless actions.</li>
                       <li>Chewing gum and shoes are not allowed on the pool deck.</li>
-                      <li>Personal belongings are the user's responsibility.</li>
+                      <li>Personal belongings are the user&apos;s responsibility.</li>
                       <li>Follow staff instructions; misconduct may lead to action.</li>
                       <li>Disturbances or indecent behavior may lead to immediate removal.</li>
                     </ul>
@@ -421,7 +421,7 @@ export default function SeatsPage() {
                       <li>Temporary suspension (up to 1 month) for violations.</li>
                       <li>Permanent or year-long bans for serious or repeated offenses.</li>
                       <li>Intentional or negligent damage will be charged to the user.</li>
-                      <li>The university's decision is final and binding.</li>
+                      <li>The university&apos;s decision is final and binding.</li>
                     </ul>
                   </div>
 

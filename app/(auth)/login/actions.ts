@@ -34,6 +34,17 @@ export async function signup(formData: FormData) {
     return { error: 'Please use your college email (mitwpu.edu.in)' }
   }
 
+  // Check if email already exists in 'profiles' table
+  const { data } = await supabase
+    .from('profiles')
+    .select('email')
+    .eq('email', email)
+
+  if (data && data.length > 0) {
+    return { error: 'Email already registered' }
+  }
+
+  // If not found, allow signup
   const { error } = await supabase.auth.signUp({ email, password })
 
   if (error) {

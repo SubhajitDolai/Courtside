@@ -83,7 +83,7 @@ export default function HeroSection() {
                                     speedSegment={0.3}
                                     as="h1"
                                     className="mt-8 text-balance text-5xl md:text-6xl lg:mt-16 xl:text-[5.25rem]">
-                                    MIT World Peace University Dronacharya Sports Complex
+                                    MIT WPU&apos;s Dronacharya Sports Complex
                                 </TextEffect>
                                 <TextEffect
                                     per="line"

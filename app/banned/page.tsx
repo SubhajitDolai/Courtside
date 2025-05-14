@@ -4,61 +4,59 @@ import { Ban } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 
-export default async function BannedPage() {
+export default async function AccessRestrictedPage() {
   const supabase = await createClient()
-
-  // ✅ Auto logout
+  // Auto logout
   await supabase.auth.signOut()
-
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-6 space-y-6">
-
-      {/* 🚫 Icon */}
+      {/* Status Icon */}
       <div className="bg-red-100 p-4 rounded-full">
         <Ban className="w-8 h-8 text-red-600" />
       </div>
-
-      {/* ❌ Title */}
-      <h1 className="text-3xl font-bold text-red-700">Access Restricted</h1>
-
-      {/* 📢 Message */}
+      
+      {/* Main Title */}
+      <h1 className="text-3xl font-bold text-red-700">Account Access Restricted</h1>
+      
+      {/* Primary Message */}
       <p className="text-muted-foreground max-w-md text-center">
-        Your account has been banned due to one or more violations of the college&apos;s policies.
-        Bans may occur for the following reasons:
+        Your account access has been temporarily suspended due to potential violations of the institution&apos;s policies.
+        This restriction may have been implemented for the following reasons:
       </p>
-
-      {/* 📋 Reasons */}
+      
+      {/* Violation Categories */}
       <ul className="text-muted-foreground text-sm list-disc pl-6 max-w-md text-left space-y-1">
-        <li>Involvement in disciplinary actions or misconduct.</li>
-        <li>Booking sports slots without actually showing up.</li>
-        <li>Outstanding penalties or dues related to misuse of facilities.</li>
+        <li>Non-compliance with institutional conduct guidelines or academic policies.</li>
+        <li>Reservation of facility resources without attendance or proper cancellation.</li>
+        <li>Unresolved financial obligations related to campus services or facilities.</li>
       </ul>
-
-      {/* 🪪 Help Card */}
+      
+      {/* Resolution Information */}
       <Card className="max-w-md w-full">
         <CardHeader>
-          <CardTitle>Want to get unbanned?</CardTitle>
+          <CardTitle>Account Reinstatement Process</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-sm text-muted-foreground">
-            You may be required to pay a fine or speak to the admin to lift the ban. Reach out below to appeal or clarify your situation.
+            To resolve this matter, you may need to fulfill outstanding obligations or consult with administration. 
+            Please use the contact option below to submit an appeal or request clarification regarding your account status.
           </p>
           <Button asChild className="w-full">
             <Link 
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=subhajit.dolai@mitwpu.edu.in&su=Account%20Ban%20Appeal"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=subhajit.dolai@mitwpu.edu.in&su=Account%20Access%20Appeal%20Request"
               target="_blank"
             >
-              Contact Admin
+              Contact Administration
             </Link>
           </Button>
         </CardContent>
       </Card>
-
-      {/* 🔙 Back to Login */}
+      
+      {/* Navigation Option */}
       <Button variant="outline" asChild>
-        <Link href="/login">Back to Login</Link>
+        <Link href="/login">Return to Login</Link>
       </Button>
-
     </div>
   )
 }
