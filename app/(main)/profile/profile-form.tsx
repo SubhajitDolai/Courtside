@@ -17,6 +17,7 @@ export function ProfileForm({ profile }: { profile: any }) {
     course: profile.course || '',
     gender: profile.gender || '',
     phone_number: profile.phone_number || '',
+    user_type: profile.user_type || 'student', // Include user_type
   })
 
   const [loading, setLoading] = useState(false)
@@ -57,15 +58,42 @@ export function ProfileForm({ profile }: { profile: any }) {
           </div>
         </div>
 
-        {/* PRN + Course */}
+        {/* User Type */}
+        <div className="space-y-2">
+          <Label>User Type</Label>
+          <select
+            name="user_type"
+            value={form.user_type}
+            onChange={handleChange}
+            required
+            className="border rounded p-2 w-full"
+          >
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+          </select>
+        </div>
+
+        {/* PRN or ID + Course or Department */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label>PRN</Label>
-            <Input name="prn" value={form.prn} onChange={handleChange} required />
+            <Label>{form.user_type === 'faculty' ? 'ID' : 'PRN'}</Label>
+            <Input
+              name="prn"
+              value={form.prn}
+              onChange={handleChange}
+              placeholder={form.user_type === 'faculty' ? 'ID' : 'PRN'}
+              required
+            />
           </div>
           <div className="space-y-2">
-            <Label>Course</Label>
-            <Input name="course" value={form.course} onChange={handleChange} required />
+            <Label>{form.user_type === 'faculty' ? 'Department' : 'Course'}</Label>
+            <Input
+              name="course"
+              value={form.course}
+              onChange={handleChange}
+              placeholder={form.user_type === 'faculty' ? 'Department' : 'Course'}
+              required
+            />
           </div>
         </div>
 

@@ -1,17 +1,18 @@
 'use client'
 
+import { useState, useTransition, useActionState } from 'react'
 import { completeOnboarding } from '../actions'
-import { useActionState, useTransition } from 'react' // ✅ added transition
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react' // ✅ loader icon
+import { Loader2 } from 'lucide-react'
 
 export function OnboardingForm() {
   const [state, formAction] = useActionState(completeOnboarding, null)
-
-  // ✅ loader state
   const [pending, startTransition] = useTransition()
+
+  // 🧠 Track selected user type
+  const [userType, setUserType] = useState<'student' | 'faculty'>('student')
 
   return (
     <section className="py-32">
@@ -29,9 +30,31 @@ export function OnboardingForm() {
               <Input name="last_name" placeholder="Last Name" required />
             </div>
 
-            {/* PRN + Course */}
-            <Input name="prn" placeholder="PRN" required />
-            <Input name="course" placeholder="Course" required />
+            {/* User Type */}
+            <select
+              name="user_type"
+              required
+              className="border rounded p-2 w-full"
+              value={userType}
+              onChange={(e) => setUserType(e.target.value as 'student' | 'faculty')}
+            >
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+            </select>
+
+            {/* Conditional PRN / ID */}
+            <Input
+              name="prn"
+              placeholder={userType === 'faculty' ? 'ID' : 'PRN'}
+              required
+            />
+
+            {/* Conditional Course / Department */}
+            <Input
+              name="course"
+              placeholder={userType === 'faculty' ? 'Department' : 'Course'}
+              required
+            />
 
             {/* Phone */}
             <Input name="phone_number" placeholder="Phone Number" required />
@@ -55,6 +78,7 @@ export function OnboardingForm() {
               )}
             </Button>
 
+            {/* Error message */}
             {state?.error && <p className="text-red-500 text-center">{state.error}</p>}
           </form>
         </Card>

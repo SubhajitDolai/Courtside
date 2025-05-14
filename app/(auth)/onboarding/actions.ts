@@ -11,6 +11,8 @@ export async function completeOnboarding(prevState: unknown, formData: FormData)
     redirect('/login')
   }
 
+  const userType = formData.get('user_type')?.toString() || 'student' // Default to student if undefined
+
   const { error } = await supabase.from('profiles').insert({
     id: user.id,
     first_name: formData.get('first_name'),
@@ -19,7 +21,8 @@ export async function completeOnboarding(prevState: unknown, formData: FormData)
     email: user.email,
     course: formData.get('course'),
     gender: formData.get('gender'),
-    phone_number: formData.get('phone_number')
+    phone_number: formData.get('phone_number'),
+    user_type: userType, // Save user_type here
   })
 
   if (error) {
