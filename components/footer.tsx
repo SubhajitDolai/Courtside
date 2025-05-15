@@ -8,12 +8,12 @@ const links = [
         href: 'https://www.linkedin.com/in/subhajit-dolai/',
     },
     {
-        title: 'Solution',
-        href: '#',
+        title: 'Facilities',
+        href: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
-        title: 'Customers',
-        href: '#',
+        title: 'Achievements',
+        href: 'https://mitwpu.edu.in/about-us/student-achievements',
     },
     {
         title: 'Pricing',
@@ -25,7 +25,7 @@ const links = [
     },
     {
         title: 'About',
-        href: '#',
+        href: 'https://mitwpu.edu.in/about-us/about-mit',
     },
 ]
 

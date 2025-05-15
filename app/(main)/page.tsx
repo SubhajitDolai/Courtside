@@ -9,6 +9,7 @@ import AboutSports from "@/components/aboutSports";
 import TeamSection from "@/components/team";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { MorphingPopoverTextarea } from "@/components/ui/morphingPopoverTextarea";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -40,6 +41,7 @@ export default async function Home() {
       <CallToAction />
       <FAQsThree />
       <TeamSection />
+      <MorphingPopoverTextarea />
       <FooterSection />
     </>
   );

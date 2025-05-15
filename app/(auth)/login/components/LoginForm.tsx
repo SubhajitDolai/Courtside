@@ -30,8 +30,6 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     const formData = new FormData(e.currentTarget)
     const res = await login(formData) // 👈 server action login
 
-    setIsLoading(false)
-
     if (res.error) {
       toast.error(res.error) // ❌ show error toast
     } else {
@@ -58,6 +56,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         }
       }
     }
+    setIsLoading(false)
   }
 
   return (

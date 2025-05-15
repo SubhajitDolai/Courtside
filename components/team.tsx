@@ -85,6 +85,7 @@ export default function TeamSection() {
                                         src={member.avatar}
                                         alt={member.name}
                                         fill
+                                        sizes="80px"
                                         className="aspect-square rounded-full object-cover"
                                     />
                                 </div>
