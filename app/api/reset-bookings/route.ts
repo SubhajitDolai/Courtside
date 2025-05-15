@@ -8,7 +8,6 @@ const supabase = createClient(
 )
 
 // 1) Validate the secret key
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isValidSecret(secret: string | null): boolean {
   return secret === process.env.BACKUP_CRON_SECRET
 }
