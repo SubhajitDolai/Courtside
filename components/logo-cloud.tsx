@@ -87,6 +87,15 @@ export default function LogoCloud() {
                                     width={40}
                                 />
                             </div>
+                            <div className="flex">
+                                <Image
+                                    className="mx-auto h-10 w-auto dark:invert"
+                                    src="/sports_png/chess.webp"
+                                    alt="Chess Logo"
+                                    height={20}
+                                    width={40}
+                                />
+                            </div>
                         </InfiniteSlider>
 
                         <div className="bg-linear-to-r from-background absolute inset-y-0 left-0 w-20"></div>
