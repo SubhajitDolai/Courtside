@@ -393,20 +393,35 @@ export default function SeatsPage() {
                 <div className="text-left text-sm border rounded-xl bg-white dark:bg-neutral-800 border-muted p-4 h-48 overflow-y-auto mb-4 space-y-4">
                   <h4 className="text-lg font-semibold text-neutral-900 dark:text-white">Terms & Conditions</h4>
 
+                  {/* Swimming Rules */}
                   <div>
-                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">General Facility Rules</h5>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Swimming Pool Rules</h5>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      <li>Usage is permitted only during designated hours under supervision (if applicable).</li>
-                      <li>Proper sports attire or swimwear must be worn at all times.</li>
-                      <li>Users must shower before entering swimming facilities.</li>
-                      <li>No running, rough play, pushing, wrestling, or reckless actions.</li>
-                      <li>Chewing gum and shoes are not allowed on the pool deck.</li>
-                      <li>Personal belongings are the user&apos;s responsibility.</li>
-                      <li>Follow staff instructions; misconduct may lead to action.</li>
-                      <li>Disturbances or indecent behavior may lead to immediate removal.</li>
+                      <li>Swimming is allowed only during designated hours under supervision.</li>
+                      <li>Proper swimwear must be worn at all times.</li>
+                      <li>Users must shower before entering the pool.</li>
+                      <li>No running, rough play, acrobatics, or reckless diving.</li>
+                      <li>No chewing gum or shoes allowed on the pool deck.</li>
+                      <li>Personal belongings are your responsibility.</li>
+                      <li>Inappropriate behavior may result in removal from the facility.</li>
                     </ul>
                   </div>
 
+                  {/* Badminton Rules */}
+                  <div>
+                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Badminton Court Rules</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      <li>Use the court only during allocated slots.</li>
+                      <li>Wear non-marking sports shoes and proper attire.</li>
+                      <li>Bring your own rackets and shuttlecocks.</li>
+                      <li>No spitting, chewing gum, or food inside the court.</li>
+                      <li>Rough behavior or misuse of equipment is not allowed.</li>
+                      <li>Unauthorized access or slot misuse may lead to penalties.</li>
+                      <li>You are responsible for your personal belongings.</li>
+                    </ul>
+                  </div>
+
+                  {/* Medical Declaration */}
                   <div>
                     <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Medical Declaration</h5>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1">
@@ -415,16 +430,18 @@ export default function SeatsPage() {
                     </ul>
                   </div>
 
+                  {/* Penalties */}
                   <div>
                     <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Penalties & Disciplinary Actions</h5>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1">
                       <li>Temporary suspension (up to 1 month) for violations.</li>
-                      <li>Permanent or year-long bans for serious or repeated offenses.</li>
-                      <li>Intentional or negligent damage will be charged to the user.</li>
+                      <li>Year-long or permanent bans for serious or repeated offenses.</li>
+                      <li>Damage caused intentionally or negligently will be charged to the user.</li>
                       <li>The university&apos;s decision is final and binding.</li>
                     </ul>
                   </div>
 
+                  {/* Liability Waiver */}
                   <div>
                     <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Liability Waiver</h5>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1">

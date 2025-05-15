@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader2, Copy, Check } from 'lucide-react'
+import { Loader2, Copy, Check, Calendar, Clock, User, Tag, InfoIcon } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 
 export default function MyBookingsPage() {
   const supabase = createClient()
@@ -26,6 +33,7 @@ export default function MyBookingsPage() {
   // ✅ Booking ID Dialog states
   const [showBookingId, setShowBookingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState("all")
 
   // ✅ Profile protection
   useEffect(() => {
@@ -125,96 +133,178 @@ export default function MyBookingsPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Filter bookings based on status
+  const filteredBookings = activeTab === "all" 
+    ? bookings 
+    : bookings.filter(b => b.status === activeTab);
+
+  // Get the status color for badges
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'booked': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
+      case 'checked-in': return 'bg-green-100 text-green-800 hover:bg-green-200';
+      case 'checked-out': return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  // Format status label
+  const formatStatus = (status: string) => {
+    switch(status) {
+      case 'booked': return 'Booked';
+      case 'checked-in': return 'Checked In';
+      case 'checked-out': return 'Completed';
+      default: return status;
+    }
+  }
+
+  // Format date nicely
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
   return (
-    <div className="pt-30 p-6 min-h-screen bg-muted/40">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">My Bookings</CardTitle>
+    <div className="pt-30 p-4 md:pt-30 min-h-screen bg-gradient-to-b from-muted/40 to-background">
+      <Card className="max-w-6xl mx-auto shadow-md">
+        <CardHeader className="border-b">
+          <CardTitle className="text-2xl md:text-3xl font-bold text-center">My Bookings</CardTitle>
         </CardHeader>
 
-        <CardContent className="overflow-x-auto">
+        <CardContent className="p-4 md:p-6">
           {loading ? (
-            <div className="flex justify-center p-6">
-              <Loader2 className="animate-spin w-6 h-6" />
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="animate-spin w-10 h-10 text-emerald-500 mb-4" />
+              <p className="text-muted-foreground">Loading your bookings...</p>
             </div>
           ) : (
-            <div className="min-w-fit"> {/* ✅ Fix for mobile view */}
-              <table className="w-full text-sm border rounded-md">
-                <thead className="bg-muted text-muted-foreground">
-                  <tr>
-                    <th className="p-3 text-left whitespace-nowrap">Booking #</th>
-                    <th className="p-3 text-left whitespace-nowrap">Sport</th>
-                    <th className="p-3 text-left whitespace-nowrap">Slot</th>
-                    <th className="p-3 text-left whitespace-nowrap">Date</th>
-                    <th className="p-3 text-left whitespace-nowrap">Seat #</th>
-                    <th className="p-3 text-left whitespace-nowrap">Status</th>
-                    <th className="p-3 text-left whitespace-nowrap">Booked At</th>
-                    <th className="p-3 text-left whitespace-nowrap">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((b) => {
-                    const slotStarted = isSlotStarted(b.slots?.start_time)
+            <>
+              <Tabs 
+                defaultValue="all" 
+                className="mb-6"
+                onValueChange={setActiveTab}
+              >
+                <TabsList className="grid grid-cols-4 mb-8">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="booked">Active</TabsTrigger>
+                  <TabsTrigger value="checked-in">Checked In</TabsTrigger>
+                  <TabsTrigger value="checked-out">Completed</TabsTrigger>
+                </TabsList>
 
-                    return (
-                      <tr key={b.id} className="border-t hover:bg-accent transition-colors">
-                        <td className="p-3 whitespace-nowrap">
-                          {/* ✅ Booking ID click */}
-                          <button
-                            onClick={() => setShowBookingId(b.id)}
-                            className="underline text-emerald-400 hover:text-emerald-300"
-                          >
-                            {b.id.slice(0, 6)}...
-                          </button>
-                        </td>
-                        <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
-                        <td className="p-3 whitespace-nowrap">
-                          {formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}{' '}
-                          {slotStarted && <span className="text-xs text-red-500 ml-2">Started</span>}
-                        </td>
-                        <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
-                        <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
-                        <td className="p-3 whitespace-nowrap">
-                          {b.status === 'booked' && <span className="text-yellow-600">Booked</span>}
-                          {b.status === 'checked-in' && <span className="text-green-600">Checked-in</span>}
-                          {b.status === 'checked-out' && <span className="text-gray-600">Checked-out</span>}
-                        </td>
-                        <td className="p-3 whitespace-nowrap">
-                          {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          }) : ''}
-                        </td>
-                        <td className="p-3 whitespace-nowrap space-x-2">
-                          {b.status === 'booked' && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={canceling === b.id || slotStarted}
-                              onClick={() => handleCancel(b.id)}
-                              className={slotStarted ? 'opacity-50 cursor-not-allowed' : ''}
-                            >
-                              {canceling === b.id ? 'Cancelling...' : 'Cancel'}
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  {!bookings.length && (
-                    <tr>
-                      <td colSpan={8} className="p-4 text-center text-muted-foreground whitespace-nowrap">
-                        No bookings found.
-                      </td>
-                    </tr>
+                <TabsContent value={activeTab} className="mt-0">
+                  {filteredBookings.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredBookings.map((booking) => {
+                        const slotStarted = isSlotStarted(booking.slots?.start_time);
+                        const startTime = formatTime12hr(booking.slots?.start_time);
+                        const endTime = formatTime12hr(booking.slots?.end_time);
+                        const bookingDate = booking.booking_date ? formatDate(booking.booking_date) : '';
+                        
+                        return (
+                          <Card key={booking.id} className="overflow-hidden hover:shadow-lg transition-all">
+                            <CardHeader className="p-4 pb-2 space-y-1 bg-muted/30 border-b">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-bold text-lg text-primary">
+                                    {booking.sports?.name}
+                                  </h3>
+                                  <button
+                                    onClick={() => setShowBookingId(booking.id)}
+                                    className="text-xs text-muted-foreground hover:text-emerald-500 flex items-center gap-1"
+                                  >
+                                    <span>Booking #{booking.id.slice(0, 6)}...</span>
+                                    <InfoIcon size={12} />
+                                  </button>
+                                </div>
+                                <div>
+                                  <Badge className={`${getStatusColor(booking.status)} transition-colors`}>
+                                    {formatStatus(booking.status)}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            
+                            <CardContent className="p-4 pt-3 space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Calendar size={16} className="text-muted-foreground" />
+                                  <span>{bookingDate}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Clock size={16} className="text-muted-foreground" />
+                                  <div>
+                                    <span>{startTime} - {endTime}</span>
+                                    {slotStarted && <span className="ml-2 text-xs text-red-500 font-medium">Started</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <User size={16} className="text-muted-foreground" />
+                                <span>Spot #{booking.seat_number}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <Tag size={16} className="text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground">
+                                  {booking.created_at ? 
+                                    `Booked on ${new Date(booking.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
+                                      day: '2-digit',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true,
+                                    })}` : ''}
+                                </span>
+                              </div>
+                            </CardContent>
+                            
+                            {booking.status === 'booked' && (
+                              <CardFooter className="p-4 pt-0 flex justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  disabled={canceling === booking.id || slotStarted}
+                                  onClick={() => handleCancel(booking.id)}
+                                  className={`${slotStarted ? 'opacity-50 cursor-not-allowed' : ''} transition-opacity`}
+                                >
+                                  {canceling === booking.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Cancelling...
+                                    </>
+                                  ) : (
+                                    'Cancel Booking'
+                                  )}
+                                </Button>
+                              </CardFooter>
+                            )}
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="bg-muted rounded-full p-4 mb-4">
+                        <Calendar className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No bookings found</h3>
+                      <p className="text-muted-foreground max-w-md">
+                        {activeTab === "all" 
+                          ? "You don't have any bookings yet. Start by making a new booking."
+                          : `You don't have any ${activeTab === "booked" ? "active" : activeTab} bookings.`}
+                      </p>
+                    </div>
                   )}
-                </tbody>
-              </table>
-            </div>
+                </TabsContent>
+              </Tabs>
+            </>
           )}
         </CardContent>
       </Card>

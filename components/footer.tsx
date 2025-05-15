@@ -5,7 +5,7 @@ import Logo from './logo'
 const links = [
     {
         title: 'Developer',
-        href: 'https://www.linkedin.com/in/subhajit-dolai/',
+        href: 'https://www.linkedin.com/in/subhajit-dolai',
     },
     {
         title: 'Facilities',
@@ -52,7 +52,7 @@ export default function FooterSection() {
                 </div>
                 <div className="my-8 flex flex-wrap justify-center gap-6 text-sm">
                     <Link
-                        href="#"
+                        href="https://x.com/MITWPUOfficial"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="X/Twitter"
@@ -69,7 +69,7 @@ export default function FooterSection() {
                         </svg>
                     </Link>
                     <Link
-                        href="#"
+                        href="https://www.linkedin.com/school/mitwpuofficial"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="LinkedIn"
@@ -86,7 +86,7 @@ export default function FooterSection() {
                         </svg>
                     </Link>
                     <Link
-                        href="#"
+                        href="https://www.facebook.com/MITWPUOfficial"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Facebook"
@@ -103,7 +103,7 @@ export default function FooterSection() {
                         </svg>
                     </Link>
                     <Link
-                        href="#"
+                        href="https://www.threads.com/@mitwpuofficial"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Threads"
@@ -125,7 +125,7 @@ export default function FooterSection() {
                         </svg>
                     </Link>
                     <Link
-                        href="#"
+                        href="https://www.instagram.com/mitwpuofficial"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Instagram"
