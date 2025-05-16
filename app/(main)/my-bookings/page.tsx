@@ -1,4 +1,4 @@
-import MyBookingsShell from './components/my-bookings-shell'
+import MyBookingsShell from './client/my-bookings-shell'
 
 export default function MyBookingsPage() {
   return <MyBookingsShell />
