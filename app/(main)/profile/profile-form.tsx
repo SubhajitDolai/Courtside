@@ -7,9 +7,12 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProfileForm({ profile }: { profile: any }) {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     first_name: profile.first_name || '',
     last_name: profile.last_name || '',
@@ -36,10 +39,11 @@ export function ProfileForm({ profile }: { profile: any }) {
     setLoading(false)
 
     if (error) {
-      console.error(error)
-      toast.error('Update failed')
+      console.error(error);
+      toast.error('Update failed');
     } else {
-      toast.success('Profile updated successfully.')
+      toast.success('Profile updated successfully.');
+      router.push('/profile');
     }
   }
 
