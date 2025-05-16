@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader2, Copy, Check, Calendar, Clock, User, Tag, InfoIcon } from 'lucide-react'
+import { Loader, Copy, Check, Calendar, Clock, User, Tag, InfoIcon } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -179,7 +179,7 @@ export default function MyBookingsPage() {
         <CardContent className="p-4 md:p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="animate-spin w-10 h-10 text-emerald-500 mb-4" />
+              <Loader className="animate-spin w-10 h-10 text-emerald-500 mb-4" />
               <p className="text-muted-foreground">Loading your bookings...</p>
             </div>
           ) : (
@@ -276,7 +276,7 @@ export default function MyBookingsPage() {
                                 >
                                   {canceling === booking.id ? (
                                     <>
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                                       Cancelling...
                                     </>
                                   ) : (

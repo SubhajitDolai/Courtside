@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signup } from '@/app/(auth)/login/actions'
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { Loader, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -99,7 +99,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Please wait
                     </>
                   ) : (

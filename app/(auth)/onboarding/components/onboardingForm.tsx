@@ -5,7 +5,7 @@ import { completeOnboarding } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 
 export function OnboardingForm() {
   const [state, formAction] = useActionState(completeOnboarding, null)
@@ -70,7 +70,7 @@ export function OnboardingForm() {
             <Button type="submit" className="w-full" disabled={pending}>
               {pending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (

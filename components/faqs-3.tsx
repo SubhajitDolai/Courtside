@@ -17,13 +17,13 @@ export default function FAQsThree() {
             id: 'item-1',
             icon: 'circle-help',
             question: 'How can I book a sports facility at MIT-WPU?',
-            answer: "Booking is simple — just log in with your MIT-WPU email, complete your profile, and choose an available slot from the booking page. You'll receive a confirmation instantly.",
+            answer: "Log in with your MIT-WPU email, complete your profile, select a time slot, and then choose an available spot. You’ll receive a confirmation — show your booking number at the check-in counter. You can access it anytime from My Bookings.",
         },
         {
             id: 'item-2',
             icon: 'ban',
-            question: 'Can I modify or cancel my booking later?',
-            answer: 'Yes, bookings can be modified or canceled up to 2 hours before the scheduled time. Visit your dashboard to manage your existing reservations quickly and easily.',
+            question: 'Can I cancel my booking later?',
+            answer: "Yes, bookings can be canceled up to 30 minutes before the scheduled time. Visit 'My Bookings' to manage your reservations quickly and easily.",
         },
         {
             id: 'item-3',
@@ -35,7 +35,7 @@ export default function FAQsThree() {
             id: 'item-4',
             icon: 'dumbbell',
             question: 'What equipment is provided, and what should I bring?',
-            answer: 'All users are required to bring their own equipment for every activity. Please ensure you have the necessary gear and follow the dress code for each facility.',
+            answer: 'All users are required to bring their own equipment for every activity, except indoor games. Please ensure you have the necessary gear and follow the dress code for each facility.',
         },
         {
             id: 'item-5',

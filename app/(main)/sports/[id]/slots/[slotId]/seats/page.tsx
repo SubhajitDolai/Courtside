@@ -15,7 +15,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Loader2, Clock, Users, CheckCircle, XCircle, Calendar, Trophy } from 'lucide-react'
+import { Loader, Clock, Users, CheckCircle, XCircle, Calendar, Trophy } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -246,7 +246,7 @@ export default function SeatsPage() {
       {isBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-white" />
+            <Loader className="w-8 h-8 animate-spin text-white" />
             <p className="text-white text-md">Booking your spot...</p>
           </div>
         </div>
@@ -481,7 +481,7 @@ export default function SeatsPage() {
             >
               {isBooking ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Booking...
                 </div>
               ) : 'Confirm'}

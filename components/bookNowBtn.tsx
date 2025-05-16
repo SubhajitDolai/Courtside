@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 
 export default function BookNowButton() {
   const router = useRouter()
@@ -23,8 +23,8 @@ export default function BookNowButton() {
     >
       {isLoading ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Please wait
+          <Loader className="mr-2 h-4 w-4 animate-spin" />
+          Loading...
         </>
       ) : (
         'Book now'

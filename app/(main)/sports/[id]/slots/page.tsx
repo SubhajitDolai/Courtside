@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function SportSlotsPage() {
@@ -184,7 +184,7 @@ export default function SportSlotsPage() {
                   <Button onClick={() => handleViewSeats(slot.id)} className="w-full" disabled={past || loadingSlotId === slot.id}>
                     {loadingSlotId === slot.id ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
                         Loading...
                       </>
                     ) : 'Book now'}

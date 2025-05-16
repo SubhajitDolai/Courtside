@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -74,7 +74,7 @@ export default function SportsList({ sports: initialSports }: { sports: Sport[] 
             >
               {loadingId === sport.id ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Loading...
                 </>
               ) : (

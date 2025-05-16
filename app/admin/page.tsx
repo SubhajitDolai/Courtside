@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, Calendar, Loader2 } from 'lucide-react'
+import { Trophy, Clock, Calendar, Loader } from 'lucide-react'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -41,7 +41,7 @@ export default function AdminPage() {
       {/* ✅ Loading overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader2 className="w-8 h-8 animate-spin text-white" />
+          <Loader className="w-8 h-8 animate-spin text-white" />
         </div>
       )}
 
