@@ -26,6 +26,7 @@ const SportsShell = dynamic(() => import('./sports-shell'), {
   ),
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function SportsClientPage({ sports }: { sports: any[] }) {
   return <SportsShell initialSports={sports} />
 }
