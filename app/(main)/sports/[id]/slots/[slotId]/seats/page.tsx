@@ -19,6 +19,7 @@ import { Loader, Clock, Users, CheckCircle, XCircle, Calendar, Trophy } from 'lu
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getTodayDateInIST } from '@/lib/date'
 
 // ✅ Convert 24hr time to 12hr format
 const formatTime12hr = (time24: string) => {
@@ -162,8 +163,8 @@ export default function SeatsPage() {
       return
     }
 
-    // booking_date logic broken coz of time zone issue fix-later
-    const today = new Date().toISOString().split('T')[0]
+    // Store the current date by using "@/lib/date.ts" which has the function in order to set the 'booking_date'
+    const today = getTodayDateInIST()
 
     // ✅ Prevent multiple booking by user
     const { data: existing } = await supabase

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { PencilIcon, Loader2 } from 'lucide-react'
+import { PencilIcon, Loader } from 'lucide-react'
 
 export default function EditButton() {
   const router = useRouter()
@@ -18,7 +18,7 @@ export default function EditButton() {
     <Button size="lg" className="gap-2" onClick={handleEdit} disabled={loading}>
       {loading ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader className="h-4 w-4 animate-spin" />
           Loading...
         </>
       ) : (
