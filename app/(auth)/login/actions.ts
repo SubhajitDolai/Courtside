@@ -71,7 +71,7 @@ export async function signup(formData: FormData) {
 
     return { success: true }
 
-  } catch (err: any) {
+  } catch {
     // Random error (e.g. network crash, unexpected)
     return { error: 'Something went wrong. Please try again.' }
   }
