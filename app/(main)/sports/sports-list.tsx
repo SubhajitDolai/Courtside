@@ -5,44 +5,22 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
 import { Loader } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 
-// ✅ Define type
 interface Sport {
   id: string
   name: string
   image_url: string | null
 }
 
-export default function SportsList({ sports: initialSports }: { sports: Sport[] }) {
-  const router = useRouter()
-  const [sports, setSports] = useState(initialSports)
-  const [loadingId, setLoadingId] = useState<string | null>(null)
-
-  const supabase = createClient()
-
-  // ✅ Auto-refresh sports list
-  useEffect(() => {
-    const fetchSports = async () => {
-      const { data } = await supabase
-        .from('sports')
-        .select('*')
-        .eq('is_active', true)
-        .order('name', { ascending: true })
-
-      if (data) setSports(data)
-    }
-
-    const interval = setInterval(fetchSports, 5000)
-    return () => clearInterval(interval)
-  }, [supabase])
-
-  const handleViewSlots = (sportId: string) => {
-    setLoadingId(sportId)
-    router.push(`/sports/${sportId}/slots`)
-  }
-
+export default function SportsList({
+  sports,
+  loadingId,
+  handleViewSlots,
+}: {
+  sports: Sport[]
+  loadingId: string | null
+  handleViewSlots: (sportId: string) => void
+}) {
   if (!sports.length) {
     return (
       <p className="col-span-full text-center text-muted-foreground">
