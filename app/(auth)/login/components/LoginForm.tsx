@@ -16,7 +16,6 @@ import { Loader, Eye, EyeOff } from "lucide-react"
 import { login } from '../actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client' // ✅ import supabase client
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
@@ -31,31 +30,34 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     const res = await login(formData) // 👈 server action login
 
     if (res.error) {
-      toast.error(res.error) // ❌ show error toast
-    } else {
-      toast.success('Logged in successfully') // ✅ success
+      const msg = res.error.toLowerCase()
 
-      // ✅ Check user role after login
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        // ✅ Redirect based on role
-        if (profile?.role === 'ban') {
-          router.push('/banned') // 😂 banned user
-        } else if (profile?.role === 'admin') {
-          router.push('/admin') // 🗿 admin
-        } else {
-          router.push('/') // ✅ normal user
-        }
+      if (msg.includes('invalid login credentials')) {
+        toast.error('Invalid email or password.')
+      } else if (msg.includes('fetch failed')) {
+        toast.error('No internet connection. Please check your network.')
+      } else {
+        toast.error('Something went wrong. Please try again.')
       }
+
+      setIsLoading(false)
+      return
     }
+
+    toast.success('Logged in successfully')
+
+    // ✅ Redirect based on role
+    switch (res.role) {
+      case 'ban':
+        router.push('/banned') // 😂 banned user
+        break
+      case 'admin':
+        router.push('/admin') // 🗿 admin
+        break
+      default:
+        router.push('/') // ✅ normal user
+    }
+
     setIsLoading(false)
   }
 

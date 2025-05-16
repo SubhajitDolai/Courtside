@@ -8,18 +8,30 @@ import { createClient } from '@/utils/supabase/server'
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) return { error: error.message }
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'User not found after login' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  return {
+    error: null,
+    role: profile?.role ?? null, // return the role
   }
-
-  const { error } = await supabase.auth.signInWithPassword(data)
-
-  if (error) {
-    return { error: 'Invalid email or password' }
-  }
-
-  return { success: true }
 }
 
 // Signup method
