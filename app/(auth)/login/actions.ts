@@ -41,29 +41,40 @@ export async function signup(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  // Check mitwpu email
+  // Validate MITWPU email
   if (!email.endsWith('@mitwpu.edu.in')) {
     return { error: 'Please use your college email (mitwpu.edu.in)' }
   }
 
-  // Check if email already exists in 'profiles' table
-  const { data } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('email', email)
+  try {
+    // Check if email already exists in 'profiles' table
+    const { data } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('email', email)
 
-  if (data && data.length > 0) {
-    return { error: 'Email already registered' }
+    if (data && data.length > 0) {
+      return { error: 'Email already registered' }
+    }
+
+    // If not found, allow signup
+    const { error } = await supabase.auth.signUp({ email, password })
+
+    // best error handling
+    if (error) {
+      const msg = error.message.toLowerCase()
+      if (msg.includes('fetch failed')) {
+        return { error: 'No internet connection. Please check your network.' }
+      }
+      return { error: error.message }
+    }
+
+    return { success: true }
+
+  } catch (err: any) {
+    // Random error (e.g. network crash, unexpected)
+    return { error: 'Something went wrong. Please try again.' }
   }
-
-  // If not found, allow signup
-  const { error } = await supabase.auth.signUp({ email, password })
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  return { success: true }
 }
 
 // Logout method
