@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
+import { GlobalRouteChangeHandler } from "@/components/GlobalRouteChangeHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +38,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <LoadingBarProvider>
+            <GlobalRouteChangeHandler />
+            {children}
+          </LoadingBarProvider>
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>

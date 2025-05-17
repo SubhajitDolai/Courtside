@@ -1,22 +1,29 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function BookingSuccessPage() {
   const params = useSearchParams()
   const bookingId = params.get('booking_id')
   const [copied, setCopied] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
+  const { start } = useGlobalLoadingBar()
 
   useEffect(() => {
     // ✅ Ensure the component is mounted on the client-side
     setMounted(true)
   }, [])
+
+  const handleGoHome = () => {
+    start()
+    router.push('/sports')
+  }
 
   const handleCopy = () => {
     if (bookingId) {
@@ -61,8 +68,8 @@ export default function BookingSuccessPage() {
         </CardContent>
       </Card>
 
-      <Button asChild size="lg" className="mt-2">
-        <Link href="/sports">Go to Home</Link>
+      <Button onClick={handleGoHome} size="lg" className="mt-2">
+        Go to Home
       </Button>
 
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SportsList from '../sports-list'
 import { createClient } from '@/utils/supabase/client'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 interface Sport {
   id: string
@@ -16,6 +17,7 @@ export default function SportsShell({ initialSports }: { initialSports: Sport[] 
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
+  const { start } = useGlobalLoadingBar()
 
   useEffect(() => {
     const fetchSports = async () => {
@@ -34,6 +36,7 @@ export default function SportsShell({ initialSports }: { initialSports: Sport[] 
 
   const handleViewSlots = (sportId: string) => {
     setLoadingId(sportId)
+    start()
     router.push(`/sports/${sportId}/slots`)
   }
 

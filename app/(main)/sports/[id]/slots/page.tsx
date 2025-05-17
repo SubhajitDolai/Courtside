@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Loader } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function SportSlotsPage() {
   const params = useParams<{ id: string }>()
@@ -22,6 +23,7 @@ export default function SportSlotsPage() {
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
   const [sportName, setSportName] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const { start } = useGlobalLoadingBar()
 
   useEffect(() => {
     checkProfile() // ✅ ban check
@@ -130,6 +132,7 @@ export default function SportSlotsPage() {
 
   const handleViewSeats = (slotId: string) => {
     setLoadingSlotId(slotId)
+    start()
     router.push(`/sports/${sportId}/slots/${slotId}/seats`)
   }
 

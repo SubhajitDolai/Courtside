@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { createClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation';
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProfileForm({ profile }: { profile: any }) {
@@ -24,6 +25,7 @@ export function ProfileForm({ profile }: { profile: any }) {
   })
 
   const [loading, setLoading] = useState(false)
+  const { start } = useGlobalLoadingBar()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -32,6 +34,7 @@ export function ProfileForm({ profile }: { profile: any }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    start()
 
     const supabase = createClient()
     const { error } = await supabase.from('profiles').update(form).eq('id', profile.id)
