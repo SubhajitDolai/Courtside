@@ -1,22 +1,11 @@
+import { getUserWithProfile } from '@/lib/getUserWithProfile'
 import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
 import SportsClientPage from './client/client-page'
 
 export default async function SportsPage() {
+  await getUserWithProfile()
+
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) redirect('/onboarding')
-  if (profile.role === 'ban') redirect('/banned')
-
   const { data: sports } = await supabase
     .from('sports')
     .select('id, name, image_url')

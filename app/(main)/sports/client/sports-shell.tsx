@@ -21,7 +21,7 @@ export default function SportsShell({ initialSports }: { initialSports: Sport[] 
     const fetchSports = async () => {
       const { data } = await supabase
         .from('sports')
-        .select('*')
+        .select('id, name, image_url')
         .eq('is_active', true)
         .order('name', { ascending: true })
 
