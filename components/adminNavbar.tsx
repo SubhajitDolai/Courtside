@@ -1,10 +1,10 @@
 "use client";
 
-import { Menu, Loader } from "lucide-react"; // ✅ Loader
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useTransition } from "react";
-import { usePathname, useRouter } from "next/navigation"; // ✅ router for push
+import { useState, useEffect, useTransition, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Button } from "./ui/button";
 import { logout } from "@/app/(auth)/login/actions";
@@ -23,46 +23,100 @@ export default function AdminNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const pathname = usePathname(); // ✅ get current route
+  const pathname = usePathname();
   const router = useRouter();
 
-  // ✅ loader state for nav
-  const [navLoading, setNavLoading] = useState(false);
-
-  // ✅ handle pending logout
   const [isPending, startTransition] = useTransition();
 
-  const handleLogout = () => {
-    startTransition(async () => {
-      toast.info("Logging out...");
-      await logout();
-    });
+  const [loadingBarVisible, setLoadingBarVisible] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const progressInterval = useRef<number | null>(null);
+
+  const startLoadingBar = () => {
+    setLoadingBarVisible(true);
+    setLoadingProgress(0);
+    progressInterval.current = window.setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 80) {
+          clearInterval(progressInterval.current!);
+          progressInterval.current = null;
+          return 80;
+        }
+        return prev + 1;
+      });
+    }, 15);
+  };
+
+  const completeLoadingBar = () => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+    setLoadingProgress(100);
+    setTimeout(() => {
+      setLoadingBarVisible(false);
+      setLoadingProgress(0);
+    }, 300);
   };
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ✅ stop loader when route changes
   useEffect(() => {
-    setNavLoading(false);
+    completeLoadingBar();
   }, [pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+      }
+    };
+  }, []);
+
+  const navigateWithLoading = (href: string) => {
+    if (href === pathname || (pathname === "/admin" && href === "/admin/")) {
+      // If already on page, finish any loading quickly
+      completeLoadingBar();
+      return;
+    }
+
+    startLoadingBar();
+    router.push(href);
+  };
+
+  const handleLogout = () => {
+    startLoadingBar();
+    startTransition(async () => {
+      toast.info("Logging out...");
+      await logout();
+      completeLoadingBar();
+    });
+  };
 
   if (!mounted) return null;
 
   return (
     <>
-      {/* ✅ Page loader */}
-      {navLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Loader className="w-8 h-8 animate-spin text-white" />
+      {/* Loading Bar */}
+      {loadingBarVisible && (
+        <div className="fixed top-0 left-0 z-[9999] h-[3px] w-full bg-transparent">
+          <div
+            className={`h-full transition-width duration-300 ease-out ${
+              resolvedTheme === "dark"
+                ? "bg-white shadow-[0_0_12px_2px_rgba(255,255,255,0.6)]"
+                : "bg-black shadow-[0_0_12px_2px_rgba(0,0,0,0.5)]"
+            }`}
+            style={{ width: `${loadingProgress}%` }}
+          />
         </div>
       )}
 
       <nav className="fixed left-1/2 top-0 z-50 mt-7 flex w-11/12 max-w-7xl -translate-x-1/2 flex-col items-center rounded-md bg-background/20 p-3 backdrop-blur-lg md:rounded-md outline">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-5">
-            <Link href="/">
+            <button onClick={() => navigateWithLoading("/")} className="focus:outline-none">
               {resolvedTheme && (
                 <Image
                   src={resolvedTheme === "light" ? "/logo-dark.webp" : "/logo-light.webp"}
@@ -71,7 +125,7 @@ export default function AdminNavbar() {
                   height={50}
                 />
               )}
-            </Link>
+            </button>
 
             <div className="hidden gap-4 md:flex">
               {navigationItems.map((item) => {
@@ -83,10 +137,7 @@ export default function AdminNavbar() {
                 return (
                   <button
                     key={item.href}
-                    onClick={() => {
-                      setNavLoading(true); // ✅ show loader
-                      router.push(item.href);
-                    }}
+                    onClick={() => navigateWithLoading(item.href)}
                     className={`font-bold transition ${
                       isActive ? "text-foreground" : "text-muted-foreground"
                     }`}
@@ -101,7 +152,12 @@ export default function AdminNavbar() {
           <div className="flex gap-3 flex-row items-end">
             <div className="flex gap-3 items-center flex-row">
               <ModeToggle />
-              <Button type="button" onClick={handleLogout} variant="default" disabled={isPending}>
+              <Button
+                type="button"
+                onClick={handleLogout}
+                variant="default"
+                disabled={isPending}
+              >
                 {isPending ? "Logging out..." : "Logout"}
               </Button>
             </div>
@@ -127,8 +183,7 @@ export default function AdminNavbar() {
                   key={item.href}
                   onClick={() => {
                     setIsOpen(false);
-                    setNavLoading(true); // ✅ show loader
-                    router.push(item.href);
+                    navigateWithLoading(item.href);
                   }}
                   className={`font-bold transition ${
                     isActive ? "text-foreground" : "text-muted-foreground"
