@@ -12,7 +12,7 @@ export default function LogoCloud() {
                     </div>
                     <div className="relative py-6 md:w-[calc(100%-11rem)]">
                         <InfiniteSlider
-                            speedOnHover={20}
+                            speedOnHover={40}
                             speed={40}
                             gap={112}>
                             <div className="flex">

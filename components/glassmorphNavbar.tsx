@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Loader } from "lucide-react"; // ✅ Loader icon
+import { Menu } from "lucide-react"; // ✅ Loader icon
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition, useEffect } from "react";
