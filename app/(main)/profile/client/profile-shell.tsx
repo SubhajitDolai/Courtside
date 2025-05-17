@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import EditButton from '../components/EditButton'
 
 export default function ProfileShell({ userId }: { userId: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [profile, setProfile] = useState<any | null>(null)
   const router = useRouter()
   const supabase = createClient()

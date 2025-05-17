@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
 import SlotsTable from "./slotsTable";
+import SlotsTableSkeleton from "./components/slotsTableSkeleton";
 
 export default async function AdminSlotsPage() {
   const supabase = await createClient();
@@ -24,7 +25,7 @@ export default async function AdminSlotsPage() {
       <div className="w-full max-w-5xl space-y-6">
 
         {/* ✅ Slots Table Client */}
-        <Suspense fallback={<p>Loading slots...</p>}>
+        <Suspense fallback={<SlotsTableSkeleton />}>
           <SlotsTable slots={sortedSlots} />
         </Suspense>
 
