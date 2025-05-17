@@ -26,7 +26,7 @@ export default function GlassmorphNavbar() {
   const [isPending, startTransition] = useTransition();
 
   // ✅ Page transition loading state
-  const [navLoading, setNavLoading] = useState(false);
+  // const [navLoading, setNavLoading] = useState(false);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -41,20 +41,20 @@ export default function GlassmorphNavbar() {
   }, []);
 
   // ✅ stop loader when route changes complete
-  useEffect(() => {
-    setNavLoading(false);
-  }, [pathname]);
+  // useEffect(() => {
+  //   setNavLoading(false);
+  // }, [pathname]);
 
   if (!mounted) return null;
 
   return (
     <>
       {/* ✅ Page loader overlay */}
-      {navLoading && (
+      {/* {navLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <Loader className="w-8 h-8 animate-spin text-white" />
         </div>
-      )}
+      )} */}
 
       <nav className="fixed left-1/2 top-0 z-50 mt-7 flex w-11/12 max-w-7xl -translate-x-1/2 flex-col items-center rounded-md bg-background/20 p-3 backdrop-blur-lg md:rounded-md outline">
         <div className="flex w-full items-center justify-between">
@@ -79,7 +79,7 @@ export default function GlassmorphNavbar() {
                   <button
                     key={item.href}
                     onClick={() => {
-                      setNavLoading(true); // ✅ show loader
+                      // setNavLoading(true); // ✅ show loader
                       router.push(item.href);
                     }}
                     className={`font-bold transition ${
@@ -119,7 +119,7 @@ export default function GlassmorphNavbar() {
                   key={item.href}
                   onClick={() => {
                     setIsOpen(false);
-                    setNavLoading(true); // ✅ show loader
+                    // setNavLoading(true); // ✅ show loader
                     router.push(item.href);
                   }}
                   className={`font-bold transition ${
