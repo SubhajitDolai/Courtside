@@ -16,15 +16,18 @@ import { Loader, Eye, EyeOff } from "lucide-react"
 import { login } from '../actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const { start, finish } = useGlobalLoadingBar()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsLoading(true)
+    start()
 
     const formData = new FormData(e.currentTarget)
     const res = await login(formData) // 👈 server action login
@@ -41,6 +44,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       }
 
       setIsLoading(false)
+      finish()
       return
     }
 

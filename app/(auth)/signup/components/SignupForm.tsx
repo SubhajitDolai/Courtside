@@ -26,22 +26,25 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
+import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
-
+  const { start, finish } = useGlobalLoadingBar()
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsLoading(true)
+    start()
 
     const formData = new FormData(e.currentTarget)
     const res = await signup(formData)
 
     setIsLoading(false)
+    finish()
 
     if (res.error) {
       toast.error(res.error)
