@@ -51,24 +51,24 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
   return (
     <Card>
       <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <CardTitle className="text-2xl font-bold">Manage Slots</CardTitle>
-        <div className="flex flex-col w-full gap-2 sm:flex-row sm:items-center sm:w-auto">
+        <CardTitle className="text-2xl font-bold  whitespace-nowrap">Manage Slots</CardTitle>
+        <div className="flex flex-col w-full gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
 
           {/* ✅ Search */}
           <Input
-            placeholder="Search by sport, gender, user type or time"
+            placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-[200px]"
+            className="w-full md:w-[250px]"
           />
 
           {/* ✅ Sport Filter */}
           <Select value={sportFilter} onValueChange={setSportFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full md:w-[100px]">
               <SelectValue placeholder="Filter Sport" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All Sports</SelectItem>
               {uniqueSports.map((sport) => (
                 <SelectItem key={sport} value={sport}>{sport}</SelectItem>
               ))}
@@ -77,11 +77,11 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
 
           {/* ✅ Gender Filter */}
           <Select value={genderFilter} onValueChange={setGenderFilter}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-full md:w-[100px]">
               <SelectValue placeholder="Filter Gender" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All Genders</SelectItem>
               {genders.map((g) => (
                 <SelectItem key={g} value={g}>{g.charAt(0).toUpperCase() + g.slice(1)}</SelectItem>
               ))}
@@ -90,11 +90,11 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
 
           {/* ✅ User Type Filter */}
           <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full md:w-[100px]">
               <SelectValue placeholder="Filter User Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All User Types</SelectItem>
               {uniqueUserTypes.map((u) => (
                 <SelectItem key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</SelectItem>
               ))}
@@ -102,7 +102,7 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
           </Select>
 
           {/* ✅ Add Button */}
-          <Button asChild className="w-full sm:w-auto">
+          <Button asChild className="w-full md:w-auto">
             <Link href="/admin/slots/add">+ Add Slot</Link>
           </Button>
 

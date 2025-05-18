@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createClient } from '@/utils/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -39,6 +46,14 @@ export default function AdminBookingsPage() {
   const [showBookingId, setShowBookingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  const [genderFilter, setGenderFilter] = useState('')
+  const [userTypeFilter, setUserTypeFilter] = useState('')
+  const [sportFilter, setSportFilter] = useState('')
+
+  const uniqueGenders = Array.from(new Set(bookings.map(b => b.profiles?.gender).filter(Boolean)))
+  const uniqueUserTypes = Array.from(new Set(bookings.map(b => b.profiles?.user_type).filter(Boolean)))
+  const uniqueSports = Array.from(new Set(bookings.map(b => b.sports?.name).filter(Boolean)))
+
   const [page, setPage] = useState(1)
   const perPage = 50
 
@@ -50,7 +65,7 @@ export default function AdminBookingsPage() {
       .from('bookings')
       .select(`
         id, booking_date, status, created_at, seat_number,
-        profiles ( first_name, last_name ),
+        profiles ( first_name, last_name, prn, gender, user_type ),
         sports ( name ),
         slots ( start_time, end_time )
       `)
@@ -123,17 +138,31 @@ export default function AdminBookingsPage() {
     const query = search.toLowerCase()
     const st12 = formatTime12hr(b.slots?.start_time || '')
     const et12 = formatTime12hr(b.slots?.end_time || '')
-    return (
+    const gender = b.profiles?.gender?.toLowerCase()
+    const userType = b.profiles?.user_type?.toLowerCase()
+    const sport = b.sports?.name?.toLowerCase()
+
+    const matchesSearch = (
       b.id.toLowerCase().includes(query) ||
       b.profiles?.first_name?.toLowerCase().includes(query) ||
       b.profiles?.last_name?.toLowerCase().includes(query) ||
-      b.sports?.name?.toLowerCase().includes(query) ||
+      b.profiles?.prn?.toLowerCase().includes(query) ||
+      gender?.includes(query) ||
+      userType?.includes(query) ||
+      sport?.includes(query) ||
       b.slots?.start_time?.toLowerCase().includes(query) ||
       b.slots?.end_time?.toLowerCase().includes(query) ||
       st12.includes(query) ||
       et12.includes(query) ||
-      b.booking_date?.toLowerCase().includes(query)
+      b.booking_date?.toLowerCase().includes(query) ||
+      b.seat_number?.toString().toLowerCase().includes(query)
     )
+
+    const matchesGender = !genderFilter || gender === genderFilter.toLowerCase()
+    const matchesUserType = !userTypeFilter || userType === userTypeFilter.toLowerCase()
+    const matchesSport = !sportFilter || sport === sportFilter.toLowerCase()
+
+    return matchesSearch && matchesGender && matchesUserType && matchesSport
   })
 
   const handleCopy = () => {
@@ -148,8 +177,58 @@ export default function AdminBookingsPage() {
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
       <Card>
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <CardTitle className="text-2xl font-bold">Manage Bookings</CardTitle>
-          <Input placeholder="Search booking #, name, sport, slot or date" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
+          <CardTitle className="text-2xl font-bold whitespace-nowrap">Manage Bookings</CardTitle>
+          <div className="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:items-center md:justify-end">
+            <Input
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:max-w-sm"
+            />
+
+            <Select value={genderFilter} onValueChange={(val) => setGenderFilter(val === "all" ? "" : val)}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="All Genders" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Genders</SelectItem>
+                {uniqueGenders.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={userTypeFilter} onValueChange={(val) => setUserTypeFilter(val === "all" ? "" : val)}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="All User Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All User Types</SelectItem>
+                {uniqueUserTypes.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={sportFilter} onValueChange={(val) => setSportFilter(val === "all" ? "" : val)}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="All Sports" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sports</SelectItem>
+                {uniqueSports.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* <Input placeholder="Search booking #, name, sport, slot, date, PRN, gender, user type or spot #" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" /> */}
         </CardHeader>
 
         <CardContent className="overflow-x-auto">
@@ -159,6 +238,9 @@ export default function AdminBookingsPage() {
                 <tr>
                   <th className="p-3 text-left">Booking #</th>
                   <th className="p-3 text-left">User</th>
+                  <th className="p-3 text-left">PRN/ID</th>
+                  <th className="p-3 text-left">Gender</th>
+                  <th className="p-3 text-left">User Type</th>
                   <th className="p-3 text-left">Sport</th>
                   <th className="p-3 text-left">Slot</th>
                   <th className="p-3 text-left">Date</th>
@@ -189,6 +271,9 @@ export default function AdminBookingsPage() {
                         </button>
                       </td>
                       <td className="p-3 whitespace-nowrap">{b.profiles?.first_name} {b.profiles?.last_name}</td>
+                      <td className="p-3 whitespace-nowrap">{b.profiles?.prn || '-'}</td>
+                      <td className="p-3 whitespace-nowrap">{b.profiles?.gender || '-'}</td>
+                      <td className="p-3 whitespace-nowrap">{b.profiles?.user_type || '-'}</td>
                       <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
                       <td className="p-3 whitespace-nowrap">{formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}</td>
                       <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
