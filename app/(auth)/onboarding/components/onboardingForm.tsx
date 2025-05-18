@@ -64,7 +64,7 @@ export function OnboardingForm() {
 
             {/* Gender */}
             <select name="gender" required className="border rounded p-2 w-full">
-              <option value="" disabled>Select Gender</option>
+              <option value="">Select Gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
