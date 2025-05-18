@@ -394,33 +394,84 @@ export default function SeatsPage() {
                 <div className="text-left text-sm border rounded-xl bg-white dark:bg-neutral-800 border-muted p-4 h-48 overflow-y-auto mb-4 space-y-4">
                   <h4 className="text-lg font-semibold text-neutral-900 dark:text-white">Terms & Conditions</h4>
 
-                  {/* Swimming Rules */}
-                  <div>
-                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Swimming Pool Rules</h5>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      <li>Swimming is allowed only during designated hours under supervision.</li>
-                      <li>Proper swimwear must be worn at all times.</li>
-                      <li>Users must shower before entering the pool.</li>
-                      <li>No running, rough play, acrobatics, or reckless diving.</li>
-                      <li>No chewing gum or shoes allowed on the pool deck.</li>
-                      <li>Personal belongings are your responsibility.</li>
-                      <li>Inappropriate behavior may result in removal from the facility.</li>
-                    </ul>
-                  </div>
+                  {/* Conditionally Render T&C Based on Sport */}
+                  {sportName?.toLowerCase().includes('swimming') && (
+                    <div>
+                      <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Swimming Pool Rules</h5>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>Swimming is allowed only during designated hours under supervision.</li>
+                        <li>Proper swimwear must be worn at all times.</li>
+                        <li>Users must shower before entering the pool.</li>
+                        <li>No running, rough play, acrobatics, or reckless diving.</li>
+                        <li>No chewing gum or shoes allowed on the pool deck.</li>
+                        <li>Personal belongings are your responsibility.</li>
+                        <li>Inappropriate behavior may result in removal from the facility.</li>
+                      </ul>
+                    </div>
+                  )}
 
-                  {/* Badminton Rules */}
-                  <div>
-                    <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Badminton Court Rules</h5>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      <li>Use the court only during allocated slots.</li>
-                      <li>Wear non-marking sports shoes and proper attire.</li>
-                      <li>Bring your own rackets and shuttlecocks.</li>
-                      <li>No spitting, chewing gum, or food inside the court.</li>
-                      <li>Rough behavior or misuse of equipment is not allowed.</li>
-                      <li>Unauthorized access or slot misuse may lead to penalties.</li>
-                      <li>You are responsible for your personal belongings.</li>
-                    </ul>
-                  </div>
+                  {sportName?.toLowerCase().includes('badminton') && (
+                    <div>
+                      <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Badminton Court Rules</h5>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>Use the court only during allocated slots.</li>
+                        <li>Wear non-marking sports shoes and proper attire.</li>
+                        <li>Bring your own rackets and shuttlecocks.</li>
+                        <li>No spitting, chewing gum, or food inside the court.</li>
+                        <li>Rough behavior or misuse of equipment is not allowed.</li>
+                        <li>Unauthorized access or slot misuse may lead to penalties.</li>
+                        <li>You are responsible for your personal belongings.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {sportName?.toLowerCase().includes('wrestling') && (
+                    <div>
+                      <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Wrestling Rules</h5>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>Practice only during your allotted slot under supervision.</li>
+                        <li>Wear appropriate wrestling attire and maintain hygiene.</li>
+                        <li>Remove footwear before stepping on the mats.</li>
+                        <li>No roughhousing or aggressive behavior beyond training guidelines.</li>
+                        <li>Do not use the facility if you have open wounds or infections.</li>
+                        <li>Report any injuries immediately to the supervisor.</li>
+                        <li>Personal belongings should be kept outside the wrestling area.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {sportName?.toLowerCase().includes('table tennis') && (
+                    <div>
+                      <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Table Tennis Rules</h5>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>Play only during your reserved slot time.</li>
+                        <li>Wear appropriate indoor sports shoes and comfortable attire.</li>
+                        <li>Handle equipment with care; no rough or aggressive play.</li>
+                        <li>Food, drinks, and chewing gum are prohibited in the playing area.</li>
+                        <li>Maintain respectful behavior towards other players and staff.</li>
+                        <li>Personal belongings are your responsibility.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {!['swimming', 'badminton', 'wrestling', 'table tennis'].some(sport =>
+                    sportName?.toLowerCase().includes(sport)
+                  ) && (
+                      <div>
+                        <h5 className="font-medium text-neutral-800 dark:text-neutral-100">General Rules</h5>
+                        <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                          <li>Facility usage is permitted only during your allocated booking time.</li>
+                          <li>Please handle all equipment with care and respect to maintain quality.</li>
+                          <li>Maintain cleanliness and ensure all waste is disposed of appropriately.</li>
+                          <li>Respect fellow users by maintaining a quiet and considerate environment.</li>
+                          <li>Consumption of food and beverages near the gaming area is strictly prohibited.</li>
+                          <li>Return all equipment to its designated place upon completion of use.</li>
+                          <li>Report any damaged or malfunctioning equipment to the facility staff promptly.</li>
+                          <li>Follow all instructions provided by facility personnel at all times.</li>
+                          <li>Ensure mobile devices are set to silent mode to minimize disruptions.</li>
+                        </ul>
+                      </div>
+                    )}
 
                   {/* Medical Declaration */}
                   <div>
