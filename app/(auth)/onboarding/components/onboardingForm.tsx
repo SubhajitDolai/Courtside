@@ -12,7 +12,7 @@ export function OnboardingForm() {
   const [pending, startTransition] = useTransition()
 
   // 🧠 Track selected user type
-  const [userType, setUserType] = useState<'student' | 'faculty'>('student')
+  const [userType, setUserType] = useState<'' | 'student' | 'faculty'>('')
 
   return (
     <section className="py-32">
@@ -38,30 +38,33 @@ export function OnboardingForm() {
               value={userType}
               onChange={(e) => setUserType(e.target.value as 'student' | 'faculty')}
             >
+              <option value="" disabled>Select User Type</option>
               <option value="student">Student</option>
               <option value="faculty">Faculty</option>
             </select>
 
-            {/* Conditional PRN / ID */}
-            <Input
-              name="prn"
-              placeholder={userType === 'faculty' ? 'ID' : 'PRN'}
-              required
-            />
-
-            {/* Conditional Course / Department */}
-            <Input
-              name="course"
-              placeholder={userType === 'faculty' ? 'Department' : 'Course'}
-              required
-            />
+            {/* Show PRN/ID and Course/Department only after selecting user type */}
+            {userType && (
+              <>
+                <Input
+                  name="prn"
+                  placeholder={userType === 'faculty' ? 'ID' : 'PRN'}
+                  required
+                />
+                <Input
+                  name="course"
+                  placeholder={userType === 'faculty' ? 'Department' : 'Course'}
+                  required
+                />
+              </>
+            )}
 
             {/* Phone */}
             <Input name="phone_number" placeholder="Phone Number" required />
 
             {/* Gender */}
             <select name="gender" required className="border rounded p-2 w-full">
-              <option value="">Select Gender</option>
+              <option value="" disabled>Select Gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>

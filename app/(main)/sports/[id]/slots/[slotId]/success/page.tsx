@@ -42,20 +42,20 @@ export default function BookingSuccessPage() {
 
       {/* ✅ Subtle success icon */}
       <div className="rounded-full bg-green-100 p-3">
-        <Check className="w-6 h-6 text-green-600" />
+        <Check className="w-6 h-6 text-green-500" />
       </div>
 
-      <h2 className="text-2xl font-bold text-green-700">Booking Confirmed!</h2>
+      <h2 className="text-2xl font-bold text-green-600">Booking Confirmed!</h2>
 
       {/* ✅ Better success text */}
       <p className="text-muted-foreground text-center max-w-md">
-        Your spot has been successfully booked. Please show your booking number at the sports complex check-in counter to confirm your entry.
+        Your spot has been successfully booked. Please show your booking number at the sports complex desk during check-in and check-out.
       </p>
 
       {/* ✅ Booking ID Card */}
       <Card className="w-full max-w-md border border-green-200 shadow-sm">
         <CardContent className="flex justify-between items-center p-4">
-          <span className="text-lg font-mono text-green-700">{bookingId}</span>
+          <span className="text-lg font-mono">{bookingId}</span>
           <Button
             variant="outline"
             size="icon"
