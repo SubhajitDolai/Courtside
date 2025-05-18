@@ -125,7 +125,7 @@ export default function SeatsPage() {
 
   // ✅ Fetch current seat bookings
   const refreshBookings = async () => {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getTodayDateInIST()
     const { data: bookingsData } = await supabase
       .from('bookings')
       .select('*')
