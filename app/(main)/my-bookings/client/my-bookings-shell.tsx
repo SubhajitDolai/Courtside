@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import BannedRedirect from '@/components/banned-redirect'
 
 const MyBookingsClient = dynamic(() => import('./client-bookings'), {
   ssr: false,
@@ -41,5 +42,10 @@ const MyBookingsClient = dynamic(() => import('./client-bookings'), {
 })
 
 export default function MyBookingsShell() {
-  return <MyBookingsClient />
+  return (
+    <>
+      <BannedRedirect />
+      <MyBookingsClient />
+    </>
+  )
 }

@@ -14,7 +14,6 @@ export async function getUserWithProfile() {
     .single()
 
   if (!profile) redirect('/onboarding')
-  if (profile.role === 'ban') redirect('/banned')
 
   return { user, profile }
 }

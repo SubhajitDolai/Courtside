@@ -39,6 +39,9 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         toast.error('Invalid email or password.')
       } else if (msg.includes('fetch failed')) {
         toast.error('No internet connection. Please check your network.')
+      } else if (msg.includes('banned')) {
+        toast.error('Your account has been suspended, please contact support.')
+        router.push('/banned') // 😂 banned user
       } else {
         toast.error('Something went wrong. Please try again.')
       }
@@ -51,16 +54,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     toast.success('Logged in successfully')
 
     // ✅ Redirect based on role
-    switch (res.role) {
-      case 'ban':
-        router.push('/banned') // 😂 banned user
-        break
-      case 'admin':
-        router.push('/admin') // 🗿 admin
-        break
-      default:
-        router.push('/') // ✅ normal user
-    }
+    router.push(res.role === 'admin' ? '/admin' : '/')
 
     setIsLoading(false)
   }

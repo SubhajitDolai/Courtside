@@ -22,11 +22,6 @@ export async function GET() {
     return NextResponse.json({ redirect: '/onboarding' })
   }
 
-  // ✅ If banned ➔ redirect to banned page
-  if (profile.role === 'ban') {
-    return NextResponse.json({ redirect: '/banned' })
-  }
-
   // ✅ All good ➔ allow
   return NextResponse.json({ status: 'ok' })
 }

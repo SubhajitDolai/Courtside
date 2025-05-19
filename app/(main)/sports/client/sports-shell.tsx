@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import SportsList from '../sports-list'
 import { createClient } from '@/utils/supabase/client'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import BannedRedirect from '@/components/banned-redirect'
 
 interface Sport {
   id: string
@@ -41,10 +42,13 @@ export default function SportsShell({ initialSports }: { initialSports: Sport[] 
   }
 
   return (
-    <SportsList
-      sports={sports}
-      loadingId={loadingId}
-      handleViewSlots={handleViewSlots}
-    />
+    <>
+      <BannedRedirect />
+      <SportsList
+        sports={sports}
+        loadingId={loadingId}
+        handleViewSlots={handleViewSlots}
+      />
+    </>
   )
 }

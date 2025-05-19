@@ -15,7 +15,6 @@ export default async function ProfileEditPage() {
     .single();
 
   if (!profile) redirect('/onboarding');
-  if (profile.role === 'ban') redirect('/banned');
 
   return (
     <main className="py-30 px-4 max-w-2xl mx-auto">

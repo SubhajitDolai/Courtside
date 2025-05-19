@@ -88,7 +88,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - `first_name`, `last_name`
 - `gender` ('male', 'female', 'other')
 - `user_type` ('student', 'faculty', etc.)
-- `role` ('user', 'admin', 'ban')
+- `role` ('user', 'admin')
 
 #### `sports`
 - `id`, `name`
