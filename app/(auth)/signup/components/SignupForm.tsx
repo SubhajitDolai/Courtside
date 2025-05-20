@@ -72,7 +72,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                     id="email"
                     type="email"
                     name="email"
-                    placeholder="student@mitwpu.edu.in"
+                    placeholder="user@mitwpu.edu.in"
                     required
                   />
                 </div>

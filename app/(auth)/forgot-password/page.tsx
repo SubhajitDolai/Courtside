@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="student@mitwpu.edu.in"
+                placeholder="user@mitwpu.edu.in"
                 required
               />
             </div>
