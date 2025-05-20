@@ -32,7 +32,7 @@ export default function ProfileShell({ userId }: { userId: string }) {
     }
 
     fetchProfile()
-  }, [userId])
+  }, [userId, router, supabase])
 
   if (!profile) return null
 

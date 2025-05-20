@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
@@ -21,6 +21,7 @@ import {
   TabsTrigger
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function MyBookingsClient() {
   const supabase = createClient()
@@ -50,7 +51,7 @@ export default function MyBookingsClient() {
   }, [])
 
   // ✅ Booking fetcher (reusable)
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser()
     if (!userData?.user) {
       toast.error('Please login')
@@ -78,22 +79,22 @@ export default function MyBookingsClient() {
     } else {
       setBookings(data || [])
     }
-  }
+  }, [supabase])
 
   // ✅ Initial load
   useEffect(() => {
     setLoading(true)
     fetchBookings().finally(() => setLoading(false))
-  }, [supabase])
+  }, [fetchBookings])
 
   // ✅ Auto-refresh bookings every 10 sec
   useEffect(() => {
     const interval = setInterval(() => {
       fetchBookings()
-    }, 10000) // 10 sec
+    }, 5000) // 5 sec
 
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchBookings])
 
   const handleCancel = async (bookingId: string) => {
     setCanceling(bookingId)
@@ -134,13 +135,13 @@ export default function MyBookingsClient() {
   }
 
   // Filter bookings based on status
-  const filteredBookings = activeTab === "all" 
-    ? bookings 
+  const filteredBookings = activeTab === "all"
+    ? bookings
     : bookings.filter(b => b.status === activeTab);
 
   // Get the status color for badges
   const getStatusColor = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'booked': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
       case 'checked-in': return 'bg-green-100 text-green-800 hover:bg-green-200';
       case 'checked-out': return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
@@ -150,7 +151,7 @@ export default function MyBookingsClient() {
 
   // Format status label
   const formatStatus = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'booked': return 'Booked';
       case 'checked-in': return 'Checked In';
       case 'checked-out': return 'Completed';
@@ -176,16 +177,42 @@ export default function MyBookingsClient() {
           <CardTitle className="text-2xl md:text-3xl font-bold text-center">My Bookings</CardTitle>
         </CardHeader>
 
-        <CardContent className="p-4 md:p-6">
+        <CardContent className="p-4 md:p-6 space-y-6">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Loader className="animate-spin w-10 h-10 text-emerald-500 mb-4" />
-              <p className="text-muted-foreground">Loading your bookings...</p>
-            </div>
+            <>
+              <div className="flex gap-3 mb-11">
+                <Skeleton className="h-8 w-16 rounded-md" />
+                <Skeleton className="h-8 w-20 rounded-md" />
+                <Skeleton className="h-8 w-24 rounded-md" />
+                <Skeleton className="h-8 w-28 rounded-md" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <CardHeader className="p-4 pb-2 bg-muted/30 border-b">
+                      <div className="space-y-2">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <div className="pt-8 flex justify-end">
+                        <Skeleton className="h-8 w-28 rounded-md" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           ) : (
             <>
-              <Tabs 
-                defaultValue="all" 
+              <Tabs
+                defaultValue="all"
                 className="mb-6"
                 onValueChange={setActiveTab}
               >
@@ -204,7 +231,7 @@ export default function MyBookingsClient() {
                         const startTime = formatTime12hr(booking.slots?.start_time);
                         const endTime = formatTime12hr(booking.slots?.end_time);
                         const bookingDate = booking.booking_date ? formatDate(booking.booking_date) : '';
-                        
+
                         return (
                           <Card key={booking.id} className="overflow-hidden hover:shadow-lg transition-all">
                             <CardHeader className="p-4 pb-2 space-y-1 bg-muted/30 border-b">
@@ -228,7 +255,7 @@ export default function MyBookingsClient() {
                                 </div>
                               </div>
                             </CardHeader>
-                            
+
                             <CardContent className="p-4 pt-3 space-y-3">
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="flex items-center gap-2">
@@ -243,16 +270,16 @@ export default function MyBookingsClient() {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center gap-2">
                                 <User size={16} className="text-muted-foreground" />
                                 <span>Spot #{booking.seat_number}</span>
                               </div>
-                              
+
                               <div className="flex items-center gap-2">
                                 <Tag size={16} className="text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">
-                                  {booking.created_at ? 
+                                  {booking.created_at ?
                                     `Booked on ${new Date(booking.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
                                       day: '2-digit',
                                       month: 'short',
@@ -264,7 +291,7 @@ export default function MyBookingsClient() {
                                 </span>
                               </div>
                             </CardContent>
-                            
+
                             {booking.status === 'booked' && (
                               <CardFooter className="p-4 pt-0 flex justify-end">
                                 <Button
@@ -296,7 +323,7 @@ export default function MyBookingsClient() {
                       </div>
                       <h3 className="text-lg font-medium mb-2">No bookings found</h3>
                       <p className="text-muted-foreground max-w-md">
-                        {activeTab === "all" 
+                        {activeTab === "all"
                           ? "You don't have any bookings yet. Start by making a new booking."
                           : `You don't have any ${activeTab === "booked" ? "active" : activeTab} bookings.`}
                       </p>

@@ -35,9 +35,10 @@ export default function EditSportPage() {
   const [saveOpen, setSaveOpen] = useState(false)
 
   const router = useRouter()
-  const supabase = createClient()
-
+  
   useEffect(() => {
+    const supabase = createClient()
+
     async function fetchSport() {
       const { data, error } = await supabase
         .from('sports')
@@ -58,6 +59,7 @@ export default function EditSportPage() {
   }, [sportId])
 
   async function handleSave() {
+    const supabase = createClient()
     setLoading(true)
 
     const { error } = await supabase
@@ -82,6 +84,7 @@ export default function EditSportPage() {
   }
 
   async function handleDelete() {
+    const supabase = createClient()
     setLoading(true)
 
     const { error } = await supabase

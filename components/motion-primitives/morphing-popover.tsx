@@ -182,16 +182,17 @@ function MorphingPopoverContent({
   const ref = useRef<HTMLDivElement>(null!);
   useClickOutside(ref, context.close);
 
+  const { isOpen, close } = context;
   useEffect(() => {
-    if (!context.isOpen) return;
+    if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') context.close();
+      if (event.key === 'Escape') close();
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [context.isOpen, context.close]);
+  }, [isOpen, close]);
 
   return (
     <AnimatePresence>

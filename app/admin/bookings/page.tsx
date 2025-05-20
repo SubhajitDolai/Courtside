@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -57,7 +57,7 @@ export default function AdminBookingsPage() {
   const [page, setPage] = useState(1)
   const perPage = 50
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     const from = (page - 1) * perPage
     const to = from + perPage - 1
 
@@ -73,13 +73,13 @@ export default function AdminBookingsPage() {
       .range(from, to)
 
     if (!error) setBookings(data || [])
-  }
+  }, [page, supabase])
 
   useEffect(() => {
     fetchBookings()
     const interval = setInterval(() => fetchBookings(), 5000)
     return () => clearInterval(interval)
-  }, [page])
+  }, [fetchBookings])
 
   // ✅ Reset page to 1 when search changes
   useEffect(() => {

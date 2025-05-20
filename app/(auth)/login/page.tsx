@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { LoginForm } from "./components/LoginForm";
 
 export default function LoginPage() {
@@ -13,10 +14,12 @@ export default function LoginPage() {
       </div>
 
       <div className="relative hidden bg-muted lg:block">
-        <img
+        <Image
           src="/sports_img/badminton.webp"
           alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:grayscale"
+          fill
+          className="object-cover dark:grayscale"
+          priority
         />
       </div>
     </div>

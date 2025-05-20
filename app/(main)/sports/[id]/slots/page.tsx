@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,19 +26,8 @@ export default function SportSlotsPage() {
   const [loading, setLoading] = useState(true)
   const { start } = useGlobalLoadingBar()
 
-  useEffect(() => {
-    fetchData()
-
-    // ✅ Auto-refresh every 5 sec
-    const interval = setInterval(() => {
-      fetchData()
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [sportId])
-
   // ✅ Fetch slots + sport name
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading((prev) => prev === true) // Only show skeleton on first load
     const userRes = await supabase.auth.getUser()
     const user = userRes.data.user
@@ -73,7 +62,18 @@ export default function SportSlotsPage() {
 
     setSportName(sport?.name || '')
     setLoading(false)
-  }
+  }, [supabase, sportId])
+
+  useEffect(() => {
+    fetchData()
+
+    // ✅ Auto-refresh every 5 sec
+    const interval = setInterval(() => {
+      fetchData()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [fetchData])
 
   // ✅ Gender + user_type filter logic
   const visibleSlots = slots.filter((slot) => {

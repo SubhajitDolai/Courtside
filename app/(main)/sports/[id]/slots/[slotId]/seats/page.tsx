@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -64,21 +64,20 @@ export default function SeatsPage() {
   const checkedInSeats = bookings.filter((b) => b.status === 'checked-in').length
   const checkedOutSeats = bookings.filter((b) => b.status === 'checked-out').length
 
-  // ✅ Initial fetch (with gender check)
-  useEffect(() => {
-    checkGenderAndFetch()
-  }, [])
-
-  // ✅ Auto refresh bookings every 5s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshBookings()
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+  // ✅ Fetch current seat bookings
+  const refreshBookings = useCallback(async () => {
+    const today = getTodayDateInIST()
+    const { data: bookingsData } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('sport_id', sportId)
+      .eq('slot_id', slotId)
+      .eq('booking_date', today)
+    setBookings(bookingsData || [])
+  }, [sportId, slotId, supabase])
 
   // ✅ Checks user gender & loads seats & slot details
-  const checkGenderAndFetch = async () => {
+  const checkGenderAndFetch = useCallback(async () => {
     setLoading(true)
 
     // ✅ Check user login
@@ -121,19 +120,20 @@ export default function SeatsPage() {
     setSportName(sport?.name || '')
     await refreshBookings()
     setLoading(false)
-  }
+  }, [router, slotId, sportId, supabase, refreshBookings])
 
-  // ✅ Fetch current seat bookings
-  const refreshBookings = async () => {
-    const today = getTodayDateInIST()
-    const { data: bookingsData } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('sport_id', sportId)
-      .eq('slot_id', slotId)
-      .eq('booking_date', today)
-    setBookings(bookingsData || [])
-  }
+  // ✅ Initial fetch (with gender check)
+  useEffect(() => {
+    checkGenderAndFetch()
+  }, [checkGenderAndFetch])
+
+  // ✅ Auto refresh bookings every 5s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshBookings()
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [refreshBookings])
 
   // ✅ Get current status of seat
   const getSeatStatus = (seatNumber: number) => {
@@ -201,7 +201,7 @@ export default function SeatsPage() {
 
       // ✅ Seat already booked
       if (error.code === '23505') {
-        toast.error('Sorry, this spot was just booked by someone else. Pick another.')
+        toast.error('Someone else just grabbed this spot! Please select another.')
         await refreshBookings()
       } else {
         toast.error('Booking failed. Please try again.')
