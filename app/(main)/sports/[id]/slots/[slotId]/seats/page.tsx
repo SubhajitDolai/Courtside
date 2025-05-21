@@ -182,6 +182,65 @@ export default function SeatsPage() {
       return
     }
 
+    // 🆕 Check for time conflicts with other bookings
+    if (slotDetails) {
+      // First get information about all the user's bookings for today
+      const { data: userBookings } = await supabase
+        .from('bookings')
+        .select('id, slot_id, sport_id, status')
+        .eq('user_id', user.id)
+        .eq('booking_date', today)
+        .in('status', ['booked', 'checked-in'])
+
+      // If the user has other bookings, check for time overlap
+      if (userBookings && userBookings.length > 0) {
+        // Current slot times
+        const currentStartTime = slotDetails.start_time
+        const currentEndTime = slotDetails.end_time
+
+        // For each booking, fetch slot details and check for overlap
+        for (const booking of userBookings) {
+          // Skip the current sport/slot if user is trying to book the same one
+          if (booking.sport_id === sportId && booking.slot_id === slotId) continue
+
+          // Get slot details for this booking
+          const { data: bookingSlot } = await supabase
+            .from('slots')
+            .select('start_time, end_time')
+            .eq('id', booking.slot_id)
+            .single()
+
+          // Get sport details for this booking
+          const { data: bookingSport } = await supabase
+            .from('sports')
+            .select('name')
+            .eq('id', booking.sport_id)
+            .single()
+
+          if (!bookingSlot || !bookingSport) continue
+
+          const existingStartTime = bookingSlot.start_time
+          const existingEndTime = bookingSlot.end_time
+
+          // Check for any overlap between time slots
+          const hasOverlap = (
+            // New booking starts during existing booking
+            (currentStartTime >= existingStartTime && currentStartTime < existingEndTime) ||
+            // New booking ends during existing booking
+            (currentEndTime > existingStartTime && currentEndTime <= existingEndTime) ||
+            // New booking completely contains existing booking
+            (currentStartTime <= existingStartTime && currentEndTime >= existingEndTime)
+          )
+
+          if (hasOverlap) {
+            toast.error(`You already have a booking for ${bookingSport.name} during this time slot`)
+            setIsBooking(false)
+            return
+          }
+        }
+      }
+    }
+
     // ✅ Try booking seat (DB constraint prevents double booking)
     const { data, error } = await supabase
       .from('bookings')

@@ -17,13 +17,13 @@ const members = [
         name: 'Dr. Vaibhav Wagh',
         role: 'Director of Sports',
         avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
-        linkedin: 'https://www.linkedin.com/in/abhay-kachare/',
+        linkedin: 'https://www.linkedin.com/in/dr-vaibhav-balasaheb-wagh-phd-a1981a68/',
     },
     {
         name: 'Abhay Kachare',
         role: 'Asst. Director of Sports',
         avatar: 'https://media.licdn.com/dms/image/v2/C5103AQG6lUPH7_kIPA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1549575983482?e=1752105600&v=beta&t=AnRpJjTEnrmevUi-lKUUJ0rdoyQBq3RNh8Yt97RkNi4',
-        linkedin: 'https://www.linkedin.com/in/dr-vaibhav-balasaheb-wagh-phd-a1981a68/',
+        linkedin: 'https://www.linkedin.com/in/abhay-kachare/',
     },
 ]
 
