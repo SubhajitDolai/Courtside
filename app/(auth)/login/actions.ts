@@ -18,20 +18,7 @@ export async function login(formData: FormData) {
 
   if (error) return { error: error.message }
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) return { error: 'User not found after login' }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return {
-    error: null,
-    role: profile?.role ?? null, // return the role
-  }
+  return { error: null }
 }
 
 // Signup method

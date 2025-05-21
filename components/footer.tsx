@@ -34,7 +34,7 @@ export default function FooterSection() {
         <footer className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl px-6">
                 <Link
-                    href="/"
+                    href="/admin"
                     aria-label="go home"
                     className="mx-auto block size-fit">
                     <Logo />

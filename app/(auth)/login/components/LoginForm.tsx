@@ -18,7 +18,6 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const { start, finish } = useGlobalLoadingBar()
 
   useEffect(() => {
-    router.prefetch('/admin')
     router.prefetch('/')
   }, [router])
 
@@ -51,11 +50,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
     toast.success('Logged in successfully')
 
-    // ✅ Delay redirect slightly to ensure full sync
-    setTimeout(() => {
-      // ✅ Redirect based on role
-      router.push(res.role === 'admin' ? '/admin' : '/')
-    }, 1) // ~1ms
+    router.push('/')
 
     setIsLoading(false)
   }, [router, start, finish])
