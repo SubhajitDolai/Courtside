@@ -12,6 +12,11 @@ import { Separator } from "@/components/ui/separator"
 import EditButton from '../components/EditButton'
 import BannedRedirect from '@/components/banned-redirect'
 
+// Simple Skeleton component for reuse
+function Skeleton({ className }: { className: string }) {
+  return <div className={`animate-pulse bg-muted rounded-md ${className}`} />
+}
+
 export default function ProfileShell({ userId }: { userId: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [profile, setProfile] = useState<any | null>(null)
@@ -29,12 +34,56 @@ export default function ProfileShell({ userId }: { userId: string }) {
       if (!data) return router.push('/onboarding')
 
       setProfile(data)
+
+      // ✅ Prefetch once profile is set
+      router.prefetch('/profile/edit')
     }
 
     fetchProfile()
   }, [userId, router, supabase])
 
-  if (!profile) return null
+  if (!profile)
+    return (
+      <main className="py-30 px-4 max-w-2xl mx-auto">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <CardTitle>
+              <Skeleton className="h-10 w-48 mx-auto" />
+            </CardTitle>
+            <CardDescription>
+              <Skeleton className="h-4 w-60 mx-auto mt-2" />
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6">
+              <Skeleton className="h-24 w-24 sm:h-28 sm:w-28 rounded-full border-4 border-primary/10" />
+
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-8 w-48 rounded-md" />
+                <Skeleton className="h-5 w-32 rounded-md" />
+                <Skeleton className="h-6 w-36 rounded-full" />
+              </div>
+            </div>
+
+            <Separator className="my-6" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+              {Array(4).fill(null).map((_, idx) => (
+                <div key={idx} className="space-y-1">
+                  <Skeleton className="h-4 w-20 rounded-md" />
+                  <Skeleton className="h-6 w-40 rounded-md" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex justify-center pt-2 pb-6">
+            <Skeleton className="h-10 w-24 rounded-xl" />
+          </CardFooter>
+        </Card>
+      </main>
+    )
 
   return (
     <>

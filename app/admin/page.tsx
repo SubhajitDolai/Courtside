@@ -1,13 +1,14 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Trophy, Clock, Calendar } from 'lucide-react'
-import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider' // ✅ your custom hook
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function AdminPage() {
   const router = useRouter()
-  const { start } = useGlobalLoadingBar() // ✅ use your loading bar
+  const { start } = useGlobalLoadingBar()
 
   const cards = [
     {
@@ -31,9 +32,14 @@ export default function AdminPage() {
   ]
 
   const handleCardClick = (href: string) => {
-    start()             // ✅ trigger custom loading bar
-    router.push(href)   // ➜ `GlobalRouteChangeHandler` will `finish()` it after navigation
+    start()
+    router.push(href)
   }
+
+  // ✅ Prefetch admin routes for faster UX
+  useEffect(() => {
+    cards.forEach(card => router.prefetch(card.href))
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted px-4 py-8">

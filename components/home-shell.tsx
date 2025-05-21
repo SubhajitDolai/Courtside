@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 import HeroSection from "@/components/hero-section";
 import LogoCloud from "@/components/logo-cloud";
-import ContentSection from "@/components/content-3";
 import BannedRedirect from "@/components/banned-redirect";
 
+const ContentSection = dynamic(() => import('@/components/content-3'), { ssr: false });
 const AboutSports = dynamic(() => import('@/components/aboutSports'), { ssr: false });
 const CallToAction = dynamic(() => import('@/components/call-to-action'), { ssr: false });
 const FAQsThree = dynamic(() => import('@/components/faqs-3'), { ssr: false });
@@ -18,6 +20,15 @@ const MorphingPopoverTextarea = dynamic(
 );
 
 export default function HomeShell() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Prefetch multiple routes
+    router.prefetch('/sports');
+    router.prefetch('/my-bookings');
+    router.prefetch('/profile');
+  }, [router]);
+
   return (
     <>
       <BannedRedirect />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,7 +17,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const router = useRouter()
   const { start, finish } = useGlobalLoadingBar()
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    router.prefetch('/admin')
+    router.prefetch('/')
+  }, [router])
+
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     start()
@@ -46,10 +51,18 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
     toast.success('Logged in successfully')
 
-    // ✅ Redirect based on role
-    router.push(res.role === 'admin' ? '/admin' : '/')
+    // ✅ Delay redirect slightly to ensure full sync
+    setTimeout(() => {
+      // ✅ Redirect based on role
+      router.push(res.role === 'admin' ? '/admin' : '/')
+    }, 1) // ~1ms
+
     setIsLoading(false)
-  }
+  }, [router, start, finish])
+
+  const togglePassword = useCallback(() => {
+    setShowPassword(prev => !prev)
+  }, [])
 
   return (
     <form onSubmit={handleSubmit} className={cn("flex flex-col gap-6", className)} {...props}>
@@ -95,7 +108,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             />
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
+              onClick={togglePassword}
               className="absolute right-2 top-2/4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               tabIndex={-1}
             >
