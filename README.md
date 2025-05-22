@@ -6,7 +6,7 @@
 
 **A modern sports facility booking platform for educational institutions**
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Personal Project](https://img.shields.io/badge/Personal-Project-purple.svg)](https://github.com/SubhajitDolai)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-darkgreen)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-blue)](https://tailwindcss.com/)
@@ -20,10 +20,11 @@
 Courtside is a comprehensive full-stack web application designed to streamline the booking of sports facilities such as badminton courts, swimming pools, and other sports venues. Built specifically for educational institutions and communities with shared sports infrastructure, Courtside emphasizes:
 
 - **User-friendly experience** with intuitive booking flows
-- **Real-time availability** updates with automatic refresh
+- **Real-time availability** updates using Supabase Realtime
 - **Role-based access control** for users and administrators
 - **Smart seat selection** with gender and user-type filtering
 - **Comprehensive admin dashboard** for facility management
+- **Optimized for scale** to handle 25,000+ concurrent users
 
 ## ✨ Features
 
@@ -31,7 +32,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🔐 **Secure Authentication** - Sign up & login with Supabase Auth
 - 👤 **Profile Management** - First-time user onboarding flow
 - 🎟️ **Intuitive Booking** - Book sports slots with seat selection
-- ⏱️ **Real-time Updates** - Slot availability refreshes every 5 seconds
+- ⚡ **Real-time Updates** - Instant availability updates using Supabase Realtime
 - 🔍 **Smart Filtering** - Bookings filtered by gender and user type
 - 📋 **Booking History** - View past and current bookings
 - ❌ **Easy Cancellation** - Cancel bookings with appropriate restrictions
@@ -50,12 +51,25 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | Category | Technology |
 |----------|------------|
 | Frontend | Next.js 15 (App Router) |
-| Backend | Supabase (Database + Auth) |
-| Styling | Tailwind CSS + Shadcn/ui |
+| Language | TypeScript 5.x |
+| Backend | Supabase (Database + Auth + Storage + Realtime) |
+| Styling | Tailwind CSS 4 + Shadcn/ui |
+| State Management | React 19 Hooks + Context API |
 | Icons | Lucide React |
-| Authentication | Supabase Auth |
-| Database | Supabase PostgreSQL |
-| Real-time Updates | Polling (5-second interval) |
+| Authentication | Supabase Auth with SSR |
+| Database | Supabase PostgreSQL (optimized with indexes) |
+| Real-time Updates | Supabase Realtime with custom hooks |
+| Toast Notifications | Sonner |
+| Analytics | Vercel Analytics + Speed Insights |
+| Animations | Motion + tw-animate-css |
+| Theme | next-themes (dark/light mode) |
+| Deployment | Vercel (Edge Functions) |
+
+## 🚀 Performance Optimizations
+
+- **Database Indexing**: Optimized queries with strategic indexes for 25,000+ users
+- **Supabase Realtime**: Replaced polling with efficient websocket connections
+- **Connection Pooling**: Automatic connection management for scalability
 
 ## 🗂️ Project Structure
 
@@ -156,6 +170,8 @@ Courtside is a comprehensive full-stack web application designed to streamline t
    ```
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+   BACKUP_CRON_SECRET=your-custom-key-for-hitting-custom-api-everyday-at-12am-to-clear-bookings
    ```
 
 4. **Run the development server**
@@ -188,9 +204,9 @@ Contributions are what make the open-source community such an amazing place to l
 
 Please follow the project coding conventions and use meaningful commit messages.
 
-## 📄 License
+## 💼 Project Status
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This is a personal project developed by Subhajit Dolai for educational purposes and portfolio demonstration.
 
 ## ✨ Acknowledgments
 
