@@ -20,6 +20,19 @@ import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTodayDateInIST } from '@/lib/date'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+
+// Define types for real-time subscription
+interface Booking {
+  id: string;
+  sport_id: string;
+  slot_id: string;
+  user_id: string;
+  booking_date: string;
+  seat_number: number;
+  status: string;
+  created_at: string;
+}
 
 // ✅ Convert 24hr time to 12hr format
 const formatTime12hr = (time24: string) => {
@@ -40,10 +53,7 @@ export default function SeatsPage() {
   // ✅ Seat limit from sports table
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
   const [sportName, setSportName] = useState<string>('')
-  // ✅ Seat bookings fetched from Supabase
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bookings, setBookings] = useState<any[]>([])
-
+  
   // ✅ Loading states
   const [loading, setLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)
@@ -57,24 +67,39 @@ export default function SeatsPage() {
   // ✅ Slot details (start time, end time, gender)
   const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string } | null>(null)
 
+  // ✅ Fetch current seat bookings with Realtime
+  const fetchBookings = useCallback(async () => {
+    const today = getTodayDateInIST()
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('sport_id', sportId)
+      .eq('slot_id', slotId)
+      .eq('booking_date', today)
+      
+    if (error) {
+      console.error('Error fetching bookings:', error)
+      return []
+    }
+      
+    return data || []
+  }, [sportId, slotId, supabase])
+
+  // ✅ Use Realtime subscription for bookings
+  const { data: bookings } = useRealtimeSubscription<Booking>(
+    'bookings',     // table name
+    [],             // initial data (empty array)
+    fetchBookings,  // fetch function
+    'slot_id',      // filter column
+    slotId         // filter value
+  )
+
   // ✅ Count seats summary safely
   const totalSeats = seatLimit || 0
   const availableSeats = totalSeats - bookings.length
   const bookedSeats = bookings.filter((b) => b.status === 'booked').length
   const checkedInSeats = bookings.filter((b) => b.status === 'checked-in').length
   const checkedOutSeats = bookings.filter((b) => b.status === 'checked-out').length
-
-  // ✅ Fetch current seat bookings
-  const refreshBookings = useCallback(async () => {
-    const today = getTodayDateInIST()
-    const { data: bookingsData } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('sport_id', sportId)
-      .eq('slot_id', slotId)
-      .eq('booking_date', today)
-    setBookings(bookingsData || [])
-  }, [sportId, slotId, supabase])
 
   // ✅ Checks user gender & loads seats & slot details
   const checkGenderAndFetch = useCallback(async () => {
@@ -118,22 +143,21 @@ export default function SeatsPage() {
 
     setSeatLimit(sport?.seat_limit || 0)
     setSportName(sport?.name || '')
-    await refreshBookings()
     setLoading(false)
-  }, [router, slotId, sportId, supabase, refreshBookings])
+  }, [router, slotId, sportId, supabase])
 
   // ✅ Initial fetch (with gender check)
   useEffect(() => {
     checkGenderAndFetch()
   }, [checkGenderAndFetch])
 
-  // ✅ Auto refresh bookings every 5s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshBookings()
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [refreshBookings])
+  // ✅ Remove the polling useEffect
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     refreshBookings()
+  //   }, 5000)
+  //   return () => clearInterval(interval)
+  // }, [refreshBookings])
 
   // ✅ Get current status of seat
   const getSeatStatus = (seatNumber: number) => {
@@ -261,7 +285,7 @@ export default function SeatsPage() {
       // ✅ Seat already booked
       if (error.code === '23505') {
         toast.error('Someone else just grabbed this spot! Please select another.')
-        await refreshBookings()
+        // No need to manually refresh - Realtime will handle it
       } else {
         toast.error('Booking failed. Please try again.')
       }

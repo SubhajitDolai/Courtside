@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SportsList from '../sports-list'
 import { createClient } from '@/utils/supabase/client'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import BannedRedirect from '@/components/banned-redirect'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 
 interface Sport {
   id: string
@@ -14,26 +15,33 @@ interface Sport {
 }
 
 export default function SportsShell({ initialSports }: { initialSports: Sport[] }) {
-  const [sports, setSports] = useState(initialSports)
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
   const { start } = useGlobalLoadingBar()
-
-  useEffect(() => {
-    const fetchSports = async () => {
-      const { data } = await supabase
-        .from('sports')
-        .select('id, name, image_url')
-        .eq('is_active', true)
-        .order('name', { ascending: true })
-
-      if (data) setSports(data)
+  
+  // Define fetchSports function that returns data instead of setting state
+  const fetchSports = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('sports')
+      .select('id, name, image_url')
+      .eq('is_active', true)
+      .order('name', { ascending: true })
+      
+    if (error) {
+      console.error('Error fetching sports:', error)
+      return []
     }
-
-    const interval = setInterval(fetchSports, 5000)
-    return () => clearInterval(interval)
+    
+    return data || []
   }, [supabase])
+  
+  // Use Realtime subscription instead of polling
+  const { data: sports } = useRealtimeSubscription<Sport>(
+    'sports',       // table name
+    initialSports,  // initial data from server
+    fetchSports     // fetch function
+  )
 
   const handleViewSlots = (sportId: string) => {
     setLoadingId(sportId)

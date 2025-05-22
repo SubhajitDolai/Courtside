@@ -22,13 +22,22 @@ import {
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+
+// Define the Booking type
+interface Booking {
+  id: string
+  booking_date: string
+  status: string
+  seat_number: number
+  created_at: string
+  sports: { name: string }
+  slots: { start_time: string, end_time: string }
+}
 
 export default function MyBookingsClient() {
   const supabase = createClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bookings, setBookings] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
   const [canceling, setCanceling] = useState<string | null>(null)
 
   // ✅ Booking ID Dialog states
@@ -55,46 +64,45 @@ export default function MyBookingsClient() {
     const { data: userData } = await supabase.auth.getUser()
     if (!userData?.user) {
       toast.error('Please login')
-      return
+      return []
     }
 
     const { data, error } = await supabase
       .from('bookings')
       .select(`
-        id, 
-        booking_date, 
-        status, 
-        seat_number,
-        created_at,
-        sports ( name ),
-        slots ( start_time, end_time )
-      `)
+      id, 
+      booking_date, 
+      status, 
+      seat_number,
+      created_at,
+      sports ( name ),
+      slots ( start_time, end_time )
+    `)
       .eq('user_id', userData.user.id)
-      .order('booking_date', { ascending: false }) // ✅ Sorted latest date first
-      .order('created_at', { ascending: false })  // ✅ If same date, latest created shows first
+      .order('booking_date', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error(error)
       toast.error('Failed to load bookings')
+      return []
     } else {
-      setBookings(data || [])
+      // Transform the data to match our Booking interface
+      return (data || []).map(item => ({
+        ...item,
+        // Ensure these are objects not arrays
+        sports: item.sports || null,
+        slots: item.slots || null
+      })) as unknown as Booking[]
     }
   }, [supabase])
 
-  // ✅ Initial load
-  useEffect(() => {
-    setLoading(true)
-    fetchBookings().finally(() => setLoading(false))
-  }, [fetchBookings])
-
-  // ✅ Auto-refresh bookings every 10 sec
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchBookings()
-    }, 5000) // 5 sec
-
-    return () => clearInterval(interval)
-  }, [fetchBookings])
+  // ✅ Use Realtime subscription instead of polling
+  const { data: bookings, loading: loadingBookings } = useRealtimeSubscription<Booking>(
+    'bookings',     // table name
+    [],             // initial data (empty array)
+    fetchBookings   // fetch function
+  )
 
   const handleCancel = async (bookingId: string) => {
     setCanceling(bookingId)
@@ -104,12 +112,13 @@ export default function MyBookingsClient() {
       toast.error('Cancellation failed')
     } else {
       toast.success('Booking cancelled.')
-      setBookings((prev) => prev.filter((b) => b.id !== bookingId))
+      // No need to manually update state - Realtime will handle it
+      // setBookings((prev) => prev.filter((b) => b.id !== bookingId))
     }
     setCanceling(null)
   }
 
-  // ✅ Now disables 30 min before slot start
+  // Rest of your functions remain the same
   const isSlotStarted = (slotStartTime: string) => {
     const now = new Date()
     const [hour, minute] = slotStartTime.split(':').map(Number)
@@ -119,7 +128,6 @@ export default function MyBookingsClient() {
     return now >= slotStart
   }
 
-  // ✅ Convert "HH:MM" → "h:mm AM/PM"
   const formatTime12hr = (time24: string) => {
     const [hour, minute] = time24.split(':')
     const date = new Date()
@@ -127,7 +135,6 @@ export default function MyBookingsClient() {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
   }
 
-  // ✅ Copy Booking #
   const handleCopy = (id: string) => {
     navigator.clipboard.writeText(id)
     setCopied(true)
@@ -178,7 +185,7 @@ export default function MyBookingsClient() {
         </CardHeader>
 
         <CardContent className="p-4 md:p-6 space-y-6">
-          {loading ? (
+          {loadingBookings ? (
             <>
               <div className="flex gap-3 mb-11">
                 <Skeleton className="h-8 w-16 rounded-md" />

@@ -10,6 +10,18 @@ import { Loader } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import BannedRedirect from '@/components/banned-redirect'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+
+// Define the types
+interface Slot {
+  id: string
+  start_time: string
+  end_time: string
+  sport_id: string
+  is_active: boolean
+  gender: string
+  allowed_user_type: string
+}
 
 export default function SportSlotsPage() {
   const params = useParams<{ id: string }>()
@@ -17,63 +29,79 @@ export default function SportSlotsPage() {
   const sportId = params.id
   const supabase = createClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [slots, setSlots] = useState<any[]>([])
+  // Remove this state as it will be handled by the hook
+  // const [slots, setSlots] = useState<any[]>([])
+  
   const [userGender, setUserGender] = useState<string | null>(null)
   const [userType, setUserType] = useState<string | null>(null)
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
   const [sportName, setSportName] = useState<string>('')
+  // Keep loading for initial state
   const [loading, setLoading] = useState(true)
   const { start } = useGlobalLoadingBar()
 
-  // ✅ Fetch slots + sport name
-  const fetchData = useCallback(async () => {
-    setLoading((prev) => prev === true) // Only show skeleton on first load
-    const userRes = await supabase.auth.getUser()
-    const user = userRes.data.user
+  // Get user profile data (this doesn't need to be part of the realtime subscription)
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userRes = await supabase.auth.getUser()
+      const user = userRes.data.user
 
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('gender, user_type') // ✅ fetch user_type also
-        .eq('id', user.id)
-        .single()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('gender, user_type')
+          .eq('id', user.id)
+          .single()
 
-      setUserGender(profile?.gender || null)
-      setUserType(profile?.user_type || null)
+        setUserGender(profile?.gender || null)
+        setUserType(profile?.user_type || null)
+      }
     }
 
-    // ✅ Fetch slots
-    const { data: slotData } = await supabase
+    fetchUserData()
+  }, [supabase])
+
+  // Fetch sport name (separate from slot data)
+  useEffect(() => {
+    const fetchSportName = async () => {
+      const { data: sport } = await supabase
+        .from('sports')
+        .select('name')
+        .eq('id', sportId)
+        .single()
+
+      setSportName(sport?.name || '')
+    }
+
+    fetchSportName()
+  }, [sportId, supabase])
+
+  // ✅ Fetch slots with realtime updates
+  const fetchSlots = useCallback(async () => {
+    const { data, error } = await supabase
       .from('slots')
       .select('*')
       .eq('sport_id', sportId)
       .eq('is_active', true)
       .order('start_time', { ascending: true })
 
-    setSlots(slotData ?? [])
-
-    // ✅ Fetch sport name
-    const { data: sport } = await supabase
-      .from('sports')
-      .select('name')
-      .eq('id', sportId)
-      .single()
-
-    setSportName(sport?.name || '')
-    setLoading(false)
-  }, [supabase, sportId])
-
-  useEffect(() => {
-    fetchData()
-
-    // ✅ Auto-refresh every 5 sec
-    const interval = setInterval(() => {
-      fetchData()
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [fetchData])
+    if (error) {
+      console.error('Error fetching slots:', error)
+      return []
+    }
+      
+    setLoading(false) // Set loading to false after initial load
+    return data || []
+  }, [sportId, supabase])
+  
+  // Use Realtime subscription for slots
+  const { data: slots } = useRealtimeSubscription<Slot>(
+    'slots',        // table name
+    [],             // initial data (empty array)
+    fetchSlots,     // fetch function
+    'sport_id',     // filter column
+    sportId         // filter value
+  )
 
   // ✅ Gender + user_type filter logic
   const visibleSlots = slots.filter((slot) => {
@@ -95,8 +123,7 @@ export default function SportSlotsPage() {
   }
 
   // ✅ Check if slot expired
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isSlotPast = (slot: any) => {
+  const isSlotPast = (slot: Slot) => {
     const now = new Date()
     const [hour, minute] = slot.end_time.split(':').map(Number)
     const slotEnd = new Date()

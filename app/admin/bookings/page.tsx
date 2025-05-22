@@ -25,35 +25,50 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Copy, Check } from 'lucide-react'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+
+// Define types
+interface Profile {
+  first_name: string;
+  last_name: string;
+  prn: string;
+  gender: string;
+  user_type: string;
+}
+
+interface Sport {
+  name: string;
+}
+
+interface Slot {
+  start_time: string;
+  end_time: string;
+}
+
+interface Booking {
+  id: string;
+  booking_date: string;
+  status: string;
+  created_at: string;
+  seat_number: number;
+  profiles: Profile;
+  sports: Sport;
+  slots: Slot;
+}
 
 export default function AdminBookingsPage() {
   const supabase = createClient()
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bookings, setBookings] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
-
-  // ✅ For delete dialog
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
-
-  // ✅ For check-in/out confirm dialog
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [actionType, setActionType] = useState<'check-in' | 'check-out'>('check-in')
-
-  // ✅ For Booking ID dialog
   const [showBookingId, setShowBookingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
-
   const [genderFilter, setGenderFilter] = useState('')
   const [userTypeFilter, setUserTypeFilter] = useState('')
   const [sportFilter, setSportFilter] = useState('')
-
-  const uniqueGenders = Array.from(new Set(bookings.map(b => b.profiles?.gender).filter(Boolean)))
-  const uniqueUserTypes = Array.from(new Set(bookings.map(b => b.profiles?.user_type).filter(Boolean)))
-  const uniqueSports = Array.from(new Set(bookings.map(b => b.sports?.name).filter(Boolean)))
-
   const [page, setPage] = useState(1)
   const perPage = 50
 
@@ -64,24 +79,31 @@ export default function AdminBookingsPage() {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
-        id, booking_date, status, created_at, seat_number,
-        profiles ( first_name, last_name, prn, gender, user_type ),
-        sports ( name ),
-        slots ( start_time, end_time )
-      `)
+      id, booking_date, status, created_at, seat_number,
+      profiles ( first_name, last_name, prn, gender, user_type ),
+      sports ( name ),
+      slots ( start_time, end_time )
+    `)
       .order('created_at', { ascending: false })
       .range(from, to)
 
-    if (!error) setBookings(data || [])
+    if (error) {
+      console.error('Error fetching bookings:', error)
+      return []
+    }
+
+    // Cast the response as Booking[]
+    return (data || []) as unknown as Booking[]
   }, [page, supabase])
 
-  useEffect(() => {
-    fetchBookings()
-    const interval = setInterval(() => fetchBookings(), 5000)
-    return () => clearInterval(interval)
-  }, [fetchBookings])
+  // Use our realtime hook (type-safe now)
+  const { data: bookings, loading: loadingBookings } = useRealtimeSubscription<Booking>(
+    'bookings',     // table name
+    [],             // initial data (empty array)
+    fetchBookings   // fetch function
+  )
 
-  // ✅ Reset page to 1 when search changes
+  // Reset page to 1 when search changes
   useEffect(() => {
     setPage(1)
   }, [search])
@@ -103,8 +125,8 @@ export default function AdminBookingsPage() {
     const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', confirmId)
 
     if (!error) {
-      setBookings((prev) => prev.map((b) => (b.id === confirmId ? { ...b, status: newStatus } : b)))
       toast.success(`Status updated to "${newStatus}"`)
+      // No need to manually update state - Realtime will handle it
     } else {
       toast.error('Failed to update status')
     }
@@ -118,8 +140,8 @@ export default function AdminBookingsPage() {
     setDeleting(true)
     const { error } = await supabase.from('bookings').delete().eq('id', deleteId)
     if (!error) {
-      setBookings((prev) => prev.filter((b) => b.id !== deleteId))
       toast.success('Booking deleted')
+      // No need to manually update state - Realtime will handle it
     } else {
       toast.error('Failed to delete')
     }
@@ -127,7 +149,12 @@ export default function AdminBookingsPage() {
     setDeleteId(null)
   }
 
+  const uniqueGenders = Array.from(new Set(bookings.filter(b => b.profiles?.gender).map(b => b.profiles.gender)))
+  const uniqueUserTypes = Array.from(new Set(bookings.filter(b => b.profiles?.user_type).map(b => b.profiles.user_type)))
+  const uniqueSports = Array.from(new Set(bookings.filter(b => b.sports?.name).map(b => b.sports.name)))
+
   const formatTime12hr = (time24: string) => {
+    if (!time24) return '';
     const [hour, minute] = time24.split(':')
     const date = new Date()
     date.setHours(Number(hour), Number(minute))
@@ -138,24 +165,24 @@ export default function AdminBookingsPage() {
     const query = search.toLowerCase()
     const st12 = formatTime12hr(b.slots?.start_time || '')
     const et12 = formatTime12hr(b.slots?.end_time || '')
-    const gender = b.profiles?.gender?.toLowerCase()
-    const userType = b.profiles?.user_type?.toLowerCase()
-    const sport = b.sports?.name?.toLowerCase()
+    const gender = b.profiles?.gender?.toLowerCase() || ''
+    const userType = b.profiles?.user_type?.toLowerCase() || ''
+    const sport = b.sports?.name?.toLowerCase() || ''
 
     const matchesSearch = (
       b.id.toLowerCase().includes(query) ||
-      b.profiles?.first_name?.toLowerCase().includes(query) ||
-      b.profiles?.last_name?.toLowerCase().includes(query) ||
-      b.profiles?.prn?.toLowerCase().includes(query) ||
-      gender?.includes(query) ||
-      userType?.includes(query) ||
-      sport?.includes(query) ||
-      b.slots?.start_time?.toLowerCase().includes(query) ||
-      b.slots?.end_time?.toLowerCase().includes(query) ||
+      (b.profiles?.first_name?.toLowerCase() || '').includes(query) ||
+      (b.profiles?.last_name?.toLowerCase() || '').includes(query) ||
+      (b.profiles?.prn?.toLowerCase() || '').includes(query) ||
+      gender.includes(query) ||
+      userType.includes(query) ||
+      sport.includes(query) ||
+      (b.slots?.start_time?.toLowerCase() || '').includes(query) ||
+      (b.slots?.end_time?.toLowerCase() || '').includes(query) ||
       st12.includes(query) ||
       et12.includes(query) ||
-      b.booking_date?.toLowerCase().includes(query) ||
-      b.seat_number?.toString().toLowerCase().includes(query)
+      (b.booking_date?.toLowerCase() || '').includes(query) ||
+      (b.seat_number?.toString().toLowerCase() || '').includes(query)
     )
 
     const matchesGender = !genderFilter || gender === genderFilter.toLowerCase()
@@ -175,6 +202,8 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="pt-30 p-6 min-h-screen bg-muted/40">
+      {/* Rest of your UI component remains the same */}
+      {/* Everything from the Card component down remains unchanged */}
       <Card>
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="text-2xl font-bold whitespace-nowrap">Manage Bookings</CardTitle>
@@ -228,110 +257,113 @@ export default function AdminBookingsPage() {
               </SelectContent>
             </Select>
           </div>
-          {/* <Input placeholder="Search booking #, name, sport, slot, date, PRN, gender, user type or spot #" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" /> */}
         </CardHeader>
 
         <CardContent className="overflow-x-auto">
-          <div className="min-w-fit">
-            <table className="w-full text-sm border rounded-md">
-              <thead className="bg-muted text-muted-foreground">
-                <tr>
-                  <th className="p-3 text-left">Booking #</th>
-                  <th className="p-3 text-left">User</th>
-                  <th className="p-3 text-left">PRN/ID</th>
-                  <th className="p-3 text-left">Gender</th>
-                  <th className="p-3 text-left">User Type</th>
-                  <th className="p-3 text-left">Sport</th>
-                  <th className="p-3 text-left">Slot</th>
-                  <th className="p-3 text-left">Date</th>
-                  <th className="p-3 text-left">Booked At</th>
-                  <th className="p-3 text-left">Spot #</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBookings.map((b) => {
-                  const now = new Date()
-                  const [eh, em] = (b.slots?.end_time || '00:00').split(':').map(Number)
-                  const slotEnd = new Date()
-                  slotEnd.setHours(eh, em, 0, 0)
-                  const slotOver = now > slotEnd
+          {loadingBookings && <p className="text-center py-4">Loading bookings...</p>}
 
-                  // ✅ Disable rules
-                  const disableDelete = slotOver
-                  const disableCheckIn = ['checked-in', 'checked-out', 'booked'].includes(b.status) && slotOver
-                  const disableCheckOut = ['booked', 'checked-out'].includes(b.status) && slotOver
-
-                  return (
-                    <tr key={b.id} className="border-t hover:bg-accent/50 transition-colors">
-                      <td className="p-3 whitespace-nowrap">
-                        <button onClick={() => setShowBookingId(b.id)} className="underline text-primary">
-                          {b.id.slice(0, 6)}...
-                        </button>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">{b.profiles?.first_name} {b.profiles?.last_name}</td>
-                      <td className="p-3 whitespace-nowrap">{b.profiles?.prn || '-'}</td>
-                      <td className="p-3 whitespace-nowrap">{b.profiles?.gender || '-'}</td>
-                      <td className="p-3 whitespace-nowrap">{b.profiles?.user_type || '-'}</td>
-                      <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
-                      <td className="p-3 whitespace-nowrap">{formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}</td>
-                      <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
-                      <td className="p-3 whitespace-nowrap">
-                        {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true,
-                        }) : ''}
-                      </td>
-                      <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
-                      <td className="p-3 whitespace-nowrap">
-                        <Badge variant="outline" className={
-                          b.status === 'booked' ? 'bg-yellow-200 text-yellow-800' :
-                            b.status === 'checked-in' ? 'bg-green-200 text-green-800' :
-                              b.status === 'checked-out' ? 'bg-gray-200 text-gray-800' :
-                                ''
-                        }>
-                          {b.status.replace('-', ' ')}
-                        </Badge>
-                      </td>
-                      <td className="p-3 whitespace-nowrap flex gap-4">
-                        <Button size="sm" onClick={() => { setActionType('check-in'); setConfirmId(b.id) }} disabled={loading || disableCheckIn} className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}>
-                          Check-in
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => { setActionType('check-out'); setConfirmId(b.id) }} disabled={loading || disableCheckOut} className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}>
-                          Check-out
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => setDeleteId(b.id)} disabled={disableDelete} className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}>
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-                {!filteredBookings.length && (
+          {!loadingBookings && (
+            <div className="min-w-fit">
+              <table className="w-full text-sm border rounded-md">
+                {/* Same table structure as before */}
+                <thead className="bg-muted text-muted-foreground">
                   <tr>
-                    <td colSpan={9} className="p-4 text-center text-muted-foreground">No bookings found.</td>
+                    <th className="p-3 text-left">Booking #</th>
+                    <th className="p-3 text-left">User</th>
+                    <th className="p-3 text-left">PRN/ID</th>
+                    <th className="p-3 text-left">Gender</th>
+                    <th className="p-3 text-left">User Type</th>
+                    <th className="p-3 text-left">Sport</th>
+                    <th className="p-3 text-left">Slot</th>
+                    <th className="p-3 text-left">Date</th>
+                    <th className="p-3 text-left">Booked At</th>
+                    <th className="p-3 text-left">Spot #</th>
+                    <th className="p-3 text-left">Status</th>
+                    <th className="p-3 text-left">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredBookings.map((b) => {
+                    const now = new Date()
+                    const [eh, em] = (b.slots?.end_time || '00:00').split(':').map(Number)
+                    const slotEnd = new Date()
+                    slotEnd.setHours(eh, em, 0, 0)
+                    const slotOver = now > slotEnd
 
-            {/* ✅ Pagination buttons */}
-            <div className="flex justify-between items-center mt-4">
-              <Button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>Previous</Button>
-              <span>Page {page}</span>
-              <Button onClick={() => setPage((p) => p + 1)} disabled={bookings.length < perPage}>Next</Button>
+                    // Disable rules
+                    const disableDelete = slotOver
+                    const disableCheckIn = ['checked-in', 'checked-out', 'booked'].includes(b.status) && slotOver
+                    const disableCheckOut = ['booked', 'checked-out'].includes(b.status) && slotOver
+
+                    return (
+                      <tr key={b.id} className="border-t hover:bg-accent/50 transition-colors">
+                        <td className="p-3 whitespace-nowrap">
+                          <button onClick={() => setShowBookingId(b.id)} className="underline text-primary">
+                            {b.id.slice(0, 6)}...
+                          </button>
+                        </td>
+                        <td className="p-3 whitespace-nowrap">{b.profiles?.first_name} {b.profiles?.last_name}</td>
+                        <td className="p-3 whitespace-nowrap">{b.profiles?.prn || '-'}</td>
+                        <td className="p-3 whitespace-nowrap">{b.profiles?.gender || '-'}</td>
+                        <td className="p-3 whitespace-nowrap">{b.profiles?.user_type || '-'}</td>
+                        <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
+                        <td className="p-3 whitespace-nowrap">{formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}</td>
+                        <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
+                        <td className="p-3 whitespace-nowrap">
+                          {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                          }) : ''}
+                        </td>
+                        <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
+                        <td className="p-3 whitespace-nowrap">
+                          <Badge variant="outline" className={
+                            b.status === 'booked' ? 'bg-yellow-200 text-yellow-800' :
+                              b.status === 'checked-in' ? 'bg-green-200 text-green-800' :
+                                b.status === 'checked-out' ? 'bg-gray-200 text-gray-800' :
+                                  ''
+                          }>
+                            {b.status.replace('-', ' ')}
+                          </Badge>
+                        </td>
+                        <td className="p-3 whitespace-nowrap flex gap-4">
+                          <Button size="sm" onClick={() => { setActionType('check-in'); setConfirmId(b.id) }} disabled={loading || disableCheckIn} className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}>
+                            Check-in
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => { setActionType('check-out'); setConfirmId(b.id) }} disabled={loading || disableCheckOut} className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}>
+                            Check-out
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => setDeleteId(b.id)} disabled={disableDelete} className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}>
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {!filteredBookings.length && (
+                    <tr>
+                      <td colSpan={12} className="p-4 text-center text-muted-foreground">No bookings found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Pagination buttons */}
+              <div className="flex justify-between items-center mt-4">
+                <Button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>Previous</Button>
+                <span>Page {page}</span>
+                <Button onClick={() => setPage((p) => p + 1)} disabled={bookings.length < perPage}>Next</Button>
+              </div>
             </div>
-
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* ✅ Dialogs */}
+      {/* All Dialogs remain the same */}
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !deleting && setDeleteId(o ? deleteId : null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -376,7 +408,6 @@ export default function AdminBookingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   )
 }
