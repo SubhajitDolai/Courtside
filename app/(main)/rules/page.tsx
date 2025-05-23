@@ -34,31 +34,6 @@ export default function RulesPage() {
               <li>Use the restroom facilities, not the pool.</li>
             </ul>
           </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Equipment Usage</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Swimming aids and equipment must be used responsibly.</li>
-              <li>Return all equipment to designated storage areas after use.</li>
-              <li>Report damaged equipment to staff immediately.</li>
-              <li>No unauthorized equipment allowed in the pool.</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Lane Etiquette</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Swim counterclockwise when sharing a lane.</li>
-              <li>Choose lanes appropriate for your swimming speed.</li>
-              <li>Maximum 6 swimmers per lane during busy periods.</li>
-              <li>Tap a swimmer&apos;s feet once if you need to pass.</li>
-              <li>Rest at the ends of the pool, not in the middle of lanes.</li>
-            </ul>
-          </div>
         </CardContent>
       </Card>
 
@@ -76,124 +51,86 @@ export default function RulesPage() {
               <li>During service, the racket head must be below waist level.</li>
               <li>The shuttlecock must be hit before it touches the ground.</li>
               <li>A point is scored on every serve regardless of who serves.</li>
-              <li>If the shuttlecock hits the net during play but goes over, play continues.</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Court Conduct</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Only non-marking shoes are allowed on court.</li>
-              <li>Keep the court clean and free from water bottles/equipment.</li>
-              <li>No shouting, abusive language, or racket throwing.</li>
-              <li>Respect decisions of officials or appointed referees.</li>
-              <li>Clear the court promptly when your time slot ends.</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Equipment Care</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Handle nets and posts with care.</li>
-              <li>Report any damaged equipment or court issues.</li>
-              <li>Do not adjust the net height without staff permission.</li>
-              <li>Dispose of used shuttlecocks properly.</li>
             </ul>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tennis Rules */}
+      {/* Wrestling Rules */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-bold">Tennis Court Rules</CardTitle>
+          <CardTitle className="text-3xl font-bold">Wrestling Rules</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 text-sm leading-6">
           <div>
-            <h3 className="text-lg font-semibold">Game Rules</h3>
+            <h3 className="text-lg font-semibold">General Rules</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Standard scoring: 0 (Love), 15, 30, 40, Game.</li>
-              <li>Deuce occurs at 40-40, with advantage scoring thereafter.</li>
-              <li>Serves must land in the diagonal service box.</li>
-              <li>Players change ends after odd-numbered games.</li>
-              <li>Ball touching any line is considered &quot;in&quot;.</li>
-              <li>Server announces the score before each serve.</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Court Etiquette</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Wait for a break in play before walking behind a court.</li>
-              <li>Return balls from other courts between points, not during play.</li>
-              <li>Keep noise to a minimum during points.</li>
-              <li>Call your own lines honestly and respect opponents&apos; calls.</li>
-              <li>Shake hands after the match.</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="text-lg font-semibold">Court Maintenance</h3>
-            <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Only tennis shoes allowed (no running shoes or black-soled shoes).</li>
-              <li>Remove all trash and personal items when leaving.</li>
-              <li>Report court damage or hazards to staff.</li>
-              <li>No food or glass containers on the court.</li>
-              <li>No use of courts when wet or under maintenance.</li>
+              <li>Matches are conducted on a standard wrestling mat.</li>
+              <li>Participants must wear proper wrestling attire.</li>
+              <li>No striking, biting, or unsportsmanlike conduct is allowed.</li>
+              <li>Points are awarded for takedowns, escapes, and reversals.</li>
+              <li>Matches are supervised by a referee whose decisions are final.</li>
             </ul>
           </div>
         </CardContent>
       </Card>
 
-      {/* Basketball Rules */}
+      {/* Table Tennis Rules */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-bold">Basketball Court Rules</CardTitle>
+          <CardTitle className="text-3xl font-bold">Table Tennis Rules</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 text-sm leading-6">
           <div>
             <h3 className="text-lg font-semibold">Game Rules</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Standard pickup games are played to 11, 15, or 21 points (win by 2).</li>
-              <li>Three-pointers count as 2 points and all other baskets as 1 in pickup games.</li>
-              <li>Winner of the previous game stays on court (king of the court).</li>
-              <li>Call your own fouls and violations honestly.</li>
-              <li>&quot;Check&quot; the ball at the top of the key after fouls or out-of-bounds.</li>
-              <li>No hanging on the rim except to avoid injury.</li>
+              <li>Games are played to 11 points with a 2-point lead.</li>
+              <li>Service alternates every 2 points, except during deuce.</li>
+              <li>The ball must be tossed at least 6 inches during service.</li>
+              <li>A point is scored if the opponent fails to return the ball.</li>
+              <li>Players switch sides after each game.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Indoor Games Rules */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold">Indoor Games Rules</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6 text-sm leading-6">
+          <div>
+            <h3 className="text-lg font-semibold">Chess</h3>
+            <ul className="list-disc pl-5 space-y-2 mt-2">
+              <li>Standard chess rules apply.</li>
+              <li>Players must use the clock provided for timed games.</li>
+              <li>Touch-move rule is enforced.</li>
+              <li>Respect your opponent and maintain silence during play.</li>
             </ul>
           </div>
 
           <Separator />
 
           <div>
-            <h3 className="text-lg font-semibold">Court Conduct</h3>
+            <h3 className="text-lg font-semibold">Carrom</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>No profanity, fighting, or intimidation allowed.</li>
-              <li>Respect all players regardless of skill level.</li>
-              <li>No jewelry or accessories that could cause injuries.</li>
-              <li>Full-court games only when sufficient players are present.</li>
-              <li>Share court space during busy periods.</li>
+              <li>Players must use the striker provided.</li>
+              <li>No leaning over the board beyond the baseline.</li>
+              <li>Fouls result in penalties as per standard rules.</li>
+              <li>Keep the board clean and free of debris.</li>
             </ul>
           </div>
 
           <Separator />
 
           <div>
-            <h3 className="text-lg font-semibold">Equipment Rules</h3>
+            <h3 className="text-lg font-semibold">Foosball</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Bring your own basketball when possible.</li>
-              <li>Return borrowed equipment to proper storage.</li>
-              <li>Report damaged backboards, rims, or nets.</li>
-              <li>No dunking on adjustable hoops set below 10 feet.</li>
-              <li>No moving or adjusting equipment without staff permission.</li>
+              <li>No spinning the rods excessively.</li>
+              <li>Games are played to 5 or 10 points, as agreed upon.</li>
+              <li>Respect the equipment and avoid rough handling.</li>
+              <li>Allow others to play during busy periods.</li>
             </ul>
           </div>
         </CardContent>
