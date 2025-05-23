@@ -136,22 +136,27 @@ export default function GlassmorphNavbar() {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest("button[aria-label='Toggle menu']")
+      ) {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
   // Toggle mobile menu visibility
-  const toggleMobileMenu = () => {
-    setIsOpen(!isOpen);
+  const toggleMobileMenu = (event?: React.MouseEvent) => {
+    event?.stopPropagation(); // Prevent event propagation
+    setIsOpen((prev) => !prev); // Toggle the state
   };
 
   const navigateWithLoading = (href: string) => {
@@ -331,7 +336,7 @@ export default function GlassmorphNavbar() {
             <div className="md:hidden flex items-center gap-3">
               <ModeToggle />
               <Button 
-                onClick={toggleMobileMenu}
+                onClick={(e) => toggleMobileMenu(e)} // Pass the event to stop propagation
                 size="icon"
                 variant="ghost"
                 aria-label="Toggle menu"
