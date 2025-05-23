@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, Calendar } from 'lucide-react'
+import { Trophy, Clock, ClipboardList } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function AdminPage() {
@@ -26,7 +26,7 @@ export default function AdminPage() {
     {
       title: 'Manage Bookings',
       description: 'View and manage user bookings',
-      icon: <Calendar className="h-8 w-8 text-primary" />,
+      icon: <ClipboardList className="h-8 w-8 text-primary" />,
       href: '/admin/bookings',
     },
   ]
