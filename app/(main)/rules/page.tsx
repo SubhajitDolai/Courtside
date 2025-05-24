@@ -12,7 +12,7 @@ export default function RulesPage() {
         <AlertCircle className="h-4 w-4 text-primary" />
         <AlertTitle>Important Notice</AlertTitle>
         <AlertDescription>
-          All users must adhere to these rules to maintain facility standards and ensure everyone&apos;s safety.
+          All participants are required to adhere to these rules to maintain the facility&apos;s standards and ensure a safe and respectful environment.
         </AlertDescription>
       </Alert>
 
@@ -25,13 +25,13 @@ export default function RulesPage() {
           <div>
             <h3 className="text-lg font-semibold">Safety Rules</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>No diving in shallow areas (less than 5 feet deep).</li>
-              <li>No running or horseplay around the pool area.</li>
-              <li>No food, drinks, or glass containers in the pool area.</li>
-              <li>Children under 12 must be accompanied by an adult.</li>
-              <li>No swimming during lightning or thunder storms.</li>
-              <li>Shower before entering the pool.</li>
-              <li>Use the restroom facilities, not the pool.</li>
+              <li>Diving is strictly prohibited in areas with a depth of less than 5 feet.</li>
+              <li>Maintain a calm and orderly demeanor; running or roughhousing is not permitted in the pool vicinity.</li>
+              <li>Consumption of food, beverages, or the use of glass containers is not allowed in the pool area.</li>
+              <li>All participants are required to take a shower prior to entering the pool to maintain hygiene standards.</li>
+              <li>Please utilize restroom facilities before entering the pool to ensure cleanliness and safety.</li>
+              <li>Proper swimwear is mandatory for all participants.</li>
+              <li>Do not obstruct lifeguards or interfere with their duties.</li>
             </ul>
           </div>
         </CardContent>
@@ -47,10 +47,12 @@ export default function RulesPage() {
             <h3 className="text-lg font-semibold">Game Rules</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>Games are played to 21 points with a clear 2-point lead (cap at 30).</li>
-              <li>Service alternates between right and left courts when server scores.</li>
-              <li>During service, the racket head must be below waist level.</li>
+              <li>Service alternates between right and left courts when the server scores.</li>
+              <li>During service, the racket head must remain below waist level.</li>
               <li>The shuttlecock must be hit before it touches the ground.</li>
-              <li>A point is scored on every serve regardless of who serves.</li>
+              <li>A point is scored on every serve, regardless of who serves.</li>
+              <li>Players must wear non-marking shoes to protect the court surface.</li>
+              <li>Do not enter the court until the previous game has concluded.</li>
             </ul>
           </div>
         </CardContent>
@@ -66,10 +68,12 @@ export default function RulesPage() {
             <h3 className="text-lg font-semibold">General Rules</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>Matches are conducted on a standard wrestling mat.</li>
-              <li>Participants must wear proper wrestling attire.</li>
-              <li>No striking, biting, or unsportsmanlike conduct is allowed.</li>
+              <li>Participants must wear appropriate wrestling attire.</li>
+              <li>No striking, biting, or unsportsmanlike conduct is permitted.</li>
               <li>Points are awarded for takedowns, escapes, and reversals.</li>
-              <li>Matches are supervised by a referee whose decisions are final.</li>
+              <li>All matches are supervised by a referee, whose decisions are final.</li>
+              <li>Participants must warm up before matches to prevent injuries.</li>
+              <li>All jewelry and accessories must be removed before entering the mat.</li>
             </ul>
           </div>
         </CardContent>
@@ -88,7 +92,9 @@ export default function RulesPage() {
               <li>Service alternates every 2 points, except during deuce.</li>
               <li>The ball must be tossed at least 6 inches during service.</li>
               <li>A point is scored if the opponent fails to return the ball.</li>
-              <li>Players switch sides after each game.</li>
+              <li>Players must switch sides after each game.</li>
+              <li>Only standard table tennis paddles and balls are permitted.</li>
+              <li>Do not lean on or place items on the table.</li>
             </ul>
           </div>
         </CardContent>
@@ -105,8 +111,9 @@ export default function RulesPage() {
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>Standard chess rules apply.</li>
               <li>Players must use the clock provided for timed games.</li>
-              <li>Touch-move rule is enforced.</li>
-              <li>Respect your opponent and maintain silence during play.</li>
+              <li>The touch-move rule is enforced.</li>
+              <li>Maintain silence and respect your opponent during play.</li>
+              <li>Players must reset the board after completing their game.</li>
             </ul>
           </div>
 
@@ -119,6 +126,7 @@ export default function RulesPage() {
               <li>No leaning over the board beyond the baseline.</li>
               <li>Fouls result in penalties as per standard rules.</li>
               <li>Keep the board clean and free of debris.</li>
+              <li>Participants must avoid excessive powder usage on the board.</li>
             </ul>
           </div>
 
@@ -127,10 +135,11 @@ export default function RulesPage() {
           <div>
             <h3 className="text-lg font-semibold">Foosball</h3>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>No spinning the rods excessively.</li>
+              <li>No excessive spinning of the rods.</li>
               <li>Games are played to 5 or 10 points, as agreed upon.</li>
               <li>Respect the equipment and avoid rough handling.</li>
               <li>Allow others to play during busy periods.</li>
+              <li>Do not apply excessive force to the rods to prevent damage.</li>
             </ul>
           </div>
         </CardContent>

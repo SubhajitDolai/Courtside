@@ -50,10 +50,14 @@ export default function SeatsPage() {
   const sportId = params.id as string
   const slotId = params.slotId as string
 
+  // Invite state & qrLoading state
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [qrLoading, setQrLoading] = useState(true);
+
   // ✅ Seat limit from sports table
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
   const [sportName, setSportName] = useState<string>('')
-  
+
   // ✅ Loading states
   const [loading, setLoading] = useState(true)
   const [isBooking, setIsBooking] = useState(false)
@@ -76,12 +80,12 @@ export default function SeatsPage() {
       .eq('sport_id', sportId)
       .eq('slot_id', slotId)
       .eq('booking_date', today)
-      
+
     if (error) {
       console.error('Error fetching bookings:', error)
       return []
     }
-      
+
     return data || []
   }, [sportId, slotId, supabase])
 
@@ -150,14 +154,6 @@ export default function SeatsPage() {
   useEffect(() => {
     checkGenderAndFetch()
   }, [checkGenderAndFetch])
-
-  // ✅ Remove the polling useEffect
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     refreshBookings()
-  //   }, 5000)
-  //   return () => clearInterval(interval)
-  // }, [refreshBookings])
 
   // ✅ Get current status of seat
   const getSeatStatus = (seatNumber: number) => {
@@ -425,6 +421,19 @@ export default function SeatsPage() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <Button
+          onClick={() => setIsInviteOpen(true)}
+          className="flex items-center gap-2"
+          variant="secondary"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="animate-pulse">
+            <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+          </svg>
+          Invite Friends
+        </Button>
+      </div>
+
       {/* ✅ Live Seat Analytics */}
       <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 grid grid-cols-2 sm:grid-cols-5 gap-4 text-center w-full max-w-2xl mx-auto">
         <div className="flex flex-col">
@@ -621,6 +630,105 @@ export default function SeatsPage() {
                 </div>
               ) : 'Confirm'}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+        <AlertDialogContent className="sm:max-w-md border bg-white dark:bg-neutral-900 shadow-xl rounded-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+              Invite Friends
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="text-center text-neutral-700 dark:text-neutral-300 mt-4">
+                {/* QR Code with Loading State */}
+                <div className="flex justify-center my-4 relative min-h-[170px]">
+                  {qrLoading ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Loader className="h-8 w-8 animate-spin text-primary" />
+                      <span className="sr-only">Loading QR code</span>
+                    </div>
+                  ) : null}
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+                      window.location.href
+                    )}&size=150x150`}
+                    alt="QR Code"
+                    className={`rounded-lg border border-gray-300 shadow-md bg-white p-2 ${qrLoading ? 'opacity-0' : 'opacity-100'}`}
+                    onLoad={() => setQrLoading(false)}
+                    onError={() => {
+                      setQrLoading(false);
+                      toast.error("Failed to load QR code");
+                    }}
+                    style={{ transition: 'opacity 0.3s ease' }}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Ask a nearby friend to scan this code to join.
+                </p>
+
+                {/* Social Media Buttons - WhatsApp and Device only */}
+                <div className="flex flex-col gap-4">
+                  <Button
+                    className="bg-[#25D366] text-white hover:bg-[#22c15e] py-3 rounded-lg shadow-md flex items-center justify-center gap-2"
+                    onClick={() =>
+                      window.open(
+                        `https://wa.me/?text=${encodeURIComponent(
+                          `Join me for ${sportName} at this slot (${formatTime12hr(
+                            slotDetails?.start_time || ''
+                          )} – ${formatTime12hr(slotDetails?.end_time || '')}): ${window.location.href}`
+                        )}`,
+                        '_blank'
+                      )
+                    }
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+                    </svg>
+                    Share via WhatsApp
+                  </Button>
+                  <Button
+                    className="bg-neutral-800 text-white hover:bg-neutral-900 py-3 rounded-lg shadow-md flex items-center justify-center gap-2"
+                    onClick={async () => {
+                      if (!navigator.share) {
+                        toast.error('Sharing not supported on this device');
+                        return;
+                      }
+
+                      try {
+                        await navigator.share({
+                          title: `Join me for ${sportName}`,
+                          text: `Join me for ${sportName} at this slot (${formatTime12hr(
+                            slotDetails?.start_time || ''
+                          )} – ${formatTime12hr(slotDetails?.end_time || '')})`,
+                          url: window.location.href,
+                        });
+                        toast.success('Link shared successfully!');
+                      } catch (error: unknown) {
+                        // Don't show error for user cancellations
+                        if (error instanceof Error && error.name === 'AbortError') {
+                          return;
+                        } else {
+                          toast.error('Could not share link');
+                          console.error('Sharing error:', error);
+                        }
+                      }
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+                    </svg>
+                    Share via device
+                  </Button>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center pt-6">
+            <AlertDialogCancel className="sm:w-32 border text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+              Close
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
