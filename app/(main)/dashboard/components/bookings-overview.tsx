@@ -12,13 +12,13 @@ export function BookingsOverview({ bookings }: { bookings: any[] }) {
   const booked = bookings.filter(b => b.status === 'booked').length;
   const checkedIn = bookings.filter(b => b.status === 'checked-in').length;
   const checkedOut = bookings.filter(b => b.status === 'checked-out').length;
-  const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+  // const cancelled = bookings.filter(b => b.status === 'cancelled').length;
   
   const data = [
     { name: 'Booked', value: booked, color: '#f59e0b' },
     { name: 'Checked In', value: checkedIn, color: '#10b981' },
     { name: 'Checked Out', value: checkedOut, color: '#6b7280' },
-    { name: 'Cancelled', value: cancelled, color: '#ef4444' },
+    // { name: 'Cancelled', value: cancelled, color: '#ef4444' },
   ];
   
   return (

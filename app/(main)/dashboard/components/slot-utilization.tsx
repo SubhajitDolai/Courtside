@@ -213,7 +213,7 @@ export function SlotUtilization({ bookings, bookingHistory, slots }: { bookings:
           {data.map((entry, index) => (
             <Cell 
               key={`utilization-${index}`} 
-              fill={entry.utilization > 85 ? '#ef4444' : (entry.utilization > 60 ? '#f59e0b' : '#10b981')}
+              fill={entry.utilization > 85 ? '#10b981' : (entry.utilization > 60 ? '#f59e0b' : '#ef4444')}
               fillOpacity={activeIndex === index ? 1 : 0.8}
             />
           ))}

@@ -10,12 +10,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export function ModeToggle() {
   const { setTheme, theme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
-  const [deviceType, setDeviceType] = React.useState<'mobile'|'tablet'|'desktop'>('desktop')
+  const [deviceType, setDeviceType] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop')
 
   // After mounting, we can safely access the theme and detect device
   React.useEffect(() => {
     setMounted(true)
-    
+
     // Simple device detection
     const detectDevice = () => {
       const width = window.innerWidth
@@ -27,10 +27,10 @@ export function ModeToggle() {
         setDeviceType('desktop')
       }
     }
-    
+
     // Set initial device type
     detectDevice()
-    
+
     // Update on resize
     window.addEventListener('resize', detectDevice)
     return () => window.removeEventListener('resize', detectDevice)
@@ -39,7 +39,7 @@ export function ModeToggle() {
   // Function to cycle between themes: light → dark → system → light
   const cycleTheme = () => {
     if (!mounted) return
-    
+
     if (theme === 'light') {
       setTheme('dark')
     } else if (theme === 'dark') {
@@ -73,7 +73,7 @@ export function ModeToggle() {
   // Get tooltip text based on current theme
   const getTooltipText = () => {
     if (!mounted) return "Toggle theme"
-    
+
     if (theme === 'light') {
       return "Light mode (click for dark)"
     } else if (theme === 'dark') {
@@ -83,13 +83,27 @@ export function ModeToggle() {
     }
   }
 
+  // Add this right before the final return statement
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative h-9 w-9 rounded-full p-0"
+        aria-label="Toggle theme"
+      >
+        <Sun className="h-[1.2rem] w-[1.2rem] text-muted-foreground" />
+      </Button>
+    );
+  }
+
   return (
     <TooltipProvider>
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
           <Button
-            variant="ghost" 
-            size="icon" 
+            variant="ghost"
+            size="icon"
             onClick={cycleTheme}
             className="relative h-9 w-9 rounded-full p-0"
             aria-label={`Current theme: ${theme || 'system'}. Click to cycle themes.`}

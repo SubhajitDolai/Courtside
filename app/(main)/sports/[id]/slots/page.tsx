@@ -171,7 +171,9 @@ export default function SportSlotsPage() {
             ))}
           </div>
         ) : visibleSlots.length === 0 ? (
-          <p className="text-center text-muted-foreground">No slots available for the selected sport</p>
+          <div className='flex items-center justify-center min-h-[60vh] my-12'>
+            <p className="text-center text-muted-foreground text-lg">No slots available for {sportName}</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {visibleSlots.map((slot) => {
