@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import { getUserWithProfile } from '@/lib/getUserWithProfile'
+import { checkProfile } from '@/lib/check-profile'
 import DashboardClient from './components/dashboard-client'
 import { Suspense } from 'react'
 import DashboardSkeleton from './components/dashboard-skeleton'
@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function DashboardPage() {
+  // Check profile - will redirect if needed
+  await checkProfile()
+  
+  // If we get here, we have both user and profile
   try {
-    // Ensure user is logged in
-    await getUserWithProfile()
-    
     const supabase = await createClient()
     
     // Fetch data in parallel for better performance with appropriate limits
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
         .from('bookings')
         .select('*, sports:sport_id(name), slots:slot_id(start_time, end_time), profiles:user_id(gender, user_type)')
         .order('created_at', { ascending: false })
-        .limit(1000),  // Good limit for large datasets
+        .limit(1000),
       
       supabase
         .from('bookings_history')
