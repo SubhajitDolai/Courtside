@@ -32,6 +32,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next()  // No need for authentication, let it pass through
   }
 
+  // Special handling for invitation links
+  if (request.nextUrl.pathname === '/set-password' && request.nextUrl.searchParams.has('token')) {
+    // Let this route go through without auth check
+    return supabaseResponse
+  }
+
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
@@ -51,6 +57,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/error') ||
       request.nextUrl.pathname.startsWith('/forgot-password') ||
       request.nextUrl.pathname.startsWith('/reset-password') ||
+      request.nextUrl.pathname.startsWith('/set-password') ||
       request.nextUrl.pathname.startsWith('/banned')
     )
   ) {
@@ -66,6 +73,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/signup') &&
     !request.nextUrl.pathname.startsWith('/forgot-password') &&
     !request.nextUrl.pathname.startsWith('/reset-password') &&
+    !request.nextUrl.pathname.startsWith('/set-password') &&
     !request.nextUrl.pathname.startsWith('/error') &&
     !request.nextUrl.pathname.startsWith('/banned') &&
     !request.nextUrl.pathname.startsWith('/auth')
