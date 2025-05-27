@@ -88,23 +88,25 @@ export function MorphingPopoverTextarea() {
                     return;
                   }
 
-                  // Fetch user email from profiles
+                  // Fetch user profile information
                   const { data: profile, error: profileError } = await supabase
                     .from('profiles')
-                    .select('email')
+                    .select('id, email, first_name, last_name, prn')
                     .eq('id', user.id)
                     .single();
 
                   if (profileError || !profile) {
-                    toast.error('Could not fetch user email');
+                    toast.error('Could not fetch user profile information');
                     return;
                   }
 
-                  // Insert feedback with email
+                  // Insert feedback with profile information, but no redundant user_id
                   const { error } = await supabase.from('user_feedback').insert({
-                    user_id: user.id,
+                    profile_id: profile.id,
                     note: note.trim(),
                     email: profile.email,
+                    user_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || null,
+                    user_prn: profile.prn || null
                   });
 
                   if (error) {

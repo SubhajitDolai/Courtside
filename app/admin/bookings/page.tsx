@@ -51,6 +51,8 @@ interface Booking {
   status: string;
   created_at: string;
   seat_number: number;
+  checked_in_at: string | null;
+  checked_out_at: string | null;
   profiles: Profile;
   sports: Sport;
   slots: Slot;
@@ -79,7 +81,7 @@ export default function AdminBookingsPage() {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
-      id, booking_date, status, created_at, seat_number,
+      id, booking_date, status, created_at, seat_number, checked_in_at, checked_out_at,
       profiles ( first_name, last_name, prn, gender, user_type ),
       sports ( name ),
       slots ( start_time, end_time )
@@ -108,6 +110,31 @@ export default function AdminBookingsPage() {
     setPage(1)
   }, [search])
 
+  // Helper function to get current IST timestamp
+  const getCurrentISTTimestamp = () => {
+    return new Date().toISOString()
+  }
+
+  // Helper function to format timestamp in IST
+  const formatISTTimestamp = (timestamp: string | null) => {
+    if (!timestamp) return '-'
+
+    try {
+      return new Date(timestamp).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      })
+    } catch (error) {
+      console.error('Error formatting timestamp:', error)
+      return '-'
+    }
+  }
+
   const handleStatusChange = async () => {
     if (!confirmId) return
     setLoading(true)
@@ -115,20 +142,60 @@ export default function AdminBookingsPage() {
     if (!booking) return toast.error('Booking not found')
 
     let newStatus = booking.status
-
-    if (actionType === 'check-in') {
-      newStatus = booking.status === 'booked' ? 'checked-in' : 'booked'
-    } else if (actionType === 'check-out') {
-      newStatus = booking.status === 'checked-in' ? 'checked-out' : 'checked-in'
+    const now = getCurrentISTTimestamp()
+    let updateData: {
+      status: string;
+      checked_in_at?: string | null;
+      checked_out_at?: string | null
+    } = {
+      status: newStatus
     }
 
-    const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', confirmId)
+    if (actionType === 'check-in') {
+      if (booking.status === 'checked-in') {
+        // Revert to booked, clear check-in time
+        newStatus = 'booked'
+        updateData = {
+          status: newStatus,
+          checked_in_at: null
+        }
+      } else {
+        // Set to checked-in with current time
+        newStatus = 'checked-in'
+        updateData = {
+          status: newStatus,
+          checked_in_at: now
+        }
+      }
+    } else if (actionType === 'check-out') {
+      if (booking.status === 'checked-out') {
+        // Revert to checked-in, clear check-out time
+        newStatus = 'checked-in'
+        updateData = {
+          status: newStatus,
+          checked_out_at: null
+        }
+      } else {
+        // Set to checked-out with current time
+        newStatus = 'checked-out'
+        updateData = {
+          status: newStatus,
+          checked_out_at: now
+        }
+      }
+    }
+
+    const { error } = await supabase
+      .from('bookings')
+      .update(updateData)
+      .eq('id', confirmId)
 
     if (!error) {
       toast.success(`Status updated to "${newStatus}"`)
       // No need to manually update state - Realtime will handle it
     } else {
-      toast.error('Failed to update status')
+      toast.error(`Failed to update status: ${error.message}`) // Use error message here
+      console.error('Error updating booking status:', error) // Log the error object
     }
 
     setLoading(false)
@@ -182,7 +249,9 @@ export default function AdminBookingsPage() {
       st12.includes(query) ||
       et12.includes(query) ||
       (b.booking_date?.toLowerCase() || '').includes(query) ||
-      (b.seat_number?.toString().toLowerCase() || '').includes(query)
+      (b.seat_number?.toString().toLowerCase() || '').includes(query) ||
+      (b.checked_in_at ? formatISTTimestamp(b.checked_in_at).toLowerCase().includes(query) : false) ||
+      (b.checked_out_at ? formatISTTimestamp(b.checked_out_at).toLowerCase().includes(query) : false)
     )
 
     const matchesGender = !genderFilter || gender === genderFilter.toLowerCase()
@@ -277,6 +346,8 @@ export default function AdminBookingsPage() {
                     <th className="p-3 text-left">Slot</th>
                     <th className="p-3 text-left">Date</th>
                     <th className="p-3 text-left">Booked At</th>
+                    <th className="p-3 text-left">Check-in Time</th>
+                    <th className="p-3 text-left">Check-out Time</th>
                     <th className="p-3 text-left">Spot #</th>
                     <th className="p-3 text-left">Status</th>
                     <th className="p-3 text-left">Actions</th>
@@ -319,6 +390,8 @@ export default function AdminBookingsPage() {
                             hour12: true,
                           }) : ''}
                         </td>
+                        <td className="p-3 whitespace-nowrap">{formatISTTimestamp(b.checked_in_at)}</td>
+                        <td className="p-3 whitespace-nowrap">{formatISTTimestamp(b.checked_out_at)}</td>
                         <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
                         <td className="p-3 whitespace-nowrap">
                           <Badge variant="outline" className={
@@ -346,7 +419,7 @@ export default function AdminBookingsPage() {
                   })}
                   {!filteredBookings.length && (
                     <tr>
-                      <td colSpan={12} className="p-4 text-center text-muted-foreground">No bookings found.</td>
+                      <td colSpan={14} className="p-4 text-center text-muted-foreground">No bookings found.</td>
                     </tr>
                   )}
                 </tbody>
