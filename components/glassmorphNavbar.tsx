@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, User, X, Calendar, Trophy, Mail, BarChart3, ScrollText, FileText, Info } from "lucide-react";
+import { ChevronDown, LogOut, Menu, User, X, Calendar, Trophy, Mail, BarChart3, ScrollText, FileText, Info, Bot } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,15 +50,14 @@ export const navigationItems = [
       { title: "Dashboard", href: "/dashboard", icon: BarChart3 },
     ] 
   },
-  // { 
-  //   title: "Facilities", 
-  //   category: "main",
-  //   icon: Building,
-  //   items: [
-  //     { title: "Venues", href: "/venues", icon: MapPin },
-  //     { title: "Gallery", href: "/gallery", icon: ImageIcon },
-  //   ] 
-  // },
+  { 
+    title: "AI Assistant", 
+    category: "main",
+    icon: Bot,
+    items: [
+      { title: "Chat with AI", href: "/assistant", icon: Bot },
+    ] 
+  },
   { 
     title: "Guidelines", 
     category: "main",
@@ -255,7 +254,7 @@ export default function GlassmorphNavbar() {
                         {category.title}
                       </NavigationMenuTrigger>
                       <NavigationMenuContent className="bg-background/80 backdrop-blur-lg border border-border/40 shadow-md rounded-md">
-                        <ul className="grid w-[200px] gap-3 p-4">
+                        <ul className="grid w-[200px] gap-3 p-4 md:w-[400px] md:grid-cols-1">
                           {category.items.map((item) => (
                             <li key={item.href}>
                               <NavigationMenuLink asChild>
