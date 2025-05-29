@@ -4,6 +4,7 @@ import { useChat } from '@ai-sdk/react'
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import ReactMarkdown from 'react-markdown'
 import {
   Loader,
   Send,
@@ -17,9 +18,24 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function AiAssistant() {
+interface AssistantData {
+  sports: any[]
+  slots: any[]
+  sportsWithSlots: any[]
+  todayBookings: number
+  availableSports: number
+}
+
+interface AiAssistantProps {
+  initialData: AssistantData
+}
+
+export function AiAssistant({ initialData }: AiAssistantProps) {
   const { messages, input, handleInputChange, handleSubmit, status, reload, setMessages, append } = useChat({
     api: '/api/chat',
+    body: {
+      sportsData: initialData
+    }
   })
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
@@ -57,9 +73,9 @@ export function AiAssistant() {
 
   const quickSuggestions = [
     "What sports are available today?",
-    "Show me badminton slots for tomorrow",
+    "Show me badminton slots for today",
     "How many bookings are there today?",
-    "I want to book a tennis court",
+    "I want to book a badminton court",
     "What are the swimming pool timings?",
     "Help me book a slot for this weekend"
   ]
@@ -210,12 +226,43 @@ export function AiAssistant() {
                       )}
                     >
                       <div className={cn(
-                        'leading-relaxed whitespace-pre-wrap text-sm',
+                        'leading-relaxed text-sm',
                         message.role === 'user' 
                           ? 'text-white dark:text-neutral-900' 
                           : 'text-neutral-900 dark:text-neutral-100'
                       )}>
-                        {message.content}
+                        {message.role === 'assistant' ? (
+                          <ReactMarkdown
+                            components={{
+                              a: ({ href, children }) => (
+                                <a 
+                                  href={href} 
+                                  className="text-primary hover:text-primary/80 underline font-medium transition-colors duration-200"
+                                  target={href?.startsWith('http') ? '_blank' : '_self'}
+                                  rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                >
+                                  {children}
+                                </a>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-foreground">{children}</strong>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>
+                              ),
+                              li: ({ children }) => (
+                                <li className="text-sm">{children}</li>
+                              ),
+                              p: ({ children }) => (
+                                <p className="mb-2 last:mb-0">{children}</p>
+                              ),
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        ) : (
+                          <div className="whitespace-pre-wrap">{message.content}</div>
+                        )}
                       </div>
 
                       {/* Copy button for assistant messages */}
