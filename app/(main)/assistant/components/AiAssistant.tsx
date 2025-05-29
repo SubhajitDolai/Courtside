@@ -19,11 +19,19 @@ import {
 import { cn } from '@/lib/utils'
 
 interface AssistantData {
-  sports: any[]
-  slots: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sportsWithSlots: any[]
-  todayBookings: number
-  availableSports: number
+  facilityStats: {
+    totalSports: number
+    totalSlots: number
+    todayBookings: number
+    currentDate: string
+  }
+  currentUser: {
+    user_type: string
+    gender: string
+  } | null
+  lastUpdated: string
 }
 
 interface AiAssistantProps {
@@ -31,7 +39,7 @@ interface AiAssistantProps {
 }
 
 export function AiAssistant({ initialData }: AiAssistantProps) {
-  const { messages, input, handleInputChange, handleSubmit, status, reload, setMessages, append } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setMessages, append } = useChat({
     api: '/api/chat',
     body: {
       sportsData: initialData
@@ -72,12 +80,12 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
   }
 
   const quickSuggestions = [
-    "What sports are available today?",
-    "Show me badminton slots for today",
-    "How many bookings are there today?",
-    "I want to book a badminton court",
-    "What are the swimming pool timings?",
-    "Help me book a slot for this weekend"
+    "What sports are available?",
+    "Book a court at 3 PM",
+    "Show facility status",
+    "Find available slots",
+    "Help with swimming rules",
+    "What's popular today?"
   ]
 
   const handleSuggestionClick = async (suggestion: string) => {
@@ -110,7 +118,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
   return (
     <div className="h-full flex flex-col max-w-5xl mx-auto">
       {/* Messages Area */}
-      <div 
+      <div
         className="flex-1 overflow-y-auto px-4 py-6"
         style={{
           scrollbarWidth: 'thin',
@@ -148,11 +156,11 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                     <Button
                       key={index}
                       variant="outline"
-                      className="text-left justify-start h-auto py-4 px-5 text-sm hover:bg-primary/5 hover:border-primary/30 transition-all duration-200"
+                      className="text-left justify-start h-auto py-3 px-4 text-sm hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 min-h-[3rem] whitespace-normal"
                       onClick={() => handleSuggestionClick(suggestion)}
                     >
-                      <MessageSquare className="w-4 h-4 mr-3 text-primary flex-shrink-0" />
-                      <span>{suggestion}</span>
+                      <MessageSquare className="w-4 h-4 mr-3 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="leading-tight">{suggestion}</span>
                     </Button>
                   ))}
                 </div>
@@ -227,36 +235,81 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                     >
                       <div className={cn(
                         'leading-relaxed text-sm',
-                        message.role === 'user' 
-                          ? 'text-white dark:text-neutral-900' 
+                        message.role === 'user'
+                          ? 'text-white dark:text-neutral-900'
                           : 'text-neutral-900 dark:text-neutral-100'
                       )}>
                         {message.role === 'assistant' ? (
                           <ReactMarkdown
                             components={{
-                              a: ({ href, children }) => (
-                                <a 
-                                  href={href} 
-                                  className="text-primary hover:text-primary/80 underline font-medium transition-colors duration-200"
-                                  target={href?.startsWith('http') ? '_blank' : '_self'}
-                                  rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                >
-                                  {children}
-                                </a>
-                              ),
+                              a: ({ href, children, ...props }) => {
+                                const isExternal = href?.startsWith('http')
+                                const isInternal = href?.startsWith('/')
+
+                                return (
+                                  <a
+                                    href={href}
+                                    className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline font-semibold transition-all duration-200 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 px-1 py-0.5 rounded"
+                                    target={isExternal ? '_blank' : '_self'}
+                                    rel={isExternal ? 'noopener noreferrer' : undefined}
+                                    onClick={(e) => {
+                                      if (isInternal) {
+                                        e.preventDefault()
+                                        if (href) window.location.href = href
+                                      }
+                                    }}
+                                    {...props}
+                                  >
+                                    {children}
+                                    {isExternal && <span className="text-xs">↗</span>}
+                                  </a>
+                                )
+                              },
                               strong: ({ children }) => (
-                                <strong className="font-semibold text-foreground">{children}</strong>
+                                <strong className="font-bold text-foreground bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">{children}</strong>
                               ),
                               ul: ({ children }) => (
-                                <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>
+                                <ul className="list-none space-y-2 my-3 ml-0">{children}</ul>
                               ),
                               li: ({ children }) => (
-                                <li className="text-sm">{children}</li>
+                                <li className="flex items-start gap-2 text-sm leading-relaxed">
+                                  <span className="text-primary mt-1 font-bold">•</span>
+                                  <span className="flex-1">{children}</span>
+                                </li>
                               ),
                               p: ({ children }) => (
-                                <p className="mb-2 last:mb-0">{children}</p>
+                                <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>
+                              ),
+                              h1: ({ children }) => (
+                                <h1 className="text-lg font-bold mb-3 text-primary border-b border-primary/20 pb-1">{children}</h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className="text-base font-semibold mb-2 text-foreground">{children}</h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className="text-sm font-semibold mb-1 text-muted-foreground uppercase tracking-wide">{children}</h3>
+                              ),
+                              code: ({ children, className }) => {
+                                const isInline = !className
+                                return isInline ? (
+                                  <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-sm font-mono font-semibold">
+                                    {children}
+                                  </code>
+                                ) : (
+                                  <code className={`block bg-muted p-3 rounded-lg text-sm font-mono overflow-x-auto border-l-4 border-primary`}>
+                                    {children}
+                                  </code>
+                                )
+                              },
+                              blockquote: ({ children }) => (
+                                <blockquote className="border-l-4 border-primary bg-primary/5 pl-4 py-2 my-3 italic rounded-r">
+                                  {children}
+                                </blockquote>
                               ),
                             }}
+                            allowedElements={undefined}
+                            disallowedElements={['script', 'iframe', 'object', 'embed', 'form']}
+                            skipHtml={false}
                           >
                             {message.content}
                           </ReactMarkdown>
