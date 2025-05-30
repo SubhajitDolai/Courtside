@@ -389,6 +389,13 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                   (status === 'submitted' || status === 'streaming') && "pl-10"
                 )}
                 autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                type="text"
+                inputMode="text"
+                name="message"
+                id="chat-input"
                 onBlur={() => {
                   // Prevent losing focus when not intended
                   if (status === 'ready') {

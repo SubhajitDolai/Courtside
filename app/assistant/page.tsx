@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import { AiAssistant } from './components/AiAssistant'
 import { createClient } from '@/utils/supabase/server'
+import { ArrowLeft } from 'lucide-react'
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
@@ -107,8 +109,23 @@ export default async function AssistantPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#fbfbfa] dark:bg-[#191919]">
-      {/* Spacer for glassmorphic navbar */}
-      <div className="h-23 md:h-23 flex-shrink-0" />
+      {/* Back Button Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border/10 bg-background/80 backdrop-blur-md">
+        <Link 
+          href="/" 
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group"
+        >
+          <div className="w-8 h-8 rounded-full bg-muted/50 group-hover:bg-muted flex items-center justify-center transition-colors duration-200">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          <span className="font-medium">Home</span>
+        </Link>
+        
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span className="text-sm text-muted-foreground">AI Assistant</span>
+        </div>
+      </div>
 
       {/* Chat Container */}
       <div className="flex-1 overflow-hidden">
