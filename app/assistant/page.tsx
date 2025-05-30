@@ -109,21 +109,26 @@ export default async function AssistantPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#fbfbfa] dark:bg-[#191919]">
-      {/* Back Button Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/10 bg-background/80 backdrop-blur-md">
+            {/* Enhanced Sticky Navigation */}
+      <div className="sticky top-0 z-50 flex items-center justify-between p-4 border-b border-border/10 bg-background/80 backdrop-blur-xl shadow-sm">
         <Link 
           href="/" 
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group"
+          className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-all duration-200 group"
         >
-          <div className="w-8 h-8 rounded-full bg-muted/50 group-hover:bg-muted flex items-center justify-center transition-colors duration-200">
-            <ArrowLeft className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 group-hover:from-primary/20 group-hover:to-primary/10 flex items-center justify-center transition-all duration-200 group-hover:scale-105 border border-border/20">
+            <ArrowLeft className="w-4 h-4 text-primary" />
           </div>
-          <span className="font-medium">Home</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight">Courtside</span>
+            <span className="text-xs text-muted-foreground/70">Back to Home</span>
+          </div>
         </Link>
         
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="text-sm text-muted-foreground">AI Assistant</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-sm shadow-green-500/50"></div>
+            <span className="text-xs font-medium text-green-700 dark:text-green-400">Live Assistant</span>
+          </div>
         </div>
       </div>
 

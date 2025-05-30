@@ -1,4 +1,3 @@
-
 import { ArrowRight, Loader } from 'lucide-react';
 import { GlowEffect } from './motion-primitives/glow-effect';
 import { useRouter } from 'next/navigation';
@@ -25,17 +24,21 @@ export function GlowEffectButton() {
         duration={3}
         scale={0.9}
       />
-      <button className='relative inline-flex items-center gap-1 rounded-md bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-50 outline outline-[#fff2f21f]' onClick={handleClick}>
+      <button 
+        className='relative inline-flex items-center gap-1 rounded-md bg-zinc-950 px-2.5 py-1.5 text-sm text-zinc-50 outline outline-[#fff2f21f] min-w-[110px] h-[36px] justify-center' 
+        onClick={handleClick}
+        disabled={isLoading}
+      >
         {isLoading ? (
-        <>
-          <Loader className="mr-2 h-4 w-4 animate-spin" />
-          Loading...
-        </>
-      ) : (
-        <>
-          Courtside AI <ArrowRight className='h4 w-4' />
-        </>
-      )}
+          <>
+            <Loader className="h-4 w-4 animate-spin" />
+            Launching AI... 
+          </>
+        ) : (
+          <>
+            Courtside AI <ArrowRight className='h-4 w-4' />
+          </>
+        )}
       </button>
     </div>
   );

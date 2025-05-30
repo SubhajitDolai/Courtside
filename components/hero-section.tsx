@@ -67,7 +67,7 @@ export default function HeroSection() {
                             <Image
                                 src="/mit.webp"
                                 alt="background"
-                                className="absolute inset-x-0 top-56 -z-20 lg:top-32 dark:block w-full h-auto object-cover 
+                                className="absolute inset-x-0 top-56 -z-20 lg:top-32 dark:block w-full h-auto object-cover scale-[2] sm:scale-100
                                 [mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]
                                 [--webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]"
                                 width="3276"

@@ -68,8 +68,8 @@ export default function SeatsPage() {
   // ✅ Terms & Conditions checkbox
   const [agreed, setAgreed] = useState(false)
 
-  // ✅ Slot details (start time, end time, gender)
-  const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string } | null>(null)
+  // ✅ Slot details (start time, end time, gender, allowedUserType)
+  const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string; allowedUserType: string } | null>(null)
 
   // ✅ Fetch current seat bookings with Realtime
   const fetchBookings = useCallback(async () => {
@@ -125,7 +125,7 @@ export default function SeatsPage() {
     // ✅ Fetch slot's gender rule & timings
     const { data: slot } = await supabase
       .from('slots')
-      .select('gender, start_time, end_time')
+      .select('gender, start_time, end_time, allowed_user_type')
       .eq('id', slotId)
       .single()
     if (!slot) return router.push(`/sports/${sportId}/slots`)
@@ -136,7 +136,12 @@ export default function SeatsPage() {
       return router.push(`/sports/${sportId}/slots`)
     }
 
-    setSlotDetails(slot) // ✅ Save slot details
+    setSlotDetails({
+      start_time: slot.start_time,
+      end_time: slot.end_time,
+      gender: slot.gender,
+      allowedUserType: slot.allowed_user_type
+    }) // ✅ Save slot details
 
     // ✅ Load seat limit
     const { data: sport } = await supabase
@@ -333,27 +338,34 @@ export default function SeatsPage() {
       )}
 
       <div className="w-full text-center mb-8">
-        <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
           Select Your Spot
         </h1>
 
         {slotDetails && (
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-base text-muted-foreground mt-3">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base text-muted-foreground mt-3">
             <div className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
               <span className="font-medium">{sportName}</span>
             </div>
-            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="text-gray-300">•</div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               <span className="font-medium">{formatTime12hr(slotDetails.start_time)} – {formatTime12hr(slotDetails.end_time)}</span>
             </div>
-            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="text-gray-300">•</div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="font-medium capitalize">{slotDetails.gender}</span>
             </div>
-            <div className="hidden sm:block text-gray-300">•</div>
+            <div className="text-gray-300">•</div>
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="h-4 w-4">
+                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+              </svg>
+              <span className="font-medium capitalize">{slotDetails.allowedUserType}</span>
+            </div>
+            <div className="text-gray-300">•</div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span className="font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>

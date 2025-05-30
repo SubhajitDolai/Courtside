@@ -19,14 +19,13 @@ export default function BookNowButton() {
 
   return (
     <Button
-      size="lg"
-      className="rounded-xl px-5 text-base"
+      className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm min-w-[110px] h-[36px]"
       onClick={handleClick}
       disabled={isLoading}
     >
       {isLoading ? (
         <>
-          <Loader className="mr-2 h-4 w-4 animate-spin" />
+          <Loader className="h-4 w-4 animate-spin" />
           Loading...
         </>
       ) : (
