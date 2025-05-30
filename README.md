@@ -37,6 +37,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 📋 **Booking History** - View past and current bookings
 - ❌ **Easy Cancellation** - Cancel bookings with appropriate restrictions
 - 📱 **Modern UI/UX** - Responsive design with dark/light mode
+- 🧠 **AI Assistant** - Chat with Courtside AI for smart recommendations
 
 ### For Administrators
 - 🔑 **Role-based Access** - Admin panel access via profile role setting
@@ -45,6 +46,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🗄️ **Historical Data** - Access to booking history with archived data
 - ⚙️ **Facility Management** - Control sports and slot configurations
 - 📄 **Pagination** - Efficiently navigate through booking records
+- 🔄 **Daily Reset** - Automatic clearing of expired bookings at midnight
 
 ## 🛠️ Tech Stack
 
@@ -64,33 +66,44 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | Animations | Motion + tw-animate-css |
 | Theme | next-themes (dark/light mode) |
 | Deployment | Vercel (Edge Functions) |
+| AI Integration | Vercel AI SDK (Google Gemini) |
 
 ## 🚀 Performance Optimizations
 
 - **Database Indexing**: Optimized queries with strategic indexes for 25,000+ users
 - **Supabase Realtime**: Replaced polling with efficient websocket connections
 - **Connection Pooling**: Automatic connection management for scalability
+- **Enhanced Time Validation**: Bulletproof server-side validation for bookings
 
 ## 🗂️ Project Structure
 
 ```
 /app
-  /(auth)              # Auth pages
-    /login                # login logic
-    /signup               # signup logic
-    /forgot               # forgot-password logic
-    /reset                # reset-password logic
-  /(main)              # User pages
-    /sports/[id]/slots    # Dynamic slot pages
-    /my-bookings          # User booking page
-    /profile              # User profile page
+  /(auth)              # Authentication pages
+    /login                # Login functionality
+    /signup               # Signup functionality
+    /forgot-password      # Forgot password flow
+    /reset-password       # Reset password flow
+    /onboarding           # First-time user setup
+    /set-password         # Set password for new users
+  /(main)              # User-facing pages
+    /sports/[id]/slots    # Sports slot booking
+    /my-bookings          # Booking history and current bookings
+    /profile              # User profile management
+    /dashboard            # Personalized user dashboard
+    /rules                # Sports facility rules
+    /terms                # Terms and conditions
   /admin               # Admin dashboard
-    /bookings             # Bookings page
-    /slots                # Slots page
-    /sports               # Sports page
+    /bookings             # Manage bookings
+    /slots                # Manage sports slots
+    /sports               # Manage sports facilities
+  /assistant           # AI assistant for recommendations
+  /banned              # Restricted access page
 /components            # Reusable UI components
-/utils/supabase        # Supabase client setup
+/utils/supabase        # Supabase client and utilities
 /components/ui         # Shadcn UI wrappers
+/hooks                 # Custom React hooks
+/lib                   # General utility functions
 ```
 
 ## 🧮 Database Schema
@@ -136,6 +149,11 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - Slots are filtered based on gender and user type compatibility
 - Cancellation is allowed up to 30 minutes before slot start time
 - System automatically filters out expired slots
+
+### AI Assistant
+- Provides smart recommendations for booking slots
+- Validates time and slot availability using server-side checks
+- Ensures security by never exposing raw database structures
 
 ### Authentication
 - Implements Supabase Auth (email/password)
@@ -184,13 +202,6 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 5. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
-<!-- 
-## 📸 Screenshots
-
-<div align="center">
-  <img src="https://via.placeholder.com/400x200?text=Booking+Interface" alt="Booking Interface" width="45%" />
-  <img src="https://via.placeholder.com/400x200?text=Admin+Dashboard" alt="Admin Dashboard" width="45%" />
-</div> -->
 
 ## 🤝 Contributing
 
