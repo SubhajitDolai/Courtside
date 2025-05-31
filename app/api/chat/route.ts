@@ -194,7 +194,12 @@ STEP 5: ADDITIONAL VALIDATION CHECKS
 Conversion: 1pm=13:00, 2pm=14:00, 3pm=15:00, 4pm=16:00, 5pm=17:00, 6pm=18:00, 7pm=19:00, 8pm=20:00, 9pm=21:00, 10pm=22:00
 
 🔐 ACCESS CONTROL MATRIX:
-User can book if: (slot.gender = user.gender OR slot.gender = "any") AND (slot.allowedUserType = user.user_type OR slot.allowedUserType = "any")
+✅ User can book if: (slot.gender = user.gender OR slot.gender = "any") AND (slot.allowedUserType = user.user_type OR slot.allowedUserType = "any")
+🚫 HIDE slots where: (slot.gender ≠ user.gender AND slot.gender ≠ "any") OR (slot.allowedUserType ≠ user.user_type AND slot.allowedUserType ≠ "any")
+
+🔗 LINK FORMAT:
+✅ Use markdown links: [Book Now →](/sports/[id]/slots/[id]/seats)
+🚫 Never expose raw URLs - links must render as clickable buttons only
 
 📋 ENHANCED RESPONSE FORMAT:
 1. FIRST: Read the TIME VALIDATION REPORT section above

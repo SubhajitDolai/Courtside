@@ -191,6 +191,34 @@ export default function SeatsPage() {
     // Store the current date by using "@/lib/date.ts" which has the function in order to set the 'booking_date'
     const today = getTodayDateInIST()
 
+    // ✅ NEW: Check if user already has ANY booking for this sport today (regardless of slot)
+    // const { data: existingSportBooking } = await supabase
+    //   .from('bookings')
+    //   .select('id, slot_id')
+    //   .eq('user_id', user.id)
+    //   .eq('sport_id', sportId) // Same sport
+    //   .eq('booking_date', today)
+    //   .in('status', ['booked', 'checked-in', 'checked-out'])
+    //   .maybeSingle()
+
+    // if (existingSportBooking) {
+    //   // ✅ Get slot details separately to avoid join complexity
+    //   const { data: slotData } = await supabase
+    //     .from('slots')
+    //     .select('start_time, end_time')
+    //     .eq('id', existingSportBooking.slot_id)
+    //     .single()
+
+    //   const timeInfo = slotData ?
+    //     `${formatTime12hr(slotData.start_time)} - ${formatTime12hr(slotData.end_time)}` :
+    //     'Unknown time'
+
+    //   // Replace the existing toast message in the existingSportBooking check:
+    //   toast.error(`Booking limit reached! You've already secured your ${sportName} spot today (${timeInfo}). Try exploring other sports or come back tomorrow for another session! 🎯`)
+    //   setIsBooking(false)
+    //   return
+    // }
+
     // ✅ Prevent multiple booking by user
     const { data: existing } = await supabase
       .from('bookings')
@@ -361,7 +389,7 @@ export default function SeatsPage() {
             <div className="text-gray-300">•</div>
             <div className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="h-4 w-4">
-                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
               </svg>
               <span className="font-medium capitalize">{slotDetails.allowedUserType}</span>
             </div>
