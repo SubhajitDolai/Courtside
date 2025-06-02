@@ -1,6 +1,6 @@
-import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { ProgressiveBlur } from '@/components/ui/progressive-blur'
 import Image from 'next/image'
+import { InfiniteSlider } from './motion-primitives/infinite-slider'
 
 export default function LogoCloud() {
     return (
@@ -8,18 +8,18 @@ export default function LogoCloud() {
             <div className="group relative m-auto max-w-7xl px-6">
                 <div className="flex flex-col items-center md:flex-row">
                     <div className="md:max-w-44 md:border-r md:pr-6">
-                        <p className="text-end text-sm">Available games</p>
+                        <p className="text-end text-sm">Sports & Games</p>
                     </div>
-                    <div className="relative py-6 md:w-[calc(100%-11rem)]">
+                    <div className="relative py-10 md:w-[calc(100%-11rem)]">
                         <InfiniteSlider
-                            speedOnHover={40}
+                            speedOnHover={10}
                             speed={40}
-                            gap={112}>
+                            gap={120}>
                             <div className="flex">
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/badminton.webp"
-                                    alt="Badminton Logo"
+                                    src="/sports_png/swimming.webp"
+                                    alt="Swimming Logo"
                                     height={20}
                                     width={40}
                                 />
@@ -27,8 +27,8 @@ export default function LogoCloud() {
                             <div className="flex">
                                 <Image
                                     className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/swimming.webp"
-                                    alt="Swimming Logo"
+                                    src="/sports_png/badminton.webp"
+                                    alt="Badminton Logo"
                                     height={20}
                                     width={40}
                                 />
@@ -47,24 +47,6 @@ export default function LogoCloud() {
                                     className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/table-tennis.webp"
                                     alt="Table Tennis Logo"
-                                    height={20}
-                                    width={40}
-                                />
-                            </div>
-                            <div className="flex">
-                                <Image
-                                    className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/football.webp"
-                                    alt="Football Logo"
-                                    height={20}
-                                    width={40}
-                                />
-                            </div>
-                            <div className="flex">
-                                <Image
-                                    className="mx-auto h-10 w-auto dark:invert"
-                                    src="/sports_png/cricket.webp"
-                                    alt="Cricket Logo"
                                     height={20}
                                     width={40}
                                 />
@@ -92,6 +74,24 @@ export default function LogoCloud() {
                                     className="mx-auto h-10 w-auto dark:invert"
                                     src="/sports_png/chess.webp"
                                     alt="Chess Logo"
+                                    height={20}
+                                    width={40}
+                                />
+                            </div>
+                            <div className="flex">
+                                <Image
+                                    className="mx-auto h-10 w-auto dark:invert"
+                                    src="/sports_png/football.webp"
+                                    alt="Football Logo"
+                                    height={20}
+                                    width={40}
+                                />
+                            </div>
+                            <div className="flex">
+                                <Image
+                                    className="mx-auto h-10 w-auto dark:invert"
+                                    src="/sports_png/cricket.webp"
+                                    alt="Cricket Logo"
                                     height={20}
                                     width={40}
                                 />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown } from "lucide-react";
+import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, Database, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useTransition, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,10 +30,34 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
+// Categorized navigation items
 export const navigationItems = [
-  { title: "Sports", href: "/admin/sports", icon: Trophy },
-  { title: "Slots", href: "/admin/slots", icon: Clock },
-  { title: "Bookings", href: "/admin/bookings", icon: ClipboardList },
+  {
+    title: "Management",
+    category: "management",
+    icon: Settings,
+    items: [
+      { title: "Sports", href: "/admin/sports", icon: Trophy },
+      { title: "Slots", href: "/admin/slots", icon: Clock },
+    ]
+  },
+  {
+    title: "Bookings",
+    category: "bookings",
+    icon: Database,
+    items: [
+      { title: "Active Bookings", href: "/admin/bookings", icon: ClipboardList },
+      { title: "Bookings History", href: "/admin/bookings-history", icon: History },
+    ]
+  },
+  {
+    title: "User Feedback",
+    category: "feedback",
+    icon: Database,
+    items: [
+      { title: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+    ]
+  },
 ];
 
 export default function AdminNavbar() {
@@ -148,9 +172,9 @@ export default function AdminNavbar() {
   // Calculate user display info from the useCurrentUser hook - consistent with GlassmorphNavbar
   const userName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : '';
   const userDisplayName = loading ? "Loading..." : userName || (user?.email?.split('@')[0] || "");
-  
+
   // Improved user initials logic to match GlassmorphNavbar
-  const userInitials = !loading && user 
+  const userInitials = !loading && user
     ? ((user.first_name?.[0] || '') + (user.last_name?.[0] || '')).toUpperCase() || (user.email?.[0] || '').toUpperCase()
     : "";
 
@@ -160,15 +184,12 @@ export default function AdminNavbar() {
     if (href === "/admin") {
       return pathname === "/admin" || pathname === "/admin/";
     }
-    
-    // For other routes
-    return pathname.startsWith(href);
+
+    // For other routes, use exact match or proper path segments
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   if (!mounted) return null;
-
-  // Check if any nav item is active to determine the active state of the dropdown
-  const anyMenuItemActive = navigationItems.some(item => isActive(item.href));
 
   return (
     <>
@@ -177,8 +198,8 @@ export default function AdminNavbar() {
         <div className="fixed top-0 left-0 z-[9999] h-[3px] w-full bg-transparent">
           <div
             className={`h-full transition-all duration-300 ease-out ${resolvedTheme === "dark"
-                ? "bg-white shadow-[0_0_12px_2px_rgba(255,255,255,0.6)]"
-                : "bg-black shadow-[0_0_12px_2px_rgba(0,0,0,0.5)]"
+              ? "bg-white shadow-[0_0_12px_2px_rgba(255,255,255,0.6)]"
+              : "bg-black shadow-[0_0_12px_2px_rgba(0,0,0,0.5)]"
               }`}
             style={{ width: `${loadingProgress}%` }}
           />
@@ -203,7 +224,7 @@ export default function AdminNavbar() {
                   alt="Logo"
                   width={100}
                   height={50}
-                  style={{ 
+                  style={{
                     display: "block",
                     width: "auto",
                     height: "auto"
@@ -214,41 +235,45 @@ export default function AdminNavbar() {
             </button>
 
             <div className="hidden md:block">
-              <NavigationMenu>
+              <NavigationMenu viewport={false}>
                 <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger 
-                      className={cn(
-                        anyMenuItemActive ? "text-primary" : ""
-                      )}
-                    >
-                      Admin
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-background/80 backdrop-blur-lg border border-border/40 shadow-md rounded-md">
-                      <ul className="grid w-[200px] gap-3 p-4">
-                        {navigationItems.map((item) => (
-                          <li key={item.href}>
-                            <NavigationMenuLink asChild>
-                              <button
-                                onClick={() => navigateWithLoading(item.href)}
-                                className={cn(
-                                  "block w-full select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                                  isActive(item.href) 
-                                    ? "bg-accent text-accent-foreground" 
-                                    : "text-muted-foreground"
-                                )}
-                              >
-                                <div className="flex items-center gap-2">
-                                  {item.icon && <item.icon className="size-4" />}
-                                  <span className="text-sm font-medium">{item.title}</span>
-                                </div>
-                              </button>
-                            </NavigationMenuLink>
-                          </li>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+                  {navigationItems.map((category) => (
+                    <NavigationMenuItem key={category.title}>
+                      <NavigationMenuTrigger
+                        className={cn(
+                          category.items.some(item => isActive(item.href))
+                            ? "text-primary"
+                            : ""
+                        )}
+                      >
+                        {category.title}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid w-[300px] gap-2">
+                          {category.items.map((item) => (
+                            <li key={item.href}>
+                              <NavigationMenuLink asChild>
+                                <button
+                                  onClick={() => navigateWithLoading(item.href)}
+                                  className={cn(
+                                    "block w-full select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                    isActive(item.href)
+                                      ? "bg-accent text-accent-foreground"
+                                      : "text-muted-foreground"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {item.icon && <item.icon className="size-4" />}
+                                    <span className="text-sm font-medium">{item.title}</span>
+                                  </div>
+                                </button>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  ))}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
@@ -257,7 +282,7 @@ export default function AdminNavbar() {
           <div className="flex gap-3 flex-row items-center">
             <div className="hidden md:flex items-center gap-3">
               <ModeToggle />
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-1 h-9 w-9 rounded-full">
@@ -336,58 +361,60 @@ export default function AdminNavbar() {
                   </div>
                 </div>
 
-                {/* Mobile Admin Menu */}
-                <div className="py-1">
-                  <button
-                    className={cn(
-                      "flex w-full items-center justify-between px-4 py-2",
-                      "text-left font-medium",
-                      activeCategory === "Admin" ? "bg-accent text-accent-foreground" : ""
-                    )}
-                    onClick={() => setActiveCategory(
-                      activeCategory === "Admin" ? null : "Admin"
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <User className="mr-2 size-4" />
-                      Admin
-                    </div>
-                    <ChevronDown className={cn(
-                      "size-4 transition-transform",
-                      activeCategory === "Admin" ? "rotate-180" : ""
-                    )} />
-                  </button>
-                  
-                  <AnimatePresence>
-                    {activeCategory === "Admin" && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        {navigationItems.map((item) => (
-                          <button
-                            key={item.href}
-                            onClick={() => {
-                              setIsOpen(false);
-                              navigateWithLoading(item.href);
-                            }}
-                            className={cn(
-                              "w-full text-left px-8 py-2 text-sm flex items-center",
-                              isActive(item.href) 
-                                ? "text-primary font-medium" 
-                                : "text-muted-foreground"
-                            )}
-                          >
-                            {item.icon && <item.icon className="mr-2 size-4" />}
-                            {item.title}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {/* Mobile Admin Categories */}
+                {navigationItems.map((category) => (
+                  <div key={category.title} className="py-1">
+                    <button
+                      className={cn(
+                        "flex w-full items-center justify-between px-4 py-2",
+                        "text-left font-medium",
+                        activeCategory === category.title ? "bg-accent text-accent-foreground" : ""
+                      )}
+                      onClick={() => setActiveCategory(
+                        activeCategory === category.title ? null : category.title
+                      )}
+                    >
+                      <div className="flex items-center">
+                        {category.icon && <category.icon className="mr-2 size-4" />}
+                        {category.title}
+                      </div>
+                      <ChevronDown className={cn(
+                        "size-4 transition-transform",
+                        activeCategory === category.title ? "rotate-180" : ""
+                      )} />
+                    </button>
+
+                    <AnimatePresence>
+                      {activeCategory === category.title && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          {category.items.map((item) => (
+                            <button
+                              key={item.href}
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigateWithLoading(item.href);
+                              }}
+                              className={cn(
+                                "w-full text-left px-8 py-2 text-sm flex items-center",
+                                isActive(item.href)
+                                  ? "text-primary font-medium"
+                                  : "text-muted-foreground"
+                              )}
+                            >
+                              {item.icon && <item.icon className="mr-2 size-4" />}
+                              {item.title}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
 
                 <button
                   onClick={() => {

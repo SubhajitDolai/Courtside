@@ -22,7 +22,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - **User-friendly experience** with intuitive booking flows
 - **Real-time availability** updates using Supabase Realtime
 - **Role-based access control** for users and administrators
-- **Smart seat selection** with gender and user-type filtering
+- **Smart spot selection** with gender and user-type filtering
 - **Comprehensive admin dashboard** for facility management
 - **Optimized for scale** to handle 25,000+ concurrent users
 
@@ -31,7 +31,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 ### For Users
 - 🔐 **Secure Authentication** - Sign up & login with Supabase Auth
 - 👤 **Profile Management** - First-time user onboarding flow
-- 🎟️ **Intuitive Booking** - Book sports slots with seat selection
+- 🎟️ **Intuitive Booking** - Book sports slots with spot selection
 - ⚡ **Real-time Updates** - Instant availability updates using Supabase Realtime
 - 🔍 **Smart Filtering** - Bookings filtered by gender and user type
 - 📋 **Booking History** - View past and current bookings
@@ -144,8 +144,8 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 ## 📚 Core Logic
 
 ### Booking System
-- Seat availability is calculated dynamically per slot
-- Unique seat numbers are assigned during booking
+- Spot availability is calculated dynamically per slot
+- Unique spot numbers are assigned during booking
 - Slots are filtered based on gender and user type compatibility
 - Cancellation is allowed up to 30 minutes before slot start time
 - System automatically filters out expired slots

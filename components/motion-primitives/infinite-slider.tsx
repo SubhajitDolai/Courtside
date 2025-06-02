@@ -1,5 +1,4 @@
 'use client';
-
 import { cn } from '@/lib/utils';
 import { useMotionValue, animate, motion } from 'motion/react';
 import { useState, useEffect } from 'react';
@@ -91,11 +90,9 @@ export function InfiniteSlider({
       }
     : {};
 
-  const MotionDiv = motion.create('div');
-
   return (
     <div className={cn('overflow-hidden', className)}>
-      <MotionDiv
+      <motion.div
         className='flex w-max'
         style={{
           ...(direction === 'horizontal'
@@ -109,7 +106,7 @@ export function InfiniteSlider({
       >
         {children}
         {children}
-      </MotionDiv>
+      </motion.div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, ClipboardList, Search, Users, Loader } from 'lucide-react'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 
 // Define types
@@ -270,214 +270,397 @@ export default function AdminBookingsPage() {
   }
 
   return (
-    <div className="pt-30 p-6 min-h-screen bg-muted/40">
-      {/* Rest of your UI component remains the same */}
-      {/* Everything from the Card component down remains unchanged */}
-      <Card>
-        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <CardTitle className="text-2xl font-bold whitespace-nowrap">Manage Bookings</CardTitle>
-          <div className="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:items-center md:justify-end">
-            <Input
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:max-w-sm"
-            />
-
-            <Select value={genderFilter} onValueChange={(val) => setGenderFilter(val === "all" ? "" : val)}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="All Genders" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Genders</SelectItem>
-                {uniqueGenders.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={userTypeFilter} onValueChange={(val) => setUserTypeFilter(val === "all" ? "" : val)}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="All User Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All User Types</SelectItem>
-                {uniqueUserTypes.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={sportFilter} onValueChange={(val) => setSportFilter(val === "all" ? "" : val)}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="All Sports" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sports</SelectItem>
-                {uniqueSports.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-
-        <CardContent className="overflow-x-auto">
-          {loadingBookings && <p className="text-center py-4">Loading bookings...</p>}
-
-          {!loadingBookings && (
-            <div className="min-w-fit">
-              <table className="w-full text-sm border rounded-md">
-                {/* Same table structure as before */}
-                <thead className="bg-muted text-muted-foreground">
-                  <tr>
-                    <th className="p-3 text-left">Booking #</th>
-                    <th className="p-3 text-left">User</th>
-                    <th className="p-3 text-left">PRN/ID</th>
-                    <th className="p-3 text-left">Gender</th>
-                    <th className="p-3 text-left">User Type</th>
-                    <th className="p-3 text-left">Sport</th>
-                    <th className="p-3 text-left">Slot</th>
-                    <th className="p-3 text-left">Date</th>
-                    <th className="p-3 text-left">Booked At</th>
-                    <th className="p-3 text-left">Check-in Time</th>
-                    <th className="p-3 text-left">Check-out Time</th>
-                    <th className="p-3 text-left">Spot #</th>
-                    <th className="p-3 text-left">Status</th>
-                    <th className="p-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBookings.map((b) => {
-                    const now = new Date()
-                    const [eh, em] = (b.slots?.end_time || '00:00').split(':').map(Number)
-                    const slotEnd = new Date()
-                    slotEnd.setHours(eh, em, 0, 0)
-                    const slotOver = now > slotEnd
-
-                    // Disable rules
-                    const disableDelete = slotOver
-                    const disableCheckIn = ['checked-in', 'checked-out', 'booked'].includes(b.status) && slotOver
-                    const disableCheckOut = ['booked', 'checked-out'].includes(b.status) && slotOver
-
-                    return (
-                      <tr key={b.id} className="border-t hover:bg-accent/50 transition-colors">
-                        <td className="p-3 whitespace-nowrap">
-                          <button onClick={() => setShowBookingId(b.id)} className="underline text-primary">
-                            {b.id.slice(0, 6)}...
-                          </button>
-                        </td>
-                        <td className="p-3 whitespace-nowrap">{b.profiles?.first_name} {b.profiles?.last_name}</td>
-                        <td className="p-3 whitespace-nowrap">{b.profiles?.prn || '-'}</td>
-                        <td className="p-3 whitespace-nowrap">{b.profiles?.gender || '-'}</td>
-                        <td className="p-3 whitespace-nowrap">{b.profiles?.user_type || '-'}</td>
-                        <td className="p-3 whitespace-nowrap">{b.sports?.name}</td>
-                        <td className="p-3 whitespace-nowrap">{formatTime12hr(b.slots?.start_time)} – {formatTime12hr(b.slots?.end_time)}</td>
-                        <td className="p-3 whitespace-nowrap">{b.booking_date}</td>
-                        <td className="p-3 whitespace-nowrap">
-                          {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true,
-                          }) : ''}
-                        </td>
-                        <td className="p-3 whitespace-nowrap">{formatISTTimestamp(b.checked_in_at)}</td>
-                        <td className="p-3 whitespace-nowrap">{formatISTTimestamp(b.checked_out_at)}</td>
-                        <td className="p-3 whitespace-nowrap">{b.seat_number}</td>
-                        <td className="p-3 whitespace-nowrap">
-                          <Badge variant="outline" className={
-                            b.status === 'booked' ? 'bg-yellow-200 text-yellow-800' :
-                              b.status === 'checked-in' ? 'bg-green-200 text-green-800' :
-                                b.status === 'checked-out' ? 'bg-gray-200 text-gray-800' :
-                                  ''
-                          }>
-                            {b.status.replace('-', ' ')}
-                          </Badge>
-                        </td>
-                        <td className="p-3 whitespace-nowrap flex gap-4">
-                          <Button size="sm" onClick={() => { setActionType('check-in'); setConfirmId(b.id) }} disabled={loading || disableCheckIn} className={disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''}>
-                            Check-in
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => { setActionType('check-out'); setConfirmId(b.id) }} disabled={loading || disableCheckOut} className={disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''}>
-                            Check-out
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => setDeleteId(b.id)} disabled={disableDelete} className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}>
-                            Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  {!filteredBookings.length && (
-                    <tr>
-                      <td colSpan={14} className="p-4 text-center text-muted-foreground">No bookings found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-              {/* Pagination buttons */}
-              <div className="flex justify-between items-center mt-4">
-                <Button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>Previous</Button>
-                <span>Page {page}</span>
-                <Button onClick={() => setPage((p) => p + 1)} disabled={bookings.length < perPage}>Next</Button>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-green-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-green-950/20">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-8 pt-32">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg">
+                <ClipboardList className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-900 to-neutral-600 dark:from-white dark:to-neutral-300 bg-clip-text text-transparent">
+                  Manage Bookings
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  View and manage current bookings
+                </p>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm rounded-lg border border-white/20 dark:border-neutral-700/20">
+              <Users className="h-4 w-4 text-green-600 dark:text-green-500" />
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                {filteredBookings.length} Active
+              </span>
+            </div>
+          </div>
+        </div>
 
-      {/* All Dialogs remain the same */}
+        {/* Main Content Card */}
+        <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+          <CardHeader className="border-b border-neutral-100 dark:border-neutral-800 bg-gradient-to-r from-white to-neutral-50/50 dark:from-neutral-900 dark:to-neutral-800/50">
+            <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+              <ClipboardList className="h-5 w-5 text-green-600 dark:text-green-500" />
+              Current Bookings
+            </CardTitle>
+
+            {/* Filters */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pt-4">
+              <div className="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:items-center">
+                <div className="relative w-full md:max-w-sm">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                  <Input
+                    placeholder="Search bookings..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-10 border-neutral-200 dark:border-neutral-700 focus:border-green-500 dark:focus:border-green-400"
+                  />
+                </div>
+
+                <Select value={genderFilter} onValueChange={(val) => setGenderFilter(val === "all" ? "" : val)}>
+                  <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All Genders" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Genders</SelectItem>
+                    {uniqueGenders.map((g) => (
+                      <SelectItem key={g} value={g}>
+                        {g}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={userTypeFilter} onValueChange={(val) => setUserTypeFilter(val === "all" ? "" : val)}>
+                  <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All User Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All User Types</SelectItem>
+                    {uniqueUserTypes.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={sportFilter} onValueChange={(val) => setSportFilter(val === "all" ? "" : val)}>
+                  <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All Sports" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sports</SelectItem>
+                    {uniqueSports.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-6">
+            {loadingBookings && (
+              <div className="flex flex-col justify-center items-center py-16">
+                <Loader className="animate-spin text-green-600 dark:text-green-400" />
+                <p className="text-muted-foreground mt-4 font-medium">Loading bookings...</p>
+              </div>
+            )}
+
+            {!loadingBookings && (
+              <div className="overflow-x-auto bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-lg">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Booking #</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">PRN/ID</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Gender</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User Type</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Sport</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Slot</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Date</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Booked At</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Check-in</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Check-out</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Spot #</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Status</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBookings.map((b, index) => {
+                      const now = new Date()
+                      const [eh, em] = (b.slots?.end_time || '00:00').split(':').map(Number)
+                      const slotEnd = new Date()
+                      slotEnd.setHours(eh, em, 0, 0)
+                      const slotOver = now > slotEnd
+
+                      const disableDelete = slotOver
+                      const disableCheckIn = ['checked-in', 'checked-out', 'booked'].includes(b.status) && slotOver
+                      const disableCheckOut = ['booked', 'checked-out'].includes(b.status) && slotOver
+
+                      return (
+                        <tr
+                          key={b.id}
+                          className={`
+                            hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors duration-200
+                            ${index % 2 === 0 ? 'bg-white dark:bg-neutral-900' : 'bg-neutral-50/50 dark:bg-neutral-800/30'}
+                          `}
+                        >
+                          <td className="p-3 whitespace-nowrap">
+                            <button
+                              onClick={() => setShowBookingId(b.id)}
+                              className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 underline hover:no-underline transition-all duration-200 font-medium font-mono text-sm"
+                            >
+                              {b.id.slice(0, 6)}...
+                            </button>
+                          </td>
+                          <td className="p-3 whitespace-nowrap font-medium text-neutral-900 dark:text-white">
+                            {b.profiles?.first_name} {b.profiles?.last_name}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className="font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded">
+                              {b.profiles?.prn || '-'}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap capitalize">{b.profiles?.gender || '-'}</td>
+                          <td className="p-3 whitespace-nowrap capitalize">{b.profiles?.user_type || '-'}</td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className="font-medium bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full text-sm">
+                              {b.sports?.name}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="text-sm">
+                              <span className="font-medium">{formatTime12hr(b.slots?.start_time)}</span>
+                              <span className="text-neutral-400 mx-1">–</span>
+                              <span className="font-medium">{formatTime12hr(b.slots?.end_time)}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 whitespace-nowrap font-medium">{b.booking_date}</td>
+                          <td className="p-3 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
+                            {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            }) : ''}
+                          </td>
+                          <td className="p-3 whitespace-nowrap text-sm">{formatISTTimestamp(b.checked_in_at)}</td>
+                          <td className="p-3 whitespace-nowrap text-sm">{formatISTTimestamp(b.checked_out_at)}</td>
+                          <td className="p-3 whitespace-nowrap">
+                            <Badge variant="outline" className="border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/50 font-mono">
+                              #{b.seat_number}
+                            </Badge>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <Badge
+                              variant="outline"
+                              className={
+                                b.status === 'booked' ?
+                                  'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-300 dark:from-yellow-900/50 dark:to-yellow-800/50 dark:text-yellow-200 dark:border-yellow-700' :
+                                  b.status === 'checked-in' ?
+                                    'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-300 dark:from-green-900/50 dark:to-green-800/50 dark:text-green-200 dark:border-green-700' :
+                                    b.status === 'checked-out' ?
+                                      'bg-gradient-to-r from-neutral-100 to-neutral-200 text-neutral-800 border-neutral-300 dark:from-neutral-800/50 dark:to-neutral-700/50 dark:text-neutral-200 dark:border-neutral-600' :
+                                      'bg-gradient-to-r from-neutral-100 to-neutral-200 text-neutral-800 border-neutral-300 dark:from-neutral-800/50 dark:to-neutral-700/50 dark:text-neutral-200 dark:border-neutral-600'
+                              }
+                            >
+                              {b.status.replace('-', ' ')}
+                            </Badge>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => { setActionType('check-in'); setConfirmId(b.id) }}
+                                disabled={loading || disableCheckIn}
+                                className={`${disableCheckIn ? 'opacity-50 cursor-not-allowed' : ''} bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900`}
+                              >
+                                Check-in
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => { setActionType('check-out'); setConfirmId(b.id) }}
+                                disabled={loading || disableCheckOut}
+                                className={`${disableCheckOut ? 'opacity-50 cursor-not-allowed' : ''} border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800`}
+                              >
+                                Check-out
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setDeleteId(b.id)}
+                                disabled={disableDelete}
+                                className={disableDelete ? 'opacity-50 cursor-not-allowed' : ''}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {!filteredBookings.length && (
+                      <tr>
+                        <td colSpan={14} className="p-8 text-center">
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-2xl flex items-center justify-center">
+                              <Search className="h-8 w-8 text-neutral-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">No bookings found</h3>
+                            <p className="text-muted-foreground">No bookings match your current filters.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td colSpan={14} className='p8 text-center'>
+                        {/* Pagination */}
+                        <div className="flex flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border-t border-neutral-200 dark:border-neutral-600">
+                          <div className="text-sm text-muted-foreground">
+                            Showing <span className="font-medium text-neutral-900 dark:text-white">{filteredBookings.length}</span> bookings
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                              disabled={page === 1}
+                              variant="outline"
+                              size="sm"
+                              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                            >
+                              Previous
+                            </Button>
+                            <span className="text-sm font-medium text-neutral-900 dark:text-white px-3">Page {page}</span>
+                            <Button
+                              onClick={() => setPage((p) => p + 1)}
+                              disabled={bookings.length < perPage}
+                              variant="outline"
+                              size="sm"
+                              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dialogs with updated styling */}
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !deleting && setDeleteId(o ? deleteId : null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently remove the booking.</AlertDialogDescription>
+            <AlertDialogTitle className="text-neutral-900 dark:text-white">Delete Booking?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently remove the booking from the system.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleting}>{deleting ? 'Deleting...' : 'Yes, delete'}</AlertDialogAction>
+            <AlertDialogCancel
+              disabled={deleting}
+              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {deleting ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Yes, delete'
+              )}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={confirmId !== null} onOpenChange={(o) => !loading && setConfirmId(o ? confirmId : null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>{actionType === 'check-in' ? 'Check-in User?' : 'Check-out User?'}</AlertDialogTitle>
+            <AlertDialogTitle className="text-neutral-900 dark:text-white">
+              {actionType === 'check-in' ? 'Check-in User?' : 'Check-out User?'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {actionType === 'check-in' ? 'Mark this booking as checked-in?' : 'Mark this booking checked-out?'}
+              {actionType === 'check-in' ? 'Mark this booking as checked-in?' : 'Mark this booking as checked-out?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleStatusChange} disabled={loading}>{loading ? 'Please wait...' : 'Yes, confirm'}</AlertDialogAction>
+            <AlertDialogCancel
+              disabled={loading}
+              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleStatusChange}
+              disabled={loading}
+              className="bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900"
+            >
+              {loading ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Please wait...
+                </>
+              ) : (
+                'Yes, confirm'
+              )}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={showBookingId !== null} onOpenChange={(o) => { setShowBookingId(o ? showBookingId : null); setCopied(false) }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Booking Number</AlertDialogTitle>
-            <AlertDialogDescription className="flex items-center justify-between mt-2 font-mono text-sm bg-muted p-2 rounded-md">
-              {showBookingId}
-              <Button size="icon" variant="outline" onClick={handleCopy}>
-                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            <AlertDialogTitle className="text-neutral-900 dark:text-white">Booking Number</AlertDialogTitle>
+            <AlertDialogDescription className="flex items-center justify-between mt-3 font-mono text-sm bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700">
+              <span className="text-neutral-900 dark:text-white select-all">{showBookingId}</span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopy}
+                className="ml-3 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-1 text-green-600" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </>
+                )}
               </Button>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowBookingId(null)}>Close</AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => setShowBookingId(null)}
+              className="bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900"
+            >
+              Close
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

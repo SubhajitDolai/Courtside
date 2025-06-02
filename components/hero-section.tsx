@@ -37,7 +37,7 @@ export default function HeroSection() {
                     <div className="h-320 -translate-y-87.5 absolute left-0 top-0 w-60 -rotate-45 bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.04)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)]" />
                 </div>
                 <section>
-                    <div className="relative pt-24 md:pt-36">
+                    <div className="relative pt-28 md:pt-36">
                         <AnimatedGroup
                             variants={{
                                 container: {
@@ -81,7 +81,7 @@ export default function HeroSection() {
                                     preset="fade-in-blur"
                                     speedSegment={0.3}
                                     as="h1"
-                                    className="mt-8 text-balance text-5xl md:text-6xl lg:mt-16 xl:text-[5.25rem]">
+                                    className="mt-8 font-semibold text-balance text-3xl sm:text-4xl md:text-5xl lg:text-6xl lg:mt-16 xl:text-[5.25rem]">
                                     MIT WPU&apos;s Dronacharya Sports Complex
                                 </TextEffect>
                                 <TextEffect
@@ -90,8 +90,8 @@ export default function HeroSection() {
                                     speedSegment={0.3}
                                     delay={0.5}
                                     as="p"
-                                    className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                    Effortless bookings. Live slots. Designed for MIT-WPU students.
+                                    className="mx-auto font-medium mt-8 max-w-2xl text-balance text-sm sm:text-base md:text-lg">
+                                    Seamless bookings. Live availability. Designed for MIT-WPU athletes.
                                 </TextEffect>
 
                                 <AnimatedGroup
@@ -129,23 +129,14 @@ export default function HeroSection() {
                                 },
                                 ...transitionVariants,
                             }}>
-                            <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
+                            <div className="relative mt-8 overflow-hidden px-2 sm:px-2 sm:mr-0 sm:mt-12 md:mt-20">
                                 <div
                                     aria-hidden
                                     className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
                                 />
-                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
+                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-full sm:max-w-6xl overflow-hidden rounded-xl sm:rounded-2xl border p-2 sm:p-4 shadow-lg shadow-zinc-950/15 ring-1">
                                     <Image
-                                        // className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                                        className="bg-background relative hidden rounded-2xl dark:block"
-                                        src="/mit.webp"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                    <Image
-                                        // className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                                        className="z-2 border-border/25 relative rounded-2xl border dark:hidden"
+                                        className="bg-background relative block rounded-lg sm:rounded-xl w-full h-auto"
                                         src="/mit.webp"
                                         alt="app screen"
                                         width="2700"

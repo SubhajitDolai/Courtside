@@ -32,40 +32,40 @@ import {
 
 // Expanded and categorized navigation with icons
 export const navigationItems = [
-  { 
+  {
     title: "My Account",
     category: "account",
     icon: User,
     items: [
       { title: "Profile", href: "/profile", icon: User },
       { title: "My Bookings", href: "/my-bookings", icon: Calendar },
-    ] 
+    ]
   },
-  { 
-    title: "Booking Center", 
+  {
+    title: "Booking Center",
     category: "main",
     icon: Trophy,
     items: [
       { title: "Sports", href: "/sports", icon: Trophy },
       { title: "Dashboard", href: "/dashboard", icon: BarChart3 },
-    ] 
+    ]
   },
-  { 
-    title: "AI Assistant", 
+  {
+    title: "AI Assistant",
     category: "main",
     icon: Bot,
     items: [
       { title: "Chat with AI", href: "/assistant", icon: Bot },
-    ] 
+    ]
   },
-  { 
-    title: "Guidelines", 
+  {
+    title: "Guidelines",
     category: "main",
     icon: Info,
     items: [
       { title: "Rules", href: "/rules", icon: ScrollText },
       { title: "Terms", href: "/terms", icon: FileText },
-    ] 
+    ]
   },
 ];
 
@@ -78,7 +78,7 @@ export default function GlassmorphNavbar() {
   const [, startTransition] = useTransition();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  
+
   const [loadingBarVisible, setLoadingBarVisible] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const progressInterval = useRef<number | null>(null);
@@ -164,7 +164,7 @@ export default function GlassmorphNavbar() {
       completeLoadingBar();
       return;
     }
-    
+
     startLoadingBar();
     router.push(href);
   };
@@ -180,13 +180,13 @@ export default function GlassmorphNavbar() {
       }
     });
   };
-  
+
   // Calculate user display info from the useCurrentUser hook
   const userName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : '';
   const userDisplayName = loading ? "Loading..." : userName || (user?.email?.split('@')[0] || "");
-  
+
   // Get user initials - using first letter of first name and last name if available
-  const userInitials = !loading && user 
+  const userInitials = !loading && user
     ? ((user.first_name?.[0] || '') + (user.last_name?.[0] || '')).toUpperCase() || (user.email?.[0] || '').toUpperCase()
     : "";
 
@@ -201,11 +201,10 @@ export default function GlassmorphNavbar() {
       {loadingBarVisible && (
         <div className="fixed top-0 left-0 z-[9999] h-[3px] w-full bg-transparent">
           <div
-            className={`h-full transition-all duration-300 ease-out ${
-              resolvedTheme === "dark"
+            className={`h-full transition-all duration-300 ease-out ${resolvedTheme === "dark"
                 ? "bg-white shadow-[0_0_12px_2px_rgba(255,255,255,0.6)]"
                 : "bg-black shadow-[0_0_12px_2px_rgba(0,0,0,0.5)]"
-            }`}
+              }`}
             style={{ width: `${loadingProgress}%` }}
           />
         </div>
@@ -229,10 +228,10 @@ export default function GlassmorphNavbar() {
                   alt="Logo"
                   width={100}
                   height={50}
-                  style={{ 
+                  style={{
                     display: "block",
-                    width: "auto",   // Add both width and height auto
-                    height: "auto"   // to maintain aspect ratio
+                    width: "auto",
+                    height: "auto"
                   }}
                   className="object-contain"
                 />
@@ -240,21 +239,21 @@ export default function GlassmorphNavbar() {
             </button>
 
             <div className="hidden md:block">
-              <NavigationMenu>
+              <NavigationMenu viewport={false}>
                 <NavigationMenuList>
                   {mainNavItems.map((category) => (
                     <NavigationMenuItem key={category.title}>
-                      <NavigationMenuTrigger 
+                      <NavigationMenuTrigger
                         className={cn(
-                          category.items.some(item => pathname.startsWith(item.href)) 
-                            ? "text-primary" 
+                          category.items.some(item => pathname.startsWith(item.href))
+                            ? "text-primary"
                             : ""
                         )}
                       >
                         {category.title}
                       </NavigationMenuTrigger>
-                      <NavigationMenuContent className="bg-background/80 backdrop-blur-lg border border-border/40 shadow-md rounded-md">
-                        <ul className="grid w-[200px] gap-3 p-4 md:w-[400px] md:grid-cols-1">
+                      <NavigationMenuContent>
+                        <ul className="grid w-[300px] gap-2">
                           {category.items.map((item) => (
                             <li key={item.href}>
                               <NavigationMenuLink asChild>
@@ -262,8 +261,8 @@ export default function GlassmorphNavbar() {
                                   onClick={() => navigateWithLoading(item.href)}
                                   className={cn(
                                     "block w-full select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                                    pathname.startsWith(item.href) 
-                                      ? "bg-accent text-accent-foreground" 
+                                    pathname.startsWith(item.href)
+                                      ? "bg-accent text-accent-foreground"
                                       : "text-muted-foreground"
                                   )}
                                 >
@@ -287,7 +286,7 @@ export default function GlassmorphNavbar() {
           <div className="flex gap-3 flex-row items-center">
             <div className="hidden md:flex items-center gap-3">
               <ModeToggle />
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-1 h-9 w-9 rounded-full">
@@ -311,7 +310,7 @@ export default function GlassmorphNavbar() {
                   )}
                   <DropdownMenuSeparator />
                   {accountItems?.items.map((item) => (
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       key={item.href}
                       className="cursor-pointer"
                       onClick={() => navigateWithLoading(item.href)}
@@ -321,7 +320,7 @@ export default function GlassmorphNavbar() {
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="cursor-pointer text-destructive focus:text-destructive"
                     onClick={handleLogout}
                   >
@@ -334,7 +333,7 @@ export default function GlassmorphNavbar() {
 
             <div className="md:hidden flex items-center gap-3">
               <ModeToggle />
-              <Button 
+              <Button
                 onClick={(e) => toggleMobileMenu(e)} // Pass the event to stop propagation
                 size="icon"
                 variant="ghost"
@@ -348,7 +347,7 @@ export default function GlassmorphNavbar() {
 
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               ref={mobileMenuRef}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -368,7 +367,7 @@ export default function GlassmorphNavbar() {
                     {user?.email && <span className="text-xs text-muted-foreground">{user.email}</span>}
                   </div>
                 </div>
-                
+
                 {navigationItems.map((category) => (
                   <div key={category.title} className="py-1">
                     <button
@@ -390,7 +389,7 @@ export default function GlassmorphNavbar() {
                         activeCategory === category.title ? "rotate-180" : ""
                       )} />
                     </button>
-                    
+
                     <AnimatePresence>
                       {activeCategory === category.title && (
                         <motion.div
@@ -408,8 +407,8 @@ export default function GlassmorphNavbar() {
                               }}
                               className={cn(
                                 "w-full text-left px-8 py-2 text-sm flex items-center",
-                                pathname.startsWith(item.href) 
-                                  ? "text-primary font-medium" 
+                                pathname.startsWith(item.href)
+                                  ? "text-primary font-medium"
                                   : "text-muted-foreground"
                               )}
                             >
@@ -422,7 +421,7 @@ export default function GlassmorphNavbar() {
                     </AnimatePresence>
                   </div>
                 ))}
-                
+
                 <button
                   onClick={() => {
                     setIsOpen(false);
