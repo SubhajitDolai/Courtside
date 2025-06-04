@@ -19,8 +19,19 @@ export default async function SportsPage() {
         {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="flex items-center justify-center mb-4 sm:mb-6">
-            <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl">
+            <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl relative">
               <Trophy className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+              
+              {/* Live pulse ring */}
+              <div className="absolute inset-0 rounded-xl sm:rounded-2xl md:rounded-3xl bg-emerald-500/20 animate-ping" />
+              
+              {/* Live status dot */}
+              <div className="absolute -top-1 -right-1">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-neutral-900" />
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
+                </div>
+              </div>
             </div>
           </div>
           

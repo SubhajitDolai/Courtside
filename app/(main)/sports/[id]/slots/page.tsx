@@ -141,33 +141,50 @@ export default function SportSlotsPage() {
     router.push(`/sports/${sportId}/slots/${slotId}/seats`)
   }
 
+  const handleGoBack = () => {
+    start()
+    router.push('/sports')
+  }
+
   if (loading) {
     return (
       <>
         <BannedRedirect />
         <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
-            {/* Header Skeleton */}
+            {/* Header Skeleton - EXACTLY MATCHING */}
             <div className="text-center mb-8 sm:mb-12">
               <div className="flex items-center justify-center mb-4 sm:mb-6">
                 <Skeleton className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl" />
               </div>
-              <Skeleton className="h-12 w-64 mx-auto mb-4" />
-              <Skeleton className="h-6 w-48 mx-auto" />
+              
+              {/* Single title skeleton - MUCH BETTER */}
+              <Skeleton className="h-9 sm:h-11 md:h-13 lg:h-15 w-80 sm:w-96 md:w-[30rem] lg:w-[36rem] mx-auto mb-4 sm:mb-6" />
+              <Skeleton className="h-5 sm:h-6 lg:h-7 w-32 sm:w-40 mx-auto" />
             </div>
             
-            {/* Cards Skeleton */}
+            {/* Cards Skeleton - EXACTLY MATCHING */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-                  <CardHeader className="pb-4">
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/3" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-11 w-full rounded-md" />
-                  </CardContent>
-                </Card>
+                <div key={i} className="group border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm rounded-xl overflow-hidden">
+                  {/* CardHeader equivalent - pb-4 p-6 */}
+                  <div className="pb-4 p-6">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-7 w-5 rounded" />
+                        <Skeleton className="h-7 w-48" /> {/* Time range skeleton */}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Skeleton className="h-7 w-28 rounded-full" /> {/* Badge skeleton */}
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <Skeleton className="h-11 w-full rounded-md" /> {/* Button skeleton */}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -186,7 +203,7 @@ export default function SportSlotsPage() {
             <div className="flex items-center justify-center mb-4 sm:mb-6">
               <div
                 className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl"
-                onClick={() => router.push('/sports')}
+                onClick={handleGoBack}
               >
                 <Clock className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
               </div>
@@ -198,7 +215,7 @@ export default function SportSlotsPage() {
             </h1>
             
             {sportName && (
-              <p className="text-lg sm:text-xl text-neutral-600 dark:text-neutral-300">
+              <p className="text-lg sm:text-xl text-neutral-600 dark:text-neutral-400 font-bold tracking-wide">
                 {sportName}
               </p>
             )}

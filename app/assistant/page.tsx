@@ -40,7 +40,7 @@ async function getAssistantData() {
     if (user) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('user_type, gender')
+        .select('*')
         .eq('id', user.id)
         .single()
       currentUserProfile = profile

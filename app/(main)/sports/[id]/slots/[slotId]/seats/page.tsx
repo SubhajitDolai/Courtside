@@ -22,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getTodayDateInIST } from '@/lib/date'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import BannedRedirect from '@/components/banned-redirect'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 // Define types for real-time subscription
 interface Booking {
@@ -77,8 +78,11 @@ export default function SeatsPage() {
   // ✅ Slot details (start time, end time, gender, allowedUserType)
   const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string; allowedUserType: string } | null>(null)
 
+  const { start } = useGlobalLoadingBar()
+
   // ✅ Add back handler function after your other handlers
   const handleGoBack = () => {
+    start()
     router.push(`/sports/${sportId}/slots`)
   }
 
@@ -201,7 +205,6 @@ export default function SeatsPage() {
     const timer = setTimeout(() => {
       setShowConnectionStatus(true)
     }, 3000) // Show after 3 seconds
-
     return () => clearTimeout(timer)
   }, [])
 
@@ -426,26 +429,112 @@ export default function SeatsPage() {
         <BannedRedirect />
         <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
-            {/* Header Skeleton - MATCHING SPORTS PAGE */}
-            <div className="text-center mb-8 sm:mb-12">
+            {/* Header Skeleton - EXACTLY MATCHING */}
+            <div className="text-center mb-10 sm:mb-15 md:mb-15 lg:mb-13">
               <div className="flex items-center justify-center mb-4 sm:mb-6">
                 <Skeleton className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl" />
               </div>
-              <Skeleton className="h-12 w-64 mx-auto mb-4" />
-              <Skeleton className="h-6 w-48 mx-auto" />
+              <Skeleton className="h-9 sm:h-11 md:h-13 lg:h-16 w-80 sm:w-96 md:w-[30rem] lg:w-[36rem] mx-auto mb-4 sm:mb-6" />
+
+              {/* Breadcrumb info skeleton - EXACTLY MATCHING */}
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-20" /> {/* Sport name */}
+                </div>
+                <Skeleton className="h-1 w-1 rounded-full" /> {/* Dot */}
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-32" /> {/* Time range */}
+                </div>
+                <Skeleton className="h-1 w-1 rounded-full" /> {/* Dot */}
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-16" /> {/* Gender */}
+                </div>
+                <Skeleton className="h-1 w-1 rounded-full" /> {/* Dot */}
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-18" /> {/* User type */}
+                </div>
+                <Skeleton className="h-1 w-1 rounded-full" /> {/* Dot */}
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-20" /> {/* Date */}
+                </div>
+              </div>
             </div>
 
-            {/* Seats Grid Skeleton */}
-            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-800 w-full max-w-3xl mx-auto mb-8">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 rounded-lg" />
-                ))}
+            {/* Main Content Skeleton */}
+            <div className="max-w-4xl mx-auto space-y-8">
+              {/* Seat Selection Card Skeleton */}
+              <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+                <div className="px-3 sm:px-6 py-5 sm:py-6 border-b border-neutral-200 dark:border-neutral-800">
+                  <div className="flex items-start sm:items-center justify-between gap-3">
+                    {/* Left side - Title and description skeleton */}
+                    <div className="flex-1 min-w-0">
+                      <Skeleton className="h-5 sm:h-6 w-40 mb-1" />
+                      <Skeleton className="h-3 sm:h-4 w-64" />
+                    </div>
+
+                    {/* Right side - Connection status skeleton */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex-shrink-0">
+                      <Skeleton className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" />
+                      <Skeleton className="h-3 w-12 sm:w-16" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {/* Legend Skeleton */}
+                  <div className="flex flex-wrap items-center justify-center gap-6 mb-6 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Skeleton className="w-3 h-3 rounded-full" />
+                        <Skeleton className="h-4 w-13" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Seats Grid Skeleton */}
+                  <div className="flex justify-center">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4 sm:gap-5 max-w-fit mx-auto">
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <Skeleton key={i} className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-lg" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 max-w-2xl mx-auto">
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 rounded-xl" />
-                ))}
+
+              {/* Live Analytics Skeleton - EXACTLY MATCHING */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-2 max-w-3xl mx-auto">
+                <div className="bg-white dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-center">
+                  <Skeleton className="h-5 w-6 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-12 mx-auto" />
+                </div>
+                <div className="bg-emerald-50 dark:bg-emerald-950/50 rounded-md border border-emerald-200 dark:border-emerald-800 p-3 text-center">
+                  <Skeleton className="h-5 w-6 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-16 mx-auto" />
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/50 rounded-md border border-amber-200 dark:border-amber-800 p-3 text-center">
+                  <Skeleton className="h-5 w-6 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-12 mx-auto" />
+                </div>
+                <div className="bg-rose-50 dark:bg-rose-950/50 rounded-md border border-rose-200 dark:border-rose-800 p-3 text-center">
+                  <Skeleton className="h-5 w-6 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-12 mx-auto" />
+                </div>
+                <div className="bg-neutral-50 dark:bg-neutral-800 rounded-md border border-neutral-200 dark:border-neutral-700 p-3 text-center col-span-2 sm:col-span-1">
+                  <Skeleton className="h-5 w-6 mx-auto mb-2 bg-neutral-200 dark:bg-neutral-600" />
+                  <Skeleton className="h-4 w-14 mx-auto bg-neutral-200 dark:bg-neutral-600" />
+                </div>
+              </div>
+
+              {/* Action Buttons Skeleton - EXACTLY MATCHING */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Skeleton className="flex-1 h-14 sm:h-12 rounded-lg" />
+                <Skeleton className="flex-1 h-14 sm:h-12 rounded-lg" />
               </div>
             </div>
           </div>
@@ -556,7 +645,10 @@ export default function SeatsPage() {
           {/* Header Section - EXACTLY MATCHING SPORTS PAGE */}
           <div className="text-center mb-8 sm:mb-12">
             <div className="flex items-center justify-center mb-4 sm:mb-6">
-              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl">
+              <div 
+                className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl"
+                onClick={handleGoBack}
+              >
                 <TicketCheck className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
               </div>
             </div>
@@ -600,9 +692,40 @@ export default function SeatsPage() {
           <div className="max-w-4xl mx-auto space-y-8">
             {/* Seat Selection Card */}
             <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <div className="px-6 py-5 border-b border-neutral-200 dark:border-neutral-800">
-                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Choose Your Spot</h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Select an available spot for your session</p>
+              <div className="px-3 sm:px-6 py-4 sm:py-5 border-b border-neutral-200 dark:border-neutral-800">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  {/* Left side - Title and description */}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white leading-tight">Choose Your Spot</h2>
+                    <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-0.5 sm:mt-1">Select an available spot for your session</p>
+                  </div>
+
+                  {/* Right side - Live connection status */}
+                  <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex-shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      {isConnected ? (
+                        <>
+                          <div className="relative">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full" />
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                            <span className="hidden sm:inline">Live Status</span>
+                            <span className="sm:hidden">Live</span>
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-amber-500 rounded-full animate-pulse" />
+                          <span className="text-[10px] sm:text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                            <span className="hidden sm:inline">Connecting...</span>
+                            <span className="sm:hidden">Connecting</span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="p-6">
