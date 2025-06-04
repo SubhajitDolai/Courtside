@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
 interface BookingDetailsModalProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   booking: any
   isOpen: boolean
   onClose: () => void
@@ -38,6 +39,7 @@ export default function BookingDetailsModal({ booking, isOpen, onClose }: Bookin
     try {
       return format(new Date(timestamp), 'MMM dd, yyyy • h:mm a')
     } catch (error) {
+      console.error("Error:", error);
       return timestamp
     }
   }

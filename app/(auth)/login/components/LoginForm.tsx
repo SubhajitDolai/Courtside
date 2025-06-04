@@ -19,6 +19,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
   useEffect(() => {
     router.prefetch('/')
+    router.prefetch('/admin')
   }, [router])
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {

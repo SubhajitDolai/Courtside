@@ -24,16 +24,16 @@ export default function AdminPage() {
       href: '/admin/slots',
     },
     {
-      title: 'Manage Bookings',
-      description: 'View and manage user bookings',
-      icon: <ClipboardList className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />,
-      href: '/admin/bookings',
-    },
-    {
       title: 'Bookings History',
       description: 'View all time booking records',
       icon: <History className="h-8 w-8 text-teal-600 dark:text-teal-400" />,
       href: '/admin/bookings-history',
+    },
+    {
+      title: 'Manage Bookings',
+      description: 'View and manage user bookings',
+      icon: <ClipboardList className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />,
+      href: '/admin/bookings',
     },
   ]
 

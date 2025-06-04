@@ -4,12 +4,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UserCount } from './user-count'
-import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
-import { createClient } from '@/utils/supabase/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertTriangle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -55,125 +53,19 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 }
 
 export default function DashboardClient({
-  bookings: initialBookings,
-  bookingHistory: initialBookingHistory,
-  profiles: initialProfiles,
-  sports: initialSports,
-  slots: initialSlots
+  bookings,
+  bookingHistory,
+  profiles,
+  sports,
+  slots
 }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
-  const [mounted, setMounted] = useState(false)
-  const supabase = createClient()
 
-  // Set mounted to handle hydration
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Use indexed timestamps for more efficient rendering
-  useEffect(() => {
-    // Memoize expensive calculations
-    if (initialBookings.length > 0 || initialBookingHistory.length > 0) {
-      // Index creation for lookups (could be moved to a web worker for large datasets)
-      const index = new Map()
-      initialBookings.concat(initialBookingHistory).forEach(booking => {
-        if (booking.id) index.set(booking.id, true)
-      })
-    }
-  }, [initialBookings, initialBookingHistory])
-
-  // Fetch latest data with debounced Realtime subscription
-  const fetchBookings = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*, sports:sport_id(name), slots:slot_id(start_time, end_time), profiles:user_id(gender, user_type)')
-        .order('created_at', { ascending: false })
-        .limit(1000)
-      
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching bookings:', error)
-      return []
-    }
-  }
-
-  const fetchBookingHistory = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('bookings_history')
-        .select('*, sports:sport_id(name), slots:slot_id(start_time, end_time), profiles:user_id(gender, user_type)')
-        .order('created_at', { ascending: false })
-        .limit(1000)
-      
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching booking history:', error)
-      return []
-    }
-  }
-
-  const fetchProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, gender, user_type, created_at')
-        .limit(5000)
-      
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching profiles:', error)
-      return []
-    }
-  }
-
-  const fetchSports = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('sports')
-        .select('id, name, is_active')
-      
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching sports:', error)
-      return []
-    }
-  }
-
-  const fetchSlots = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('slots')
-        .select('id, sport_id, start_time, end_time, gender, allowed_user_type')
-      
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching slots:', error)
-      return []
-    }
-  }
-
-  // Fix property names to match what the hook returns
-  const { data: bookings, loading: bookingsLoading } = useRealtimeSubscription('bookings', initialBookings, fetchBookings)
-  const { data: bookingHistory, loading: bookingHistoryLoading } = useRealtimeSubscription('booking_history', initialBookingHistory, fetchBookingHistory)
-  const { data: profiles, loading: profilesLoading } = useRealtimeSubscription('profiles', initialProfiles, fetchProfiles)
-  const { data: sports, loading: sportsLoading } = useRealtimeSubscription('sports', initialSports, fetchSports)
-  const { data: slots, loading: slotsLoading } = useRealtimeSubscription('slots', initialSlots, fetchSlots)
-
-  // Combine current and history bookings for complete picture with memoization to prevent unnecessary re-renders
+  // Combine current and history bookings for complete picture with memoization
   const allBookings = useMemo(() => [...bookings, ...bookingHistory], [bookings, bookingHistory])
 
-  const isLoading = bookingsLoading || bookingHistoryLoading || profilesLoading || sportsLoading || slotsLoading
-
-  if (!mounted) return null
-
   return (
-    <div className="transition-opacity duration-300" style={{ opacity: isLoading ? 0.7 : 1 }}>
+    <div className="space-y-6">
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid grid-cols-3 max-w-lg mx-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -286,12 +178,10 @@ export default function DashboardClient({
               </CardHeader>
               <CardContent className="h-[300px] py-6">
                 <div className="h-full flex items-center justify-center">
-                  {mounted && (
-                    <div className="w-full max-w-md">
+                  <div className="w-full max-w-md">
                       {/* Gender Distribution Pie Chart */}
-                      <GenderDistribution profiles={profiles} />
-                    </div>
-                  )}
+                    <GenderDistribution profiles={profiles} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -303,12 +193,10 @@ export default function DashboardClient({
               </CardHeader>
               <CardContent className="h-[300px] py-6">
                 <div className="h-full flex items-center justify-center">
-                  {mounted && (
-                    <div className="w-full max-w-md">
+                  <div className="w-full max-w-md">
                       {/* User Type Distribution */}
-                      <UserTypeDistribution profiles={profiles} />
-                    </div>
-                  )}
+                    <UserTypeDistribution profiles={profiles} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -329,7 +217,7 @@ export default function DashboardClient({
   )
 }
 
-// Simple component for Gender Distribution chart using recharts
+// Simple component for Gender Distribution chart
 function GenderDistribution({ profiles }: { profiles: any[] }) {
   // Count gender types
   const maleCount = profiles.filter(p => p.gender === 'male').length;
@@ -391,7 +279,7 @@ function UserTypeDistribution({ profiles }: { profiles: any[] }) {
   );
 }
 
-// User Growth Chart with actual implementation
+// User Growth Chart
 function UserGrowthChart({ profiles }: { profiles: any[] }) {
   const { resolvedTheme } = useTheme();
   const textColor = resolvedTheme === "dark" ? "#f1f5f9" : "#1e293b";
@@ -468,7 +356,7 @@ function UserGrowthChart({ profiles }: { profiles: any[] }) {
       console.error('Error processing user growth data:', error);
       return [];
     }
-  }, [profiles, timeRange, resolvedTheme]);
+  }, [profiles, timeRange]);
   
   if (chartData.length === 0) {
     return (
@@ -509,7 +397,7 @@ function UserGrowthChart({ profiles }: { profiles: any[] }) {
             <XAxis 
               dataKey="name" 
               tick={{ fill: textColor }} 
-              tickFormatter={(value) => value.split(' ')[0]} // Show only month name
+              tickFormatter={(value) => value.split(' ')[0]}
             />
             <YAxis yAxisId="left" tick={{ fill: textColor }} />
             <YAxis yAxisId="right" orientation="right" tick={{ fill: textColor }} />

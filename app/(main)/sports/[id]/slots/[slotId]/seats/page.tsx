@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { Loader, Clock, Users, CheckCircle, XCircle, Calendar, Trophy, TicketCheck } from 'lucide-react'
+import { Loader, Clock, Users, CheckCircle, XCircle, Calendar, Trophy, TicketCheck, UserCheck, ArrowLeft } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,7 +46,9 @@ const formatTime12hr = (time24: string) => {
 export default function SeatsPage() {
   const params = useParams()
   const router = useRouter()
-  const supabase = createClient()
+
+  // ✅ Memoize supabase client instead of recreating it
+  const supabase = useMemo(() => createClient(), [])
 
   const sportId = params.id as string
   const slotId = params.slotId as string
@@ -69,8 +71,16 @@ export default function SeatsPage() {
   // ✅ Terms & Conditions checkbox
   const [agreed, setAgreed] = useState(false)
 
+  // ✅ show connection status state
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false)
+
   // ✅ Slot details (start time, end time, gender, allowedUserType)
   const [slotDetails, setSlotDetails] = useState<{ start_time: string; end_time: string; gender: string; allowedUserType: string } | null>(null)
+
+  // ✅ Add back handler function after your other handlers
+  const handleGoBack = () => {
+    router.push(`/sports/${sportId}/slots`)
+  }
 
   // ✅ Fetch current seat bookings with Realtime
   const fetchBookings = useCallback(async () => {
@@ -91,7 +101,7 @@ export default function SeatsPage() {
   }, [sportId, slotId, supabase])
 
   // ✅ Use Realtime subscription for bookings
-  const { data: bookings } = useRealtimeSubscription<Booking>(
+  const { data: bookings, isConnected, forceReconnect } = useRealtimeSubscription<Booking>(
     'bookings',     // table name
     [],             // initial data (empty array)
     fetchBookings,  // fetch function
@@ -110,56 +120,90 @@ export default function SeatsPage() {
   const checkGenderAndFetch = useCallback(async () => {
     setLoading(true)
 
-    // ✅ Check user login
-    const userRes = await supabase.auth.getUser()
-    const user = userRes.data.user
-    if (!user) return router.push('/login')
+    try {
+      // ✅ Check user login first (this needs to be sequential)
+      const userRes = await supabase.auth.getUser()
+      const user = userRes.data.user
+      if (!user) return router.push('/login')
 
-    // ✅ Check profile gender
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('gender')
-      .eq('id', user.id)
-      .single()
-    if (!profile) return router.push('/onboarding')
+      // ✅ PARALLEL API CALLS - Make all these requests at once
+      const [profileResult, slotResult, sportResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('gender')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('slots')
+          .select('gender, start_time, end_time, allowed_user_type, is_active')
+          .eq('id', slotId)
+          .single(),
+        supabase
+          .from('sports')
+          .select('seat_limit, name, is_active')
+          .eq('id', sportId)
+          .single()
+      ])
 
-    // ✅ Fetch slot's gender rule & timings
-    const { data: slot } = await supabase
-      .from('slots')
-      .select('gender, start_time, end_time, allowed_user_type')
-      .eq('id', slotId)
-      .single()
-    if (!slot) return router.push(`/sports/${sportId}/slots`)
+      // ✅ Handle profile check
+      if (!profileResult.data) return router.push('/onboarding')
 
-    // 🚫 Block wrong gender
-    if (slot.gender !== 'any' && profile.gender !== slot.gender) {
-      toast.error(`This slot is only for ${slot.gender} users`)
-      return router.push(`/sports/${sportId}/slots`)
+      // ✅ Handle slot check
+      if (!slotResult.data) return router.push(`/sports/${sportId}/slots`)
+
+      // ✅ Check if sport is active
+      if (!sportResult.data?.is_active) {
+        toast.error(`${sportResult.data?.name} is currently unavailable`)
+        return router.push('/sports')
+      }
+
+      // ✅ Check if slot is active  
+      if (!slotResult.data.is_active) {
+        toast.error('This time slot is currently unavailable')
+        return router.push(`/sports/${sportId}/slots`)
+      }
+
+      // ✅ Check gender rule (after we have both profile and slot data)
+      const profile = profileResult.data
+      const slot = slotResult.data
+
+      if (slot.gender !== 'any' && profile.gender !== slot.gender) {
+        toast.error(`This slot is only for ${slot.gender} users`)
+        return router.push(`/sports/${sportId}/slots`)
+      }
+
+      // ✅ Set all state at once
+      setSlotDetails({
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        gender: slot.gender,
+        allowedUserType: slot.allowed_user_type
+      })
+
+      setSeatLimit(sportResult.data?.seat_limit || 0)
+      setSportName(sportResult.data?.name || '')
+
+    } catch (error) {
+      console.error('Error in checkGenderAndFetch:', error)
+      toast.error('Failed to load page data')
+    } finally {
+      setLoading(false)
     }
-
-    setSlotDetails({
-      start_time: slot.start_time,
-      end_time: slot.end_time,
-      gender: slot.gender,
-      allowedUserType: slot.allowed_user_type
-    }) // ✅ Save slot details
-
-    // ✅ Load seat limit
-    const { data: sport } = await supabase
-      .from('sports')
-      .select('seat_limit, name')
-      .eq('id', sportId)
-      .single()
-
-    setSeatLimit(sport?.seat_limit || 0)
-    setSportName(sport?.name || '')
-    setLoading(false)
   }, [router, slotId, sportId, supabase])
 
   // ✅ Initial fetch (with gender check)
   useEffect(() => {
     checkGenderAndFetch()
   }, [checkGenderAndFetch])
+
+  useEffect(() => {
+    // Only show connection status after a delay to prevent initial flash
+    const timer = setTimeout(() => {
+      setShowConnectionStatus(true)
+    }, 3000) // Show after 3 seconds
+
+    return () => clearTimeout(timer)
+  }, [])
 
   // ✅ Get current status of seat
   const getSeatStatus = (seatNumber: number) => {
@@ -192,6 +236,32 @@ export default function SeatsPage() {
     // Store the current date by using "@/lib/date.ts" which has the function in order to set the 'booking_date'
     const today = getTodayDateInIST()
 
+    // ✅ NEW: Double-check sport and slot are still active before booking
+    const [sportCheck, slotCheck] = await Promise.all([
+      supabase
+        .from('sports')
+        .select('is_active, name')
+        .eq('id', sportId)
+        .single(),
+      supabase
+        .from('slots')
+        .select('is_active')
+        .eq('id', slotId)
+        .single()
+    ])
+
+    if (!sportCheck.data?.is_active) {
+      toast.error(`${sportCheck.data?.name || 'This sport'} is no longer available`)
+      setIsBooking(false)
+      return
+    }
+
+    if (!slotCheck.data?.is_active) {
+      toast.error('This time slot is no longer available')
+      setIsBooking(false)
+      return
+    }
+
     // ✅ NEW: Check if user already has ANY booking for this sport today (regardless of slot)
     // const { data: existingSportBooking } = await supabase
     //   .from('bookings')
@@ -221,7 +291,7 @@ export default function SeatsPage() {
     // }
 
     // ✅ Prevent multiple booking by user
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('bookings')
       .select('*')
       .eq('user_id', user.id)
@@ -230,8 +300,15 @@ export default function SeatsPage() {
       .eq('booking_date', today)
       .maybeSingle()
 
+    if (existingError) {
+      console.error('Existing booking check error:', existingError)
+      toast.error('Unable to verify your existing bookings. Please try again.')
+      setIsBooking(false)
+      return
+    }
+
     if (existing) {
-      toast.error('You already booked this slot today 🚫')
+      toast.error(`You've already secured spot #${existing.seat_number} for this session! 🎯`)
       setIsBooking(false)
       return
     }
@@ -239,12 +316,19 @@ export default function SeatsPage() {
     // 🆕 Check for time conflicts with other bookings
     if (slotDetails) {
       // First get information about all the user's bookings for today
-      const { data: userBookings } = await supabase
+      const { data: userBookings, error: bookingsError } = await supabase
         .from('bookings')
         .select('id, slot_id, sport_id, status')
         .eq('user_id', user.id)
         .eq('booking_date', today)
         .in('status', ['booked', 'checked-in'])
+
+      if (bookingsError) {
+        console.error('User bookings check error:', bookingsError)
+        toast.error('Unable to check for booking conflicts. Please try again.')
+        setIsBooking(false)
+        return
+      }
 
       // If the user has other bookings, check for time overlap
       if (userBookings && userBookings.length > 0) {
@@ -310,14 +394,19 @@ export default function SeatsPage() {
       .single()
 
     if (error) {
-      console.error(error)
+      console.error('Booking creation error:', error)
 
-      // ✅ Seat already booked
+      // ✅ Enhanced error handling by error code
       if (error.code === '23505') {
-        toast.error('Someone else just grabbed this spot! Please select another.')
-        // No need to manually refresh - Realtime will handle it
+        toast.error(`Oops! Someone just booked spot #${selectedSeat}. Please choose another available spot.`)
+      } else if (error.code === '23503') {
+        toast.error('Invalid booking data. Please refresh the page and try again.')
+      } else if (error.message?.includes('jwt')) {
+        toast.error('Your session has expired. Please log in again.')
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        toast.error('Network connection issue. Please check your internet and try again.')
       } else {
-        toast.error('Booking failed. Please try again.')
+        toast.error('Unable to complete your booking. Please try again or contact support if the issue persists.')
       }
 
       setIsBooking(false)
@@ -325,7 +414,7 @@ export default function SeatsPage() {
     }
 
     // ✅ Success!
-    toast.success('Booking successful')
+    toast.success(`Spot #${selectedSeat} is yours! Redirecting to confirmation...`)
     router.prefetch(`/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`)
     window.location.href = `/sports/${sportId}/slots/${slotId}/success?booking_id=${data.id}`
   }
@@ -345,7 +434,7 @@ export default function SeatsPage() {
               <Skeleton className="h-12 w-64 mx-auto mb-4" />
               <Skeleton className="h-6 w-48 mx-auto" />
             </div>
-            
+
             {/* Seats Grid Skeleton */}
             <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-800 w-full max-w-3xl mx-auto mb-8">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -370,12 +459,96 @@ export default function SeatsPage() {
       <BannedRedirect />
       <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
+          {/* ✅ Connection Status Indicator */}
+          {!isConnected && showConnectionStatus && (
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-800 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden">
+
+                <div className="px-4 py-3 flex items-center gap-3">
+                  {/* Status indicator */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <div className="w-3 h-3 bg-amber-500 rounded-full animate-ping" />
+                      <div className="w-3 h-3 bg-amber-500 rounded-full absolute inset-0" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                        Reconnecting...
+                      </span>
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                        Live updates paused
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-8 w-px bg-neutral-200 dark:bg-neutral-700" />
+
+                  {/* Retry button */}
+                  <button
+                    onClick={forceReconnect}
+                    className="px-3 py-1.5 text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 rounded-md hover:bg-amber-200 dark:hover:bg-amber-900/70 transition-colors duration-200 flex items-center gap-1.5"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ✅ Booking loader */}
           {isBooking && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="flex flex-col items-center gap-3">
-                <Loader className="w-8 h-8 animate-spin text-white" />
-                <p className="text-white text-md">Booking your spot...</p>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+              <div className="bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-8 max-w-sm mx-4 relative overflow-hidden">
+                {/* Animated Background Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-neutral-50/50 to-neutral-100/30 dark:from-neutral-800/30 dark:to-neutral-900/50 rounded-3xl" />
+
+                <div className="relative flex flex-col items-center gap-6">
+                  {/* Enhanced Animated Seat Icon */}
+                  <div className="relative">
+                    {/* Pulsing Background Ring */}
+                    <div className="absolute inset-0 w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-2xl animate-ping" />
+
+                    {/* Main Icon Container */}
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-neutral-700 to-neutral-900 dark:from-neutral-600 dark:to-neutral-800 rounded-xl flex items-center justify-center shadow-lg">
+                      <TicketCheck className="w-8 h-8 text-white animate-pulse" />
+                    </div>
+
+                    {/* Enhanced Spinning Ring */}
+                    <div className="absolute inset-0 rounded-xl border-4 border-transparent border-t-emerald-500 dark:border-t-emerald-400 animate-spin" />
+                    <div className="absolute inset-1 rounded-lg border-2 border-transparent border-b-neutral-700/30 dark:border-b-neutral-400/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                  </div>
+
+                  {/* Enhanced Text Content */}
+                  <div className="text-center space-y-3">
+                    <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                      Securing Your Spot
+                    </h3>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                        {selectedSeat && `Booking spot #${selectedSeat}...`}
+                      </p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                        This will only take a moment
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Progress Dots with Different Animation */}
+                  <div className="flex gap-2">
+                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 dark:from-neutral-400 dark:to-neutral-300 rounded-full animate-bounce shadow-sm" />
+                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 dark:from-neutral-400 dark:to-neutral-300 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.15s' }} />
+                    <div className="w-2.5 h-2.5 bg-gradient-to-r from-neutral-700 to-neutral-800 dark:from-neutral-400 dark:to-neutral-300 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.3s' }} />
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-1.5 overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full animate-pulse shadow-sm" style={{ width: '75%' }} />
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -387,7 +560,7 @@ export default function SeatsPage() {
                 <TicketCheck className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
               </div>
             </div>
-            
+
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4 sm:mb-6">
               Select Your
               <span className="bg-gradient-to-r from-neutral-700 to-neutral-600 dark:from-neutral-400 dark:to-neutral-300 bg-clip-text text-transparent"> Spot</span>
@@ -406,8 +579,13 @@ export default function SeatsPage() {
                 </div>
                 <div className="text-neutral-300 dark:text-neutral-600">•</div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
+                  <UserCheck className="h-4 w-4" />
                   <span className="font-medium capitalize">{slotDetails.gender}</span>
+                </div>
+                <div className="text-neutral-300 dark:text-neutral-600">•</div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span className="font-medium capitalize">{slotDetails.allowedUserType}</span>
                 </div>
                 <div className="text-neutral-300 dark:text-neutral-600">•</div>
                 <div className="flex items-center gap-2">
@@ -418,101 +596,138 @@ export default function SeatsPage() {
             )}
           </div>
 
-          {/* Seats Selection Card */}
-          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-800 w-full max-w-3xl mx-auto mb-8">
-            {/* Legend */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm text-center">
-              <div className="flex flex-col items-center bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
-                <div className="w-4 h-4 bg-green-500 rounded-full mb-2" />
-                <span>Available</span>
+          {/* ✅ REDESIGNED SEATS SECTION - CLEAN & MODERN */}
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Seat Selection Card */}
+            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+              <div className="px-6 py-5 border-b border-neutral-200 dark:border-neutral-800">
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Choose Your Spot</h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Select an available spot for your session</p>
               </div>
-              <div className="flex flex-col items-center bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
-                <div className="w-4 h-4 bg-yellow-500 rounded-full mb-2" />
-                <span>Booked</span>
+
+              <div className="p-6">
+                {/* Legend - Clean & Minimal */}
+                <div className="flex flex-wrap items-center justify-center gap-6 mb-6 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-amber-500 rounded-full" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Booked</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-rose-500 rounded-full" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">In Use</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-neutral-400 rounded-full" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Finished</span>
+                  </div>
+                </div>
+
+                {/* Seats Grid - BIGGER SEATS + DYNAMIC CENTERING */}
+                <div className="flex justify-center">
+                  <div className={`grid gap-4 sm:gap-5 max-w-fit mx-auto ${seatLimit <= 4 ? 'grid-cols-2 sm:grid-cols-4' :
+                    seatLimit <= 6 ? 'grid-cols-3 sm:grid-cols-6' :
+                      seatLimit <= 8 ? 'grid-cols-4 sm:grid-cols-8' :
+                        seatLimit <= 12 ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-12' :
+                          seatLimit <= 16 ? 'grid-cols-4 sm:grid-cols-8 md:grid-cols-16' :
+                            'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8'
+                    }`}>
+                    {Array.from({ length: seatLimit }, (_, i) => {
+                      const seatNumber = i + 1
+                      const status = getSeatStatus(seatNumber)
+
+                      let bgColor = 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'
+                      let icon = null
+                      let disabled = false
+
+                      if (status === 'booked') {
+                        bgColor = 'bg-amber-500 shadow-amber-500/20'
+                        icon = <CheckCircle className="w-4 h-4 absolute top-1.5 right-1.5 text-white" />
+                        disabled = true
+                      }
+                      if (status === 'occupied') {
+                        bgColor = 'bg-rose-500 shadow-rose-500/20'
+                        icon = <Users className="w-4 h-4 absolute top-1.5 right-1.5 text-white" />
+                        disabled = true
+                      }
+                      if (status === 'checkedout') {
+                        bgColor = 'bg-neutral-400 shadow-neutral-400/20'
+                        icon = <XCircle className="w-4 h-4 absolute top-1.5 right-1.5 text-white" />
+                        disabled = true
+                      }
+
+                      return (
+                        <Button
+                          key={seatNumber}
+                          className={`
+                            w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-lg font-bold text-white text-base sm:text-lg
+                            ${bgColor} 
+                            ${disabled ? 'cursor-not-allowed' : 'hover:scale-105 active:scale-95'} 
+                            transition-all duration-200 shadow-lg relative
+                            ${selectedSeat === seatNumber ? 'ring-2 ring-neutral-900 dark:ring-white ring-offset-2' : ''}
+                          `}
+                          disabled={disabled}
+                          onClick={() => {
+                            setSelectedSeat(seatNumber)
+                            setAgreed(false)
+                          }}
+                          title={`Spot #${seatNumber} - ${status === 'free' ? 'Available' : status}`}
+                        >
+                          {icon}
+                          <span>{seatNumber}</span>
+                        </Button>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col items-center bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
-                <div className="w-4 h-4 bg-rose-500 rounded-full mb-2" />
-                <span>Checked-in</span>
+            </div>
+
+            {/* Live Analytics - Modern Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-2 max-w-3xl mx-auto">
+              <div className="bg-white dark:bg-neutral-900 rounded-md border border-neutral-200 dark:border-neutral-800 p-3 text-center">
+                <div className="text-xl sm:text-lg font-bold text-neutral-900 dark:text-white">{totalSeats}</div>
+                <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Total</div>
               </div>
-              <div className="flex flex-col items-center bg-neutral-50 dark:bg-neutral-800 p-3 rounded-lg">
-                <div className="w-4 h-4 bg-gray-400 rounded-full mb-2" />
-                <span>Checked-out</span>
+              <div className="bg-emerald-50 dark:bg-emerald-950/50 rounded-md border border-emerald-200 dark:border-emerald-800 p-3 text-center">
+                <div className="text-xl sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">{availableSeats}</div>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Available</div>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-950/50 rounded-md border border-amber-200 dark:border-amber-800 p-3 text-center">
+                <div className="text-xl sm:text-lg font-bold text-amber-600 dark:text-amber-400">{bookedSeats}</div>
+                <div className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wider">Booked</div>
+              </div>
+              <div className="bg-rose-50 dark:bg-rose-950/50 rounded-md border border-rose-200 dark:border-rose-800 p-3 text-center">
+                <div className="text-xl sm:text-lg font-bold text-rose-600 dark:text-rose-400">{checkedInSeats}</div>
+                <div className="text-xs font-medium text-rose-600 dark:text-rose-400 uppercase tracking-wider">In Use</div>
+              </div>
+              <div className="bg-neutral-50 dark:bg-neutral-800 rounded-md border border-neutral-200 dark:border-neutral-700 p-3 text-center col-span-2 sm:col-span-1">
+                <div className="text-xl sm:text-lg font-bold text-neutral-600 dark:text-neutral-400">{checkedOutSeats}</div>
+                <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Finished</div>
               </div>
             </div>
 
-            {/* Seats Grid */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 max-w-2xl mx-auto">
-              {Array.from({ length: seatLimit }, (_, i) => {
-                const seatNumber = i + 1
-                const status = getSeatStatus(seatNumber)
-                let bgColor = 'bg-green-500 hover:bg-green-600'
-                let icon = null
+            {/* Action Buttons - Clean & Prominent */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={handleGoBack}
+                variant="outline"
+                className="flex-1 h-14 sm:h-12 rounded-lg border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 font-medium text-base"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Slots
+              </Button>
 
-                if (status === 'booked') {
-                  bgColor = 'bg-yellow-400'
-                  icon = <CheckCircle className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
-                }
-                if (status === 'occupied') {
-                  bgColor = 'bg-rose-500'
-                  icon = <Users className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
-                }
-                if (status === 'checkedout') {
-                  bgColor = 'bg-gray-400'
-                  icon = <XCircle className="w-4 h-4 absolute top-1 right-1 text-white opacity-80" />
-                }
-
-                return (
-                  <Button
-                    key={seatNumber}
-                    className={`h-16 text-white font-semibold ${bgColor} hover:brightness-105 transition rounded-xl relative flex items-center justify-center`}
-                    disabled={status !== 'free'}
-                    onClick={() => {
-                      setSelectedSeat(seatNumber)
-                      setAgreed(false)
-                    }}
-                    title={`Spot #${seatNumber}`}
-                  >
-                    {icon}
-                    <span className="text-lg">{seatNumber}</span>
-                  </Button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Invite Friends Button */}
-          <div className="text-center mb-8">
-            <Button
-              onClick={() => setIsInviteOpen(true)}
-              className="bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 transition-all duration-200 shadow-lg hover:shadow-xl"
-              variant="secondary"
-            >
-              <Users className="h-4 w-4 mr-2 animate-pulse" />
-              Invite Friends
-            </Button>
-          </div>
-
-          {/* ✅ Live Seat Analytics */}
-          <div className="bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 grid grid-cols-2 sm:grid-cols-5 gap-4 text-center w-full max-w-2xl mx-auto">
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Total</span>
-              <span className="text-xl font-bold">{totalSeats}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Available</span>
-              <span className="text-xl font-bold text-green-600">{availableSeats}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Booked</span>
-              <span className="text-xl font-bold text-yellow-600">{bookedSeats}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Checked-in</span>
-              <span className="text-xl font-bold text-red-600">{checkedInSeats}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Checked-out</span>
-              <span className="text-xl font-bold text-gray-600">{checkedOutSeats}</span>
+              <Button
+                onClick={() => setIsInviteOpen(true)}
+                className="flex-1 h-14 sm:h-12 rounded-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+              >
+                <Users className="w-4 h-4 mr-2 animate-pulse" />
+                Invite Friends
+              </Button>
             </div>
           </div>
 
@@ -679,7 +894,7 @@ export default function SeatsPage() {
                 <AlertDialogAction
                   onClick={handleConfirmBooking}
                   disabled={isBooking || !agreed}
-                  className={`sm:w-32 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 ${!agreed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`sm:w-32 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 ${!agreed || isBooking ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {isBooking ? (
                     <div className="flex items-center gap-2">

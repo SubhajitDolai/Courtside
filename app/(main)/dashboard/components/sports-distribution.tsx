@@ -13,41 +13,41 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
   const textColor = resolvedTheme === "dark" ? "#f1f5f9" : "#1e293b";
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  
+
   // Check viewport size for responsive adjustments
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
-    
+
     // Initial check
     checkIfMobile();
-    
+
     // Listen for resize events
     window.addEventListener('resize', checkIfMobile);
-    
+
     return () => {
       window.removeEventListener('resize', checkIfMobile);
     };
   }, []);
-  
+
   // Count bookings by sport using memoization
   const data = useMemo(() => {
     try {
-      const sportCounts: {[key: string]: number} = {};
-      const sportNames: {[key: string]: string} = {};
-      
+      const sportCounts: { [key: string]: number } = {};
+      const sportNames: { [key: string]: string } = {};
+
       // Create lookup map for sport names to avoid O(n²) complexity
       sports.forEach(sport => {
         if (sport.id) sportNames[sport.id] = sport.name || 'Unknown';
       });
-      
+
       bookings.forEach(booking => {
         const sportId = booking.sport_id;
         const sportName = sportId ? (sportNames[sportId] || booking.sports?.name || 'Unknown') : 'Unknown';
         sportCounts[sportName] = (sportCounts[sportName] || 0) + 1;
       });
-      
+
       return Object.entries(sportCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value); // Sort by most popular
@@ -56,23 +56,23 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
       return [];
     }
   }, [bookings, sports]);
-  
+
   // Colors for the pie chart segments, ensuring accessibility
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-  
+
   const onPieEnter = useCallback((_: any, index: number) => {
     setActiveIndex(index);
   }, []);
-  
+
   const onPieLeave = useCallback(() => {
     setActiveIndex(null);
   }, []);
-  
+
   const renderActiveShape = useCallback((props: any) => {
-    const { 
+    const {
       cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value
     } = props;
-    
+
     return (
       <g>
         <Sector
@@ -96,7 +96,7 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
       </g>
     );
   }, []);
-  
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
@@ -119,35 +119,39 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
           }}
         >
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
+            <Cell
+              key={`cell-${index}`}
               fill={COLORS[index % COLORS.length]}
               stroke={resolvedTheme === "dark" ? "#1f2937" : "#ffffff"}
               strokeWidth={1}
             />
           ))}
         </Pie>
-        <Tooltip 
+        <Tooltip
           formatter={(value) => [`${value} bookings`, 'Count']}
-          contentStyle={{ 
+          contentStyle={{
             backgroundColor: resolvedTheme === "dark" ? "#1f2937" : "#ffffff",
             borderColor: resolvedTheme === "dark" ? "#374151" : "#e2e8f0",
             color: textColor,
-            boxShadow: resolvedTheme === "dark" 
+            boxShadow: resolvedTheme === "dark"
               ? "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)"
               : "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
           }}
           itemStyle={{ color: resolvedTheme === "dark" ? "#f1f5f9" : "#1e293b" }}
         />
-        <Legend 
-          layout="vertical" 
-          verticalAlign={isMobile ? "bottom" : "middle"} 
-          align={isMobile ? "center" : "right"}
+        <Legend
+          layout="vertical"
+          verticalAlign="top"
+          align="right"
+          wrapperStyle={{
+            paddingLeft: '20px',
+            paddingTop: '0px'
+          }}
           formatter={(value, entry: any) => (
-            <span style={{ 
-              color: textColor, 
+            <span style={{
+              color: textColor,
               fontWeight: activeIndex === entry.payload.index ? 'bold' : 'normal',
-              fontSize: isMobile ? '0.75rem' : 'inherit'
+              fontSize: isMobile ? '0.75rem' : '0.875rem'
             }}>
               {value}
             </span>

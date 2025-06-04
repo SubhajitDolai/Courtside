@@ -1,28 +1,95 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
-import { Check, Copy } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Check, Copy, ArrowLeft, Clock, Hash } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import { createClient } from '@/utils/supabase/client'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
+import BannedRedirect from '@/components/banned-redirect'
+import { format } from 'date-fns'
+
+// ✅ Convert 24hr time to 12hr format
+const formatTime12hr = (time24: string | undefined) => {
+  if (!time24) return 'Loading...'
+
+  const [hour, minute] = time24.split(':')
+  const date = new Date()
+  date.setHours(Number(hour), Number(minute))
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
+interface BookingDetails {
+  id: string
+  seat_number: number
+  booking_date: string
+  status: string
+  created_at: string
+  sports: { name: string }
+  slots: { start_time: string; end_time: string; gender: string }
+}
 
 export default function BookingSuccessPage() {
   const params = useSearchParams()
+  const routeParams = useParams()
   const bookingId = params.get('booking_id')
+  const sportId = routeParams.id as string
+  const slotId = routeParams.slotId as string
+
   const [copied, setCopied] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null)
+  const [loading, setLoading] = useState(true)
+
   const router = useRouter()
   const { start } = useGlobalLoadingBar()
+  const supabase = createClient()
 
   useEffect(() => {
-    // ✅ Ensure the component is mounted on the client-side
     setMounted(true)
-  }, [])
 
-  const handleGoHome = () => {
+    const fetchBookingDetails = async () => {
+      if (!bookingId) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select(`
+            id,
+            seat_number,
+            booking_date,
+            status,
+            created_at,
+            sports (name),
+            slots (start_time, end_time, gender)
+          `)
+          .eq('id', bookingId)
+          .single()
+
+        if (error) {
+          console.error('Error fetching booking details:', error)
+        } else {
+          setBookingDetails(data as unknown as BookingDetails)
+        }
+      } catch (error) {
+        console.error('Error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookingDetails()
+  }, [bookingId, supabase])
+
+  const handleGoBack = () => {
     start()
-    router.push('/sports')
+    router.push(`/sports/${sportId}/slots/${slotId}/seats`)
   }
 
   const handleCopy = () => {
@@ -34,44 +101,229 @@ export default function BookingSuccessPage() {
   }
 
   if (!mounted) {
-    return null // ✅ Ensure nothing is rendered on the server before the client is ready
+    return null
+  }
+
+  // ✅ Loading state - MATCH APP DESIGN
+  if (loading) {
+    return (
+      <>
+        <BannedRedirect />
+        <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
+            {/* Header Skeleton */}
+            <div className="text-center mb-8 sm:mb-12">
+              <div className="flex items-center justify-center mb-4 sm:mb-6">
+                <Skeleton className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl" />
+              </div>
+              <Skeleton className="h-12 w-64 mx-auto mb-4" />
+              <Skeleton className="h-6 w-48 mx-auto" />
+            </div>
+
+            {/* Content Skeleton */}
+            <div className="max-w-2xl mx-auto space-y-6">
+              <Card className="border border-neutral-200 dark:border-neutral-800">
+                <CardHeader>
+                  <Skeleton className="h-6 w-48 mx-auto" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Skeleton className="h-16 w-full rounded-lg" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (
-    <div className="p-6 min-h-screen flex flex-col items-center justify-center space-y-6">
+    <>
+      <BannedRedirect />
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
 
-      {/* ✅ Subtle success icon */}
-      <div className="rounded-full bg-green-100 p-3">
-        <Check className="w-6 h-6 text-green-500" />
+          {/* ✅ Success Header - NICER GREEN */}
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="flex items-center justify-center mb-4 sm:mb-6">
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl">
+                <Check className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+              </div>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4 sm:mb-6">
+              Booking
+              <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent"> Confirmed!</span>
+            </h1>
+
+            <p className="text-lg text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
+              Your spot has been successfully reserved. Save your booking details for check-in.
+            </p>
+          </div>
+
+          {/* ✅ Main Content */}
+          <div className="max-w-2xl mx-auto space-y-6">
+
+            {/* ✅ Booking Details Card - MATCH MODAL DESIGN */}
+            <Card className="border border-neutral-200 dark:border-neutral-800 shadow-sm">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-xl text-neutral-900 dark:text-white">
+                  Booking Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+
+                {bookingDetails ? (
+                  <div className="space-y-4">
+                    {/* ✅ Basic Info Grid - MATCH MODAL STYLE */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Sport</label>
+                        <p className="text-neutral-900 dark:text-white font-semibold">
+                          {bookingDetails.sports?.name || 'Unknown Sport'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Spot Number</label>
+                        <p className="text-neutral-900 dark:text-white font-semibold text-lg">
+                          #{bookingDetails.seat_number}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Date</label>
+                        <p className="text-neutral-900 dark:text-white font-semibold">
+                          {format(new Date(bookingDetails.booking_date), 'MMM dd, yyyy')}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Time Slot</label>
+                        <p className="text-neutral-900 dark:text-white font-semibold">
+                          {bookingDetails.slots?.start_time && bookingDetails.slots?.end_time
+                            ? `${formatTime12hr(bookingDetails.slots.start_time)} - ${formatTime12hr(bookingDetails.slots.end_time)}`
+                            : 'Time not available'
+                          }
+                        </p>
+                      </div>
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Gender Requirement</label>
+                        <p className="text-neutral-900 dark:text-white font-semibold capitalize">
+                          {bookingDetails.slots?.gender === 'any' ? 'Open to All' : (bookingDetails.slots?.gender || 'Not specified')}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="font-medium text-neutral-600 dark:text-neutral-400">Status</label>
+                        <p className="text-emerald-600 dark:text-emerald-400 font-semibold capitalize">
+                          {bookingDetails.status || 'Booked'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* ✅ Timeline - MATCH MODAL STYLE */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium flex items-center gap-2 text-neutral-900 dark:text-white">
+                        <Clock className="h-4 w-4" />
+                        Booking Timeline
+                      </h4>
+                      <div className="text-sm space-y-1 ml-6">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-600 dark:text-neutral-400">Booked:</span>
+                          <span className="text-neutral-900 dark:text-white">
+                            {format(new Date(bookingDetails.created_at), 'MMM dd, yyyy • h:mm a')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* ✅ Booking ID - MATCH MODAL STYLE */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium flex items-center gap-2 text-neutral-900 dark:text-white">
+                        <Hash className="h-4 w-4" />
+                        Booking ID
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-xs bg-neutral-100 dark:bg-neutral-800 p-3 rounded border flex-1 break-all text-neutral-900 dark:text-white">
+                          {bookingId}
+                        </p>
+                        <Button
+                          onClick={handleCopy}
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0"
+                        >
+                          {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-neutral-500 dark:text-neutral-400 py-8">
+                    <p>Unable to load booking details</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ✅ Important Notes - IMPROVED DESIGN */}
+            <Card className="border border-amber-200 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-900/20">
+              <CardContent className="p-4"> {/* ✅ Reduced from p-6 to p-4 */}
+                <div className="space-y-2"> {/* ✅ Reduced from space-y-3 to space-y-2 */}
+                  <h3 className="font-medium text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-amber-600 dark:bg-amber-400 rounded-full" /> {/* ✅ Smaller dot, better colors */}
+                    Important Notes
+                  </h3>
+                  <ul className="space-y-1.5 text-sm text-amber-800 dark:text-amber-300"> {/* ✅ Reduced spacing, better contrast */}
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 dark:text-amber-400 mt-0.5 font-bold">•</span> {/* ✅ Better bullet color */}
+                      <span>Show this booking ID at the sports complex desk</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 dark:text-amber-400 mt-0.5 font-bold">•</span>
+                      <span>Arrive 5-10 minutes before your slot time</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 dark:text-amber-400 mt-0.5 font-bold">•</span>
+                      <span>Cancellation allowed up to 30 minutes prior</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 dark:text-amber-400 mt-0.5 font-bold">•</span>
+                      <span>Bring your student/faculty ID for verification</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ✅ Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button
+                onClick={handleGoBack}
+                variant="outline"
+                className="flex-1 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Seats
+              </Button>
+
+              <Button
+                onClick={() => {
+                  start()
+                  router.push('/my-bookings')
+                }}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 dark:from-emerald-600 dark:to-emerald-700 dark:hover:from-emerald-700 dark:hover:to-emerald-800 text-white"
+              >
+                View My Bookings
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <h2 className="text-2xl font-bold text-green-600">Booking Confirmed!</h2>
-
-      {/* ✅ Better success text */}
-      <p className="text-muted-foreground text-center max-w-md">
-        Your spot has been successfully booked. Please show your booking number at the sports complex desk during check-in and check-out.
-      </p>
-
-      {/* ✅ Booking ID Card */}
-      <Card className="w-full max-w-md border border-green-200 shadow-sm">
-        <CardContent className="flex justify-between items-center p-4">
-          <span className="text-lg font-mono">{bookingId}</span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleCopy}
-            className="ml-2"
-            title="Copy booking ID"
-          >
-            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Button onClick={handleGoHome} size="lg" className="mt-2">
-        Go to Home
-      </Button>
-
-    </div>
+    </>
   )
 }

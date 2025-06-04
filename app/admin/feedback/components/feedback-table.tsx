@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 
@@ -28,16 +28,21 @@ interface FeedbackTableProps {
 }
 
 export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
-  const [feedback, setFeedback] = useState<Feedback[]>(initialFeedback)
+  const [feedback] = useState<Feedback[]>(initialFeedback)
   const [searchTerm, setSearchTerm] = useState('')
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest')
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  
+  // ✅ PAGINATION STATE
+  const [displayedItems, setDisplayedItems] = useState(5) // Start with 5 items
+  const [isLoading, setIsLoading] = useState(false)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
 
   // Filter and sort feedback
   const filteredFeedback = useMemo(() => {
-    let filtered = feedback.filter((item) => {
+    const filtered = feedback.filter((item) => {
       const searchMatch =
         item.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,6 +63,47 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
       return sortBy === 'newest' ? dateB - dateA : dateA - dateB
     })
   }, [feedback, searchTerm, dateFrom, dateTo, sortBy])
+
+  // ✅ GET CURRENT DISPLAYED ITEMS
+  const currentItems = useMemo(() => {
+    return filteredFeedback.slice(0, displayedItems)
+  }, [filteredFeedback, displayedItems])
+
+  // ✅ LOAD MORE FUNCTION
+  const loadMore = async () => {
+    if (isLoading || displayedItems >= filteredFeedback.length) return
+    
+    setIsLoading(true)
+    
+    // Simulate loading delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    setDisplayedItems(prev => Math.min(prev + 5, filteredFeedback.length))
+    setIsLoading(false)
+  }
+
+  // ✅ INTERSECTION OBSERVER FOR INFINITE SCROLL
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading && displayedItems < filteredFeedback.length) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [isLoading, displayedItems, filteredFeedback.length])
+
+  // ✅ RESET PAGINATION WHEN FILTERS CHANGE
+  useEffect(() => {
+    setDisplayedItems(5)
+  }, [searchTerm, dateFrom, dateTo, sortBy])
 
   const toggleRowExpansion = (id: string) => {
     const newExpanded = new Set(expandedRows)
@@ -126,7 +172,7 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
         </Card>
       </div>
 
-      {/* Filters Section - Slim */}
+      {/* Filters Section - Same as before */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -213,7 +259,7 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
               <div className="flex flex-wrap gap-2">
                 {searchTerm && (
                   <Button onClick={() => setSearchTerm('')} variant="secondary" size="sm" className="text-sm">
-                    Clear: "{searchTerm}"
+                    Clear: &quot;{searchTerm}&quot;
                   </Button>
                 )}
                 {dateFrom && (
@@ -237,7 +283,7 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Feedback Submissions</h2>
           <Badge variant="secondary" className="text-sm px-3 py-1">
-            {filteredFeedback.length} {filteredFeedback.length === 1 ? 'item' : 'items'}
+            Showing {currentItems.length} of {filteredFeedback.length} {filteredFeedback.length === 1 ? 'item' : 'items'}
           </Badge>
         </div>
 
@@ -253,7 +299,8 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
           </Card>
         ) : (
           <div className="space-y-4">
-            {filteredFeedback.map((item) => (
+            {/* ✅ RENDER ONLY CURRENT ITEMS */}
+            {currentItems.map((item) => (
               <Card key={item.id} className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <CardContent className="p-6">
                   {/* Header */}
@@ -343,6 +390,33 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
                 </CardContent>
               </Card>
             ))}
+
+            {/* ✅ LOAD MORE TRIGGER & LOADING STATE */}
+            {displayedItems < filteredFeedback.length && (
+              <div ref={loadMoreRef} className="flex justify-center py-8">
+                {isLoading ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm font-medium">Loading more feedback...</span>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={loadMore}
+                    className="px-6 py-2 text-sm font-medium"
+                  >
+                    Load More ({filteredFeedback.length - displayedItems} remaining)
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* ✅ END OF RESULTS MESSAGE */}
+            {displayedItems >= filteredFeedback.length && filteredFeedback.length > 5 && (
+              <div className="text-center py-6 text-muted-foreground">
+                <p className="text-sm">You&apos;ve reached the end of the feedback list</p>
+              </div>
+            )}
           </div>
         )}
       </div>

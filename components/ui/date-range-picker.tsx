@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns"
+import { format, subMonths } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
@@ -25,16 +25,6 @@ export function DatePickerWithRange({
   onChange,
   className,
 }: DatePickerWithRangeProps) {
-  // Calculate default date range (last month to current month)
-  const getDefaultDateRange = () => {
-    const today = new Date()
-    const lastMonth = subMonths(today, 1)
-    return {
-      from: startOfMonth(lastMonth),
-      to: endOfMonth(today)
-    }
-  }
-
   // Set default month to show (last month so both months are visible)
   const defaultMonth = value?.from || subMonths(new Date(), 1)
 

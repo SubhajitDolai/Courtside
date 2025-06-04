@@ -225,7 +225,7 @@ export default function BookingsHistoryFilters({ onFiltersChange }: BookingsHist
               className="bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-900/70 cursor-pointer"
               onClick={() => updateFilters({ search: '' })}
             >
-              Search: "{filters.search}"
+              Search: &quot;{filters.search}&quot;
               <X className="h-3 w-3 ml-1" />
             </Badge>
           )}

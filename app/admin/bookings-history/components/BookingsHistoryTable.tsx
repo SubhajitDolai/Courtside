@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -78,11 +78,7 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
     setCurrentPage(1)
   }, [filters])
 
-  useEffect(() => {
-    fetchBookings()
-  }, [currentPage, filters])
-
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true)
     try {
       const offset = (currentPage - 1) * itemsPerPage
@@ -154,7 +150,11 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, filters, supabase])
+
+  useEffect(() => {
+    fetchBookings()
+  }, [fetchBookings])
 
   const handleCopy = () => {
     if (showBookingId) {
@@ -259,7 +259,7 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
         </p>
         {filters.search && (
           <p className="text-sm text-green-600 dark:text-green-400 mt-2 bg-green-50 dark:bg-green-950/50 px-3 py-1 rounded-full">
-            Searched for: "{filters.search}"
+            Searched for: &quot;{filters.search}&quot;
           </p>
         )}
       </div>
@@ -274,7 +274,7 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
           <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
           <span className="font-medium text-neutral-900 dark:text-white">
             {filters.search ? (
-              <>Found {bookings.length} result{bookings.length !== 1 ? 's' : ''} for "{filters.search}"</>
+              <>Found {bookings.length} result{bookings.length !== 1 ? 's' : ''} for &quot;{filters.search}&quot;</>
             ) : (
               <>Showing {bookings.length} of {totalCount} total bookings</>
             )}
@@ -359,7 +359,7 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
                       <span className="font-medium">
                         {formatTime12hr(booking.slots?.start_time || '')}
                       </span>
-                      <span className="text-neutral-400 mx-1">–</span>
+                      <span className="text-neutral-400 mx-1">&ndash;</span>
                       <span className="font-medium">
                         {formatTime12hr(booking.slots?.end_time || '')}
                       </span>

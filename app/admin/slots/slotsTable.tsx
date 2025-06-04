@@ -138,7 +138,7 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
                   className="bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-900/70 cursor-pointer"
                   onClick={() => setSearch('')}
                 >
-                  Search: "{search}"
+                  Search: &quot;{search}&quot;
                 </Badge>
               )}
               
