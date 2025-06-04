@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -72,6 +72,8 @@ export default function AdminBookingsPage() {
   const [userTypeFilter, setUserTypeFilter] = useState('')
   const [sportFilter, setSportFilter] = useState('')
   const [page, setPage] = useState(1)
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false)
+  const [debouncedIsConnected, setDebouncedIsConnected] = useState(false)
   const perPage = 50
 
   const fetchBookings = useCallback(async () => {
@@ -98,12 +100,29 @@ export default function AdminBookingsPage() {
     return (data || []) as unknown as Booking[]
   }, [page, supabase])
 
-  // Use our realtime hook (type-safe now)
-  const { data: bookings, loading: loadingBookings } = useRealtimeSubscription<Booking>(
+  // Use our realtime hook
+  const { data: bookings, loading: loadingBookings, isConnected } = useRealtimeSubscription<Booking>(
     'bookings',     // table name
     [],             // initial data (empty array)
     fetchBookings   // fetch function
   )
+
+  // ✅ Debounce connection status to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedIsConnected(isConnected)
+    }, 500) // Debounce connection status by 500ms
+
+    return () => clearTimeout(timer)
+  }, [isConnected])
+
+  // ✅ Show connection status after initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowConnectionStatus(true)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Reset page to 1 when search changes
   useEffect(() => {
@@ -288,11 +307,31 @@ export default function AdminBookingsPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm rounded-lg border border-white/20 dark:border-neutral-700/20">
-              <Users className="h-4 w-4 text-green-600 dark:text-green-500" />
-              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                {filteredBookings.length} Active
-              </span>
+            <div className="flex items-center gap-2 px-3 py-2 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm rounded-lg border border-white/20 dark:border-neutral-700/20">
+              {showConnectionStatus && (
+                <>
+                  {debouncedIsConnected ? (
+                    <>
+                      <div className="relative">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                        <span className="hidden sm:inline">Live Bookings: {filteredBookings.length}</span>
+                        <span className="sm:hidden">Live Bookings: {filteredBookings.length}</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-amber-500 rounded-full animate-pulse" />
+                      <span className="text-[10px] sm:text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                        <span className="hidden sm:inline">Connecting...</span>
+                        <span className="sm:hidden">Connecting</span>
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -561,7 +600,7 @@ export default function AdminBookingsPage() {
         </Card>
       </div>
 
-      {/* Dialogs with updated styling */}
+      {/* ...existing dialogs... */}
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !deleting && setDeleteId(o ? deleteId : null)}>
         <AlertDialogContent className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
           <AlertDialogHeader>

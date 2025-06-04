@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,6 +34,8 @@ export default function SportSlotsPage() {
   const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null)
   const [sportName, setSportName] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false)
+  const [debouncedIsConnected, setDebouncedIsConnected] = useState(false)
   const { start } = useGlobalLoadingBar()
 
   // Get user profile data (this doesn't need to be part of the realtime subscription)
@@ -91,13 +93,30 @@ export default function SportSlotsPage() {
   }, [sportId, supabase])
   
   // Use Realtime subscription for slots
-  const { data: slots } = useRealtimeSubscription<Slot>(
+  const { data: slots, isConnected } = useRealtimeSubscription<Slot>(
     'slots',        // table name
     [],             // initial data (empty array)
     fetchSlots,     // fetch function
     'sport_id',     // filter column
     sportId         // filter value
   )
+
+  // ✅ Debounce connection status to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedIsConnected(isConnected)
+    }, 500) // Debounce connection status by 500ms
+    
+    return () => clearTimeout(timer)
+  }, [isConnected])
+
+  // ✅ Show connection status after initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowConnectionStatus(true)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // ✅ Gender + user_type filter logic
   const visibleSlots = slots.filter((slot) => {
@@ -202,10 +221,33 @@ export default function SportSlotsPage() {
           <div className="text-center mb-8 sm:mb-12">
             <div className="flex items-center justify-center mb-4 sm:mb-6">
               <div
-                className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl"
+                className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl relative cursor-pointer"
                 onClick={handleGoBack}
               >
                 <Clock className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+                
+                {/* ✅ Dynamic Live Status - Using debounced connection status */}
+                {showConnectionStatus && debouncedIsConnected && (
+                  <>
+                    {/* Live pulse ring */}
+                    <div className="absolute inset-0 rounded-xl sm:rounded-2xl md:rounded-3xl bg-emerald-500/20 animate-ping" />
+                    
+                    {/* Live status dot */}
+                    <div className="absolute -top-1 -right-1">
+                      <div className="relative">
+                        <div className="w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-neutral-900" />
+                        <div className="w-3 h-3 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ✅ Connecting/Disconnected State */}
+                {showConnectionStatus && !debouncedIsConnected && (
+                  <div className="absolute -top-1 -right-1">
+                    <div className="w-3 h-3 bg-amber-500 rounded-full border-2 border-white dark:border-neutral-900 animate-pulse" />
+                  </div>
+                )}
               </div>
             </div>
             
