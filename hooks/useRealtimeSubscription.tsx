@@ -218,7 +218,7 @@ export function useRealtimeSubscription<T>(
             
           case 'CHANNEL_ERROR':
           case 'TIMED_OUT':
-            console.error(`🔴 Subscription failed: ${status}`)
+            console.log(`🔴 Subscription failed: ${status}`)
             setIsConnected(false)
             setError(`Connection ${status.toLowerCase()}`)
             

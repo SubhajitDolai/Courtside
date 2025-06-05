@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, Database, MessageSquare } from "lucide-react";
+import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, Database, MessageSquare, QrCode } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useTransition, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -44,18 +44,19 @@ export const navigationItems = [
   {
     title: "Bookings",
     category: "bookings",
-    icon: Database,
+    icon: ClipboardList,
     items: [
       { title: "Active Bookings", href: "/admin/bookings", icon: ClipboardList },
-      { title: "Bookings History", href: "/admin/bookings-history", icon: History },
+      { title: "QR Scanner", href: "/admin/qr-scanner", icon: QrCode },
     ]
   },
   {
-    title: "User Feedback",
-    category: "feedback",
-    icon: Database,
+    title: "Reports & History",
+    category: "reports",
+    icon: History,
     items: [
-      { title: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+      { title: "Bookings History", href: "/admin/bookings-history", icon: History },
+      { title: "User Feedback", href: "/admin/feedback", icon: MessageSquare },
     ]
   },
 ];

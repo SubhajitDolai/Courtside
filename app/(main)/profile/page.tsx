@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Button } from '@/components/ui/button'
 import { PencilIcon, Loader, User } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
@@ -82,39 +80,87 @@ export default function ProfilePage() {
 
           {/* Loading Skeleton */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <div className="p-6 space-y-6">
-                {/* Header */}
-                <div className="text-center space-y-2">
-                  <Skeleton className="h-8 w-1/2 mx-auto" />
-                  <Skeleton className="h-5 w-2/3 mx-auto" />
+            {/* Header Section Skeleton */}
+            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-7 rounded-t-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
                 </div>
+                <Skeleton className="h-10 w-32 rounded-md" />
+              </div>
+            </div>
 
-                {/* Avatar & name block */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                  <Skeleton className="h-28 w-28 rounded-full" />
-                  <div className="flex-1 space-y-2 text-center sm:text-left">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-6 w-40" />
+            {/* Form Section Skeleton */}
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 border-t-0 rounded-b-md">
+              <div className="p-8 space-y-6">
+                {/* Personal Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 rounded-md animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-6 w-full" />
+                    </div>
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-6 w-full" />
+                    </div>
                   </div>
                 </div>
 
-                <Skeleton className="h-px w-full" />
-
-                {/* Info grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div className="space-y-2" key={i}>
-                      <Skeleton className="h-4 w-1/2" />
+                {/* Account Type Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 rounded-md animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-16" />
                       <Skeleton className="h-6 w-full" />
                     </div>
-                  ))}
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-12" />
+                      <Skeleton className="h-6 w-full" />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Footer button */}
-                <div className="flex justify-center pt-2">
-                  <Skeleton className="h-10 w-32 rounded-md" />
+                {/* Academic Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 rounded-md animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+                    <Skeleton className="h-5 w-36" />
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-6 w-full" />
+                    </div>
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-6 w-full" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 rounded-md animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-full" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -145,73 +191,167 @@ export default function ProfilePage() {
 
           {/* Profile Content */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <div className="p-6">
-                <div className="text-center pb-6">
-                  <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">My Profile</h2>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">View and manage your profile information</p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6">
-                  <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-neutral-200 dark:border-neutral-700">
-                    <AvatarFallback className="bg-gradient-to-br from-neutral-700 to-neutral-800 dark:from-neutral-600 dark:to-neutral-700 text-2xl font-bold text-white">
+            {/* Header Section */}
+            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-6 rounded-t-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-12 h-12 border border-neutral-200 dark:border-neutral-700">
+                    <AvatarFallback className="bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-base font-medium">
                       {profile.first_name?.[0]}{profile.last_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
+                  <div>
+                    <h1 className="text-2xl font-semibold text-neutral-900 dark:text-white">
+                      {profile.first_name} {profile.last_name}
+                    </h1>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                      Personal information and preferences
+                    </p>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="gap-2" 
+                  onClick={handleEdit} 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <PencilIcon className="w-4 h-4 animate-pulse" />
+                      Edit Profile
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
 
-                  <div className="text-center sm:text-left flex-1">
-                    <h3 className="text-2xl font-bold text-neutral-900 dark:text-white">{profile.first_name} {profile.last_name}</h3>
-                    <p className="text-neutral-600 dark:text-neutral-400">{profile.user_type}</p>
-                    <div className="mt-2">
-                      <Badge variant="outline" className="bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600">
-                        {profile.user_type === 'faculty' ? 'Department' : 'Course'}: {profile.course}
-                      </Badge>
+            {/* Form Section */}
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 border-t-0 rounded-b-md">
+              <div className="p-8 space-y-6">
+                {/* Personal Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 border border-neutral-200 dark:border-neutral-700 rounded-md flex items-center justify-center">
+                      <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Personal Information</h3>
+                  </div>
+
+                  {/* Names */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">First Name</p>
+                      <p className="text-lg font-medium text-neutral-900 dark:text-white">
+                        {profile.first_name}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Last Name</p>
+                      <p className="text-lg font-medium text-neutral-900 dark:text-white">
+                        {profile.last_name}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <Separator className="my-6" />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
-                  <div className="space-y-1">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {profile.user_type === 'faculty' ? 'ID' : 'PRN'}
-                    </p>
-                    <p className="font-medium text-neutral-900 dark:text-white">{profile.prn}</p>
+                {/* Account Type Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 border border-neutral-200 dark:border-neutral-700 rounded-md flex items-center justify-center">
+                      <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Account Type</h3>
                   </div>
 
-                  <div className="space-y-1">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {profile.user_type === 'faculty' ? 'Department' : 'Course'}
-                    </p>
-                    <p className="font-medium text-neutral-900 dark:text-white">{profile.course}</p>
-                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* User Type */}
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">User Type</p>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 rounded-full ${profile.user_type === 'student' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                        <p className="text-lg font-medium text-neutral-900 dark:text-white capitalize">
+                          {profile.user_type}
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="space-y-1">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Phone Number</p>
-                    <p className="font-medium text-neutral-900 dark:text-white">{profile.phone_number}</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Gender</p>
-                    <p className="font-medium text-neutral-900 dark:text-white capitalize">{profile.gender}</p>
+                    {/* Gender */}
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Gender</p>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 rounded-full ${profile.gender === 'male' ? 'bg-blue-500' : 'bg-pink-500'}`}></div>
+                        <p className="text-lg font-medium text-neutral-900 dark:text-white capitalize">
+                          {profile.gender}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex justify-center pt-8">
-                  <Button size="lg" className="gap-2" onClick={handleEdit} disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader className="h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <PencilIcon className="h-4 w-4" />
-                        Edit Profile
-                      </>
-                    )}
-                  </Button>
+                {/* Academic Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 border border-neutral-200 dark:border-neutral-700 rounded-md flex items-center justify-center">
+                      <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                      {profile.user_type === 'faculty' ? 'Professional Information' : 'Academic Information'}
+                    </h3>
+                  </div>
+
+                  {/* ID + Course/Department */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        {profile.user_type === 'faculty' ? 'Employee ID' : 'Student PRN'}
+                      </p>
+                      <p className="text-lg font-medium text-neutral-900 dark:text-white font-mono">
+                        {profile.prn}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        {profile.user_type === 'faculty' ? 'Department' : 'Course/Program'}
+                      </p>
+                      <p className="text-lg font-medium text-neutral-900 dark:text-white">
+                        {profile.course}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="w-8 h-8 border border-neutral-200 dark:border-neutral-700 rounded-md flex items-center justify-center">
+                      <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Contact Information</h3>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-1">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">Phone Number</p>
+                    <p className="text-lg font-medium text-neutral-900 dark:text-white">
+                      {profile.phone_number}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

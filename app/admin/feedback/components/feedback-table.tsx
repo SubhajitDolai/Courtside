@@ -3,15 +3,29 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from '@/components/ui/alert-dialog'
+import { Checkbox } from '@/components/ui/checkbox'
+import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/utils/supabase/client'
+import { toast } from 'sonner'
 
 interface Feedback {
   id: string
@@ -25,20 +39,26 @@ interface Feedback {
 
 interface FeedbackTableProps {
   initialFeedback: Feedback[]
+  onFeedbackDeleted?: (deletedId: string) => void
 }
 
-export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
-  const [feedback] = useState<Feedback[]>(initialFeedback)
+export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: FeedbackTableProps) {
+  const [feedback, setFeedback] = useState<Feedback[]>(initialFeedback)
   const [searchTerm, setSearchTerm] = useState('')
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest')
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [isDeleting, setIsDeleting] = useState(false)
   
   // ✅ PAGINATION STATE
   const [displayedItems, setDisplayedItems] = useState(5) // Start with 5 items
   const [isLoading, setIsLoading] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  const supabase = createClient()
 
   // Filter and sort feedback
   const filteredFeedback = useMemo(() => {
@@ -121,6 +141,112 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
 
   const shouldShowExpandButton = (text: string) => {
     return text.length > 120
+  }
+
+  // Delete feedback function
+  const deleteFeedback = async (feedbackId: string) => {
+    try {
+      setDeletingIds(prev => new Set([...prev, feedbackId]))
+      
+      const { error } = await supabase
+        .from('user_feedback')
+        .delete()
+        .eq('id', feedbackId)
+
+      if (error) {
+        console.error('Error deleting feedback:', error)
+        toast.error('Failed to delete feedback')
+        return
+      }
+
+      // Remove from local state
+      setFeedback(prev => prev.filter(item => item.id !== feedbackId))
+      
+      // Remove from selected if it was selected
+      setSelectedIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(feedbackId)
+        return newSet
+      })
+      
+      // Call parent callback if provided
+      onFeedbackDeleted?.(feedbackId)
+      
+      toast.success('Feedback deleted successfully')
+    } catch (error) {
+      console.error('Error deleting feedback:', error)
+      toast.error('Failed to delete feedback')
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(feedbackId)
+        return newSet
+      })
+    }
+  }
+
+  // Bulk delete function
+  const deleteBulkFeedback = async () => {
+    if (selectedIds.size === 0) return
+
+    try {
+      setIsDeleting(true)
+      
+      const { error } = await supabase
+        .from('user_feedback')
+        .delete()
+        .in('id', Array.from(selectedIds))
+
+      if (error) {
+        console.error('Error deleting feedback:', error)
+        toast.error('Failed to delete selected feedback')
+        return
+      }
+
+      // Remove from local state
+      setFeedback(prev => prev.filter(item => !selectedIds.has(item.id)))
+      
+      // Clear selections
+      setSelectedIds(new Set())
+      
+      toast.success(`${selectedIds.size} feedback items deleted successfully`)
+    } catch (error) {
+      console.error('Error deleting feedback:', error)
+      toast.error('Failed to delete selected feedback')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Toggle selection for individual item
+  const toggleSelection = (feedbackId: string) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(feedbackId)) {
+        newSet.delete(feedbackId)
+      } else {
+        newSet.add(feedbackId)
+      }
+      return newSet
+    })
+  }
+
+  // Select all visible items
+  const toggleSelectAll = () => {
+    const visibleIds = currentItems.map(item => item.id)
+    const allSelected = visibleIds.every(id => selectedIds.has(id))
+    
+    setSelectedIds(prev => {
+      const newSet = new Set(prev)
+      if (allSelected) {
+        // Deselect all visible
+        visibleIds.forEach(id => newSet.delete(id))
+      } else {
+        // Select all visible
+        visibleIds.forEach(id => newSet.add(id))
+      }
+      return newSet
+    })
   }
 
   return (
@@ -281,10 +407,67 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
       {/* Feedback List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Feedback Submissions</h2>
-          <Badge variant="secondary" className="text-sm px-3 py-1">
-            Showing {currentItems.length} of {filteredFeedback.length} {filteredFeedback.length === 1 ? 'item' : 'items'}
-          </Badge>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-semibold">Feedback Submissions</h2>
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-sm px-3 py-1">
+                  {selectedIds.size} selected
+                </Badge>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="gap-2"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Delete Selected
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Selected Feedback</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete {selectedIds.size} feedback item{selectedIds.size === 1 ? '' : 's'}? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={deleteBulkFeedback}
+                        className={cn(buttonVariants({ variant: "destructive" }))}
+                      >
+                        Delete {selectedIds.size} Item{selectedIds.size === 1 ? '' : 's'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {filteredFeedback.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={currentItems.length > 0 && currentItems.every(item => selectedIds.has(item.id))}
+                  onCheckedChange={toggleSelectAll}
+                  aria-label="Select all visible feedback"
+                />
+                <span className="text-sm text-muted-foreground">
+                  Select all visible
+                </span>
+              </div>
+            )}
+            <Badge variant="secondary" className="text-sm px-3 py-1">
+              Showing {currentItems.length} of {filteredFeedback.length} {filteredFeedback.length === 1 ? 'item' : 'items'}
+            </Badge>
+          </div>
         </div>
 
         {filteredFeedback.length === 0 ? (
@@ -306,6 +489,11 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={selectedIds.has(item.id)}
+                        onCheckedChange={() => toggleSelection(item.id)}
+                        aria-label={`Select feedback from ${item.user_name || 'Anonymous'}`}
+                      />
                       <div className="p-2 bg-muted/50 rounded-full">
                         <MessageSquare className="h-5 w-5 text-muted-foreground" />
                       </div>
@@ -316,27 +504,71 @@ export default function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
                       </div>
                     </div>
 
-                    {/* Dynamic Expand Button - Only show for long messages */}
-                    {shouldShowExpandButton(item.note) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleRowExpansion(item.id)}
-                        className="gap-2 text-muted-foreground hover:text-foreground text-sm"
-                      >
-                        {expandedRows.has(item.id) ? (
-                          <>
-                            <ChevronUp className="h-4 w-4" />
-                            Collapse
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="h-4 w-4" />
-                            Expand
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {/* Dynamic Expand Button - Only show for long messages */}
+                      {shouldShowExpandButton(item.note) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleRowExpansion(item.id)}
+                          className="gap-2 text-muted-foreground hover:text-foreground text-sm"
+                        >
+                          {expandedRows.has(item.id) ? (
+                            <>
+                              <ChevronUp className="h-4 w-4" />
+                              Collapse
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-4 w-4" />
+                              Expand
+                            </>
+                          )}
+                        </Button>
+                      )}
+
+                      {/* Delete Button with Confirmation */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            disabled={deletingIds.has(item.id)}
+                          >
+                            {deletingIds.has(item.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                            <span className="sr-only sm:not-sr-only">Delete</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Feedback</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this feedback? This action cannot be undone.
+                              <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                                <p className="text-sm font-medium mb-1">From: {item.user_name || 'Anonymous'}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {truncateText(item.note, 100)}
+                                </p>
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteFeedback(item.id)}
+                              className={cn(buttonVariants({ variant: "destructive" }))}
+                            >
+                              Delete Feedback
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
 
                   {/* User Info */}

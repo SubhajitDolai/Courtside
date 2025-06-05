@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* QR Scanner Popup Animations */
+@keyframes shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

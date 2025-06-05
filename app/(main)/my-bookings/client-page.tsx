@@ -1,11 +1,11 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader, Copy, Check, Calendar, Clock, User, Tag, InfoIcon, AlertCircle } from 'lucide-react'
+import { Loader, Copy, Check, Calendar, Clock, User, Tag, InfoIcon, AlertCircle, QrCode, Download } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,8 @@ import { Badge } from '@/components/ui/badge'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import BannedRedirect from '@/components/banned-redirect'
 import { Skeleton } from '@/components/ui/skeleton'
+import QRCode from 'qrcode'
+import QRCodeComponent from 'react-qr-code'
 
 // Define the Booking type
 interface Booking {
@@ -49,6 +51,10 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
   const [showCancelDialog, setShowCancelDialog] = useState<string | null>(null)
+
+  // QR Code states
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
+  const [generatingQR, setGeneratingQR] = useState(false)
 
   // ✅ Booking fetcher for real-time updates
   const fetchBookings = useCallback(async () => {
@@ -87,6 +93,51 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
     fetchBookings
   )
 
+  // Generate QR code when dialog opens
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (!showBookingId) {
+        setQrCodeUrl(null)
+        return
+      }
+
+      setGeneratingQR(true)
+      try {
+        // Generate QR code with just the booking ID using qrcode package
+        const qrDataUrl = await QRCode.toDataURL(showBookingId, {
+          width: 256,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          },
+          errorCorrectionLevel: 'M'
+        })
+        setQrCodeUrl(qrDataUrl)
+      } catch (error) {
+        console.error('Failed to generate QR code:', error)
+        toast.error('Failed to generate QR code')
+      } finally {
+        setGeneratingQR(false)
+      }
+    }
+
+    generateQRCode()
+  }, [showBookingId])
+
+  // Download QR code function
+  const downloadQRCode = () => {
+    if (!qrCodeUrl || !showBookingId) return
+
+    const link = document.createElement('a')
+    link.href = qrCodeUrl
+    link.download = `booking-qr-${showBookingId.slice(0, 8)}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    toast.success('QR code downloaded!')
+  }
+
   const handleCancel = async (bookingId: string) => {
     setCanceling(bookingId)
     setShowCancelDialog(null) // Close dialog
@@ -120,6 +171,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
   const handleCopy = (id: string) => {
     navigator.clipboard.writeText(id)
     setCopied(true)
+    toast.success('Booking ID copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -172,53 +224,62 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
             </div>
             <div className="p-6 space-y-6">
               {/* Tabs Skeleton */}
-              <div className="grid grid-cols-4 w-full max-w-md gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+              <div className="grid grid-cols-4 w-full gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                 <Skeleton className="h-8 w-full rounded-md" />
                 <Skeleton className="h-8 w-full rounded-md" />
                 <Skeleton className="h-8 w-full rounded-md" />
                 <Skeleton className="h-8 w-full rounded-md" />
               </div>
 
-              {/* Single Card Skeleton - Matching Actual Structure */}
-              <Card className="border-2 shadow-sm hover:shadow-lg transition-all duration-200 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <Skeleton className="h-5 w-24" /> {/* Sport name */}
-                      <Skeleton className="h-4 w-16" /> {/* Status badge */}
-                    </div>
-                    <Skeleton className="h-8 w-8 rounded-full" /> {/* Menu button */}
-                  </div>
-                </CardHeader>
+              {/* Grid of Skeleton Cards - 3 cards to match actual layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, index) => (
+                  <Card key={index} className="border-2 shadow-sm hover:shadow-lg transition-all duration-200 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <Skeleton className="h-5 w-28" /> {/* Sport name */}
+                          <div className="flex items-center gap-1">
+                            <Skeleton className="h-4 w-20" /> {/* Booking ID */}
+                          </div>
+                        </div>
+                        <Skeleton className="h-6 w-16 rounded-full" /> {/* Status badge */}
+                      </div>
+                    </CardHeader>
 
-                <CardContent className="space-y-4 pt-0">
-                  {/* Date and Time */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4" /> {/* Calendar icon */}
-                      <Skeleton className="h-4 w-20" /> {/* Date */}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4" /> {/* Clock icon */}
-                      <Skeleton className="h-4 w-24" /> {/* Time */}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4" /> {/* User icon */}
-                      <Skeleton className="h-4 w-16" /> {/* Spot number */}
-                    </div>
-                  </div>
+                    <CardContent className="space-y-3 pt-0">
+                      {/* Date and Time Grid */}
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-4 w-4" /> {/* Calendar icon */}
+                          <Skeleton className="h-4 w-20" /> {/* Date */}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-4 w-4" /> {/* Clock icon */}
+                          <Skeleton className="h-4 w-24" /> {/* Time */}
+                        </div>
+                      </div>
 
-                  {/* Booking ID */}
-                  <div className="pt-2">
-                    <Skeleton className="h-3 w-10 mb-1" /> {/* "ID:" label */}
-                    <Skeleton className="h-4 w-32" /> {/* Booking ID */}
-                  </div>
-                </CardContent>
+                      {/* Spot info */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <Skeleton className="h-4 w-4" /> {/* User icon */}
+                        <Skeleton className="h-4 w-16" /> {/* Spot number */}
+                      </div>
 
-                <CardFooter className="pt-0">
-                  <Skeleton className="h-9 w-full" /> {/* Action button */}
-                </CardFooter>
-              </Card>
+                      {/* Created at */}
+                      <div className="flex items-center gap-2 text-xs">
+                        <Skeleton className="h-3 w-3" /> {/* Tag icon */}
+                        <Skeleton className="h-3 w-32" /> {/* Created date */}
+                      </div>
+                    </CardContent>
+
+                    <CardFooter className="pt-0 flex flex-col space-y-2">
+                      <Skeleton className="h-9 w-full" /> {/* QR Code button */}
+                      <Skeleton className="h-9 w-full" /> {/* Cancel button */}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -238,7 +299,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
 
           <div className="p-6">
             <Tabs defaultValue="all" className="space-y-6" onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 w-full max-w-md">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="booked">Active</TabsTrigger>
                 <TabsTrigger value="checked-in">In Progress</TabsTrigger>
@@ -269,13 +330,9 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                                 <CardTitle className="text-lg text-neutral-900 dark:text-white">
                                   {booking.sports?.name || 'Unknown Sport'}
                                 </CardTitle>
-                                <button
-                                  onClick={() => setShowBookingId(booking.id)}
-                                  className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 transition-colors"
-                                >
+                                <div className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
                                   <span>#{booking.id.slice(0, 8)}...</span>
-                                  <InfoIcon className="h-3 w-3" />
-                                </button>
+                                </div>
                               </div>
                               <Badge className={`${getStatusColor(booking.status)} border-0`}>
                                 {formatStatus(booking.status)}
@@ -321,8 +378,20 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                             )}
                           </CardContent>
 
-                          {booking.status === 'booked' && (
-                            <CardFooter className="pt-0">
+                          <CardFooter className="pt-0 flex flex-col space-y-2">
+                            {/* QR Code Button - Always Visible */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowBookingId(booking.id)}
+                              className="w-full text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-950/20 transition-colors"
+                            >
+                              <QrCode className="mr-2 h-4 w-4" />
+                              View QR Code & Booking ID
+                            </Button>
+
+                            {/* Cancel Button - Only for Active Bookings */}
+                            {booking.status === 'booked' && (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -339,8 +408,8 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                                   'Cancel Booking'
                                 )}
                               </Button>
-                            </CardFooter>
-                          )}
+                            )}
+                          </CardFooter>
                         </Card>
                       )
                     })}
@@ -363,35 +432,123 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
           </div>
         </div>
 
-        {/* Booking ID Dialog */}
+        {/* Enhanced Booking ID Dialog with QR Code */}
         <Dialog open={showBookingId !== null} onOpenChange={(open) => {
           if (!open) {
             setShowBookingId(null)
             setCopied(false)
+            setQrCodeUrl(null) // Clear QR code when closing
           }
         }}>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Booking Reference</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <QrCode className="h-5 w-5" />
+                Booking Reference
+              </DialogTitle>
               <DialogDescription>
-                Your complete booking ID. Show this at the facility counter for check-in.
+                Show this QR or booking ID with your student ID at check-in.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 flex items-center justify-between font-mono text-sm">
-              <span className="break-all text-neutral-900 dark:text-neutral-100">{showBookingId}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleCopy(showBookingId!)}
-                className="ml-2 flex-shrink-0"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-              </Button>
+            <div className="space-y-4">
+              {/* Booking ID Section */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground block mb-2">
+                  Booking ID
+                </label>
+                <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 flex items-center justify-between font-mono text-sm">
+                  <span className="break-all text-neutral-900 dark:text-neutral-100">
+                    {showBookingId}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleCopy(showBookingId!)}
+                    className="ml-2 flex-shrink-0"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* QR Code Section - IMPROVED UI */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground block mb-2">
+                  QR Code
+                </label>
+                <div className="bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-900 rounded-xl p-6 border border-neutral-200 dark:border-neutral-600 shadow-sm">
+                  {generatingQR ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <div className="relative">
+                        <Loader className="h-8 w-8 animate-spin text-emerald-600 mb-3" />
+                        <div className="absolute inset-0 h-8 w-8 border-2 border-transparent border-t-emerald-300 rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Generating QR code...</p>
+                    </div>
+                  ) : showBookingId ? (
+                    <div className="flex flex-col items-center space-y-4">
+                      {/* QR Code with subtle enhancements */}
+                      <div className="relative group">
+                        <div className="bg-white p-3 rounded-lg shadow-md border border-neutral-100 dark:border-neutral-700 transition-transform duration-200 group-hover:scale-105">
+                          <QRCodeComponent
+                            value={showBookingId}
+                            size={180}
+                            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                            viewBox={`0 0 180 180`}
+                          />
+                        </div>
+                        {/* Corner brackets for scan effect */}
+                        <div className="absolute -inset-1 pointer-events-none opacity-60">
+                          <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-emerald-500 rounded-tl"></div>
+                          <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-emerald-500 rounded-tr"></div>
+                          <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-emerald-500 rounded-bl"></div>
+                          <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-emerald-500 rounded-br"></div>
+                        </div>
+                      </div>
+
+                      {/* Download button with subtle styling */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={downloadQRCode}
+                        disabled={!qrCodeUrl}
+                        className="flex items-center gap-2 bg-white dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700 text-emerald-700 dark:text-emerald-300 transition-all duration-200"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download QR
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full mb-2">
+                        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                      </div>
+                      <p className="text-sm text-red-600 dark:text-red-400 font-medium">Failed to generate QR code</p>
+                      <p className="text-xs text-muted-foreground mt-1">Please try again</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1 flex items-center gap-1">
+                  <InfoIcon className="h-4 w-4" />
+                  Check-in Instructions:
+                </h4>
+                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-2">
+                  <li>• Show this QR code or booking ID at the check-in counter</li>
+                  <li>• Bring your university ID card for verification</li>
+                  <li>• Arrive 10 minutes early for smooth check-in</li>
+                  <li>• Download QR for offline access if needed</li>
+                </ul>
+              </div>
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setShowBookingId(null)}>Close</Button>
+              <Button onClick={() => setShowBookingId(null)} className="w-full">
+                Close
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

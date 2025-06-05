@@ -24,7 +24,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check, ClipboardList, Search, Users, Loader } from 'lucide-react'
+import { Copy, Check, ClipboardList, Search, Loader } from 'lucide-react'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 
 // Define types
@@ -34,6 +34,7 @@ interface Profile {
   prn: string;
   gender: string;
   user_type: string;
+  phone_number: string;
 }
 
 interface Sport {
@@ -47,7 +48,6 @@ interface Slot {
 
 interface Booking {
   id: string;
-  booking_date: string;
   status: string;
   created_at: string;
   seat_number: number;
@@ -71,6 +71,7 @@ export default function AdminBookingsPage() {
   const [genderFilter, setGenderFilter] = useState('')
   const [userTypeFilter, setUserTypeFilter] = useState('')
   const [sportFilter, setSportFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
   const [showConnectionStatus, setShowConnectionStatus] = useState(false)
   const [debouncedIsConnected, setDebouncedIsConnected] = useState(false)
@@ -83,8 +84,8 @@ export default function AdminBookingsPage() {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
-      id, booking_date, status, created_at, seat_number, checked_in_at, checked_out_at,
-      profiles ( first_name, last_name, prn, gender, user_type ),
+      id, status, created_at, seat_number, checked_in_at, checked_out_at,
+      profiles ( first_name, last_name, prn, gender, user_type, phone_number ),
       sports ( name ),
       slots ( start_time, end_time )
     `)
@@ -238,6 +239,7 @@ export default function AdminBookingsPage() {
   const uniqueGenders = Array.from(new Set(bookings.filter(b => b.profiles?.gender).map(b => b.profiles.gender)))
   const uniqueUserTypes = Array.from(new Set(bookings.filter(b => b.profiles?.user_type).map(b => b.profiles.user_type)))
   const uniqueSports = Array.from(new Set(bookings.filter(b => b.sports?.name).map(b => b.sports.name)))
+  const uniqueStatuses = Array.from(new Set(bookings.filter(b => b.status).map(b => b.status)))
 
   const formatTime12hr = (time24: string) => {
     if (!time24) return '';
@@ -254,20 +256,22 @@ export default function AdminBookingsPage() {
     const gender = b.profiles?.gender?.toLowerCase() || ''
     const userType = b.profiles?.user_type?.toLowerCase() || ''
     const sport = b.sports?.name?.toLowerCase() || ''
+    const status = b.status?.toLowerCase() || ''
 
     const matchesSearch = (
       b.id.toLowerCase().includes(query) ||
       (b.profiles?.first_name?.toLowerCase() || '').includes(query) ||
       (b.profiles?.last_name?.toLowerCase() || '').includes(query) ||
       (b.profiles?.prn?.toLowerCase() || '').includes(query) ||
+      (b.profiles?.phone_number?.toLowerCase() || '').includes(query) ||
       gender.includes(query) ||
       userType.includes(query) ||
       sport.includes(query) ||
+      status.includes(query) ||
       (b.slots?.start_time?.toLowerCase() || '').includes(query) ||
       (b.slots?.end_time?.toLowerCase() || '').includes(query) ||
       st12.includes(query) ||
       et12.includes(query) ||
-      (b.booking_date?.toLowerCase() || '').includes(query) ||
       (b.seat_number?.toString().toLowerCase() || '').includes(query) ||
       (b.checked_in_at ? formatISTTimestamp(b.checked_in_at).toLowerCase().includes(query) : false) ||
       (b.checked_out_at ? formatISTTimestamp(b.checked_out_at).toLowerCase().includes(query) : false)
@@ -276,8 +280,9 @@ export default function AdminBookingsPage() {
     const matchesGender = !genderFilter || gender === genderFilter.toLowerCase()
     const matchesUserType = !userTypeFilter || userType === userTypeFilter.toLowerCase()
     const matchesSport = !sportFilter || sport === sportFilter.toLowerCase()
+    const matchesStatus = !statusFilter || status === statusFilter.toLowerCase()
 
-    return matchesSearch && matchesGender && matchesUserType && matchesSport
+    return matchesSearch && matchesGender && matchesUserType && matchesSport && matchesStatus
   })
 
   const handleCopy = () => {
@@ -398,6 +403,20 @@ export default function AdminBookingsPage() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val === "all" ? "" : val)}>
+                  <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {uniqueStatuses.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s.replace('-', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>
@@ -418,11 +437,11 @@ export default function AdminBookingsPage() {
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Booking #</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">PRN/ID</th>
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Phone</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Gender</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User Type</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Sport</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Slot</th>
-                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Date</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Booked At</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Check-in</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Check-out</th>
@@ -467,6 +486,11 @@ export default function AdminBookingsPage() {
                               {b.profiles?.prn || '-'}
                             </span>
                           </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className="font-mono text-sm text-neutral-600 dark:text-neutral-400">
+                              {b.profiles?.phone_number || '-'}
+                            </span>
+                          </td>
                           <td className="p-3 whitespace-nowrap capitalize">{b.profiles?.gender || '-'}</td>
                           <td className="p-3 whitespace-nowrap capitalize">{b.profiles?.user_type || '-'}</td>
                           <td className="p-3 whitespace-nowrap">
@@ -481,7 +505,6 @@ export default function AdminBookingsPage() {
                               <span className="font-medium">{formatTime12hr(b.slots?.end_time)}</span>
                             </div>
                           </td>
-                          <td className="p-3 whitespace-nowrap font-medium">{b.booking_date}</td>
                           <td className="p-3 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
                             {b.created_at ? new Date(b.created_at.replace(' ', 'T')).toLocaleString('en-IN', {
                               day: '2-digit',

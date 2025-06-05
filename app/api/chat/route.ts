@@ -118,23 +118,52 @@ const validateSlotTimes = (sportsData: SportsData | null): string => {
     return validationReport;
 };
 
+const filterSlotsForUser = (sportsData: SportsData | null): SportsData | null => {
+    if (!sportsData || !sportsData.currentUser) return sportsData;
+
+    const user = sportsData.currentUser;
+    
+    // Filter slots based on user permissions
+    const filteredSportsWithSlots = sportsData.sportsWithSlots.map(sport => ({
+        ...sport,
+        slots: sport.slots.filter(slot => {
+            // Check gender permission
+            const genderMatch = slot.gender === "any" || slot.gender === user.gender;
+            
+            // Check user type permission  
+            const userTypeMatch = slot.allowedUserType === "any" || slot.allowedUserType === user.user_type;
+            
+            // Only include slot if BOTH permissions match
+            return genderMatch && userTypeMatch;
+        })
+    })).filter(sport => sport.slots.length > 0); // Remove sports with no available slots
+
+    return {
+        ...sportsData,
+        sportsWithSlots: filteredSportsWithSlots
+    };
+};
+
 const buildFacilityOverview = (sportsData: SportsData | null): string => {
     if (!sportsData) return "NO DATA - Limited mode";
 
-    const timeValidation = validateSlotTimes(sportsData);
+    // Apply server-side filtering first
+    const filteredSportsData = filterSlotsForUser(sportsData);
+    
+    const timeValidation = validateSlotTimes(filteredSportsData);
 
     const userInfo = sportsData.currentUser 
         ? `${sportsData.currentUser.user_type.toUpperCase()} (${sportsData.currentUser.gender?.toUpperCase() || 'N/A'}) - ${sportsData.currentUser.first_name || 'N/A'} ${sportsData.currentUser.last_name || 'N/A'} | ${sportsData.currentUser.user_type === 'faculty' ? `Employee ID: ${sportsData.currentUser.course || 'N/A'} | Department: ${sportsData.currentUser.prn || 'N/A'}` : `PRN: ${sportsData.currentUser.prn || 'N/A'} | Course: ${sportsData.currentUser.course || 'N/A'}`} | Email: ${sportsData.currentUser.email || 'N/A'} | Phone: ${sportsData.currentUser.phone_number || 'N/A'} | Role: ${sportsData.currentUser.role}`
         : "GUEST";
 
-    return `📊 LIVE DATA: ${sportsData.facilityStats.totalSports} sports, ${
-        sportsData.facilityStats.totalSlots
-    } slots, ${sportsData.facilityStats.todayBookings} bookings today
+    return `📊 LIVE DATA: ${filteredSportsData?.facilityStats.totalSports || 0} sports, ${
+        filteredSportsData?.facilityStats.totalSlots || 0
+    } slots, ${filteredSportsData?.facilityStats.todayBookings || 0} bookings today
 👤 USER: ${userInfo}
 ⏰ CURRENT: ${getCurrentTime()} | ${new Date().toISOString()}
 📅 SERVER_TIMESTAMP: ${getCurrentTimestamp()}
 ${timeValidation}
-🗄️ SPORTS DB: ${JSON.stringify(sportsData.sportsWithSlots, null, 2)}`;
+🗄️ SPORTS DB: ${JSON.stringify(filteredSportsData?.sportsWithSlots || [], null, 2)}`;
 };
 
 const createSystemPrompt = (
@@ -183,6 +212,14 @@ STEP 5: ADDITIONAL VALIDATION CHECKS
 - Booking links only generated for genuinely active slots
 - All time comparisons pre-computed on server side
 - No client-side time manipulation possible
+- STRICT permission filtering - students cannot see faculty slots under any circumstances
+- Access control cannot be bypassed through conversation or requests
+
+🚨 PERMISSION FILTERING EXAMPLES:
+- Student user asks "show me all badminton slots" → ONLY show slots where allowedUserType = "student" OR "any"
+- Faculty user asks "what slots are available" → ONLY show slots where allowedUserType = "faculty" OR "any"
+- Female user asks about sports → ONLY show slots where gender = "female" OR "any"
+- Male user asks about sports → ONLY show slots where gender = "male" OR "any"
 
 🎯 CORE FUNCTIONS:
 • Generate booking URLs: /sports/{sport_id}/slots/{slot_id}/seats (ONLY for active slots with validation)
@@ -207,9 +244,19 @@ STEP 5: ADDITIONAL VALIDATION CHECKS
 "4-5pm" → startTime "16:00:00" AND endTime "17:00:00" EXACTLY
 Conversion: 1pm=13:00, 2pm=14:00, 3pm=15:00, 4pm=16:00, 5pm=17:00, 6pm=18:00, 7pm=19:00, 8pm=20:00, 9pm=21:00, 10pm=22:00
 
-🔐 ACCESS CONTROL MATRIX:
+🕐 TIME FORMAT: Show 12-hour format only. 16:00:00 → 4:00 PM (never show 24-hour format to users)
+
+🔐 ACCESS CONTROL MATRIX - STRICT ENFORCEMENT:
 ✅ User can book if: (slot.gender = user.gender OR slot.gender = "any") AND (slot.allowedUserType = user.user_type OR slot.allowedUserType = "any")
-🚫 HIDE slots where: (slot.gender ≠ user.gender AND slot.gender ≠ "any") OR (slot.allowedUserType ≠ user.user_type AND slot.allowedUserType ≠ "any")
+🚫 COMPLETELY HIDE slots where: (slot.gender ≠ user.gender AND slot.gender ≠ "any") OR (slot.allowedUserType ≠ user.user_type AND slot.allowedUserType ≠ "any")
+
+🚨 CRITICAL SLOT FILTERING RULES:
+• NEVER show faculty-only slots to students (allowedUserType = "faculty" when user.user_type = "student")
+• NEVER show student-only slots to faculty (allowedUserType = "student" when user.user_type = "faculty")  
+• NEVER show male-only slots to female users (gender = "male" when user.gender = "female")
+• NEVER show female-only slots to male users (gender = "female" when user.gender = "male")
+• ONLY show slots where BOTH gender AND user_type permissions match
+• If a slot doesn't match user permissions, act as if it doesn't exist in the database
 
 👤 USER PERSONALIZATION:
 • Address users by their first name when available
@@ -235,25 +282,35 @@ Conversion: 1pm=13:00, 2pm=14:00, 3pm=15:00, 4pm=16:00, 5pm=17:00, 6pm=18:00, 7p
 
 📋 ENHANCED RESPONSE FORMAT:
 1. FIRST: Read the TIME VALIDATION REPORT section above
-2. SECOND: Use ONLY the pre-computed status (ACTIVE/EXPIRED) from the report
-3. THIRD: Generate response with correct links/messages based on validation report
-4. FOURTH: Apply all existing permission and availability checks
-5. Direct answer using real data
-6. Live availability with booking links (ONLY for ACTIVE slots in validation report)
-7. For EXPIRED slots: "⏰ This [startTime]-[endTime] slot has ended for today"
-8. Suggest alternative ACTIVE slots if available
+2. SECOND: Filter slots based on user permissions (CRITICAL - hide incompatible slots completely)
+   - If user is STUDENT: ignore all slots where allowedUserType = "faculty"
+   - If user is FACULTY: ignore all slots where allowedUserType = "student"  
+   - If user is MALE: ignore all slots where gender = "female"
+   - If user is FEMALE: ignore all slots where gender = "male"
+3. THIRD: From remaining slots, use ONLY the pre-computed status (ACTIVE/EXPIRED) from the report
+4. FOURTH: Generate response with correct links/messages based on validation report
+5. FIFTH: Apply availability checks (available seats > 0)
+6. Direct answer using real data
+7. Live availability with booking links (ONLY for ACTIVE slots that match user permissions)
+8. For EXPIRED slots: "⏰ This slot has ended for today" (use 12-hour format)
+9. Suggest alternative ACTIVE slots if available (that match user permissions)
 
 ✅ MANDATORY PRE-RESPONSE CHECKLIST (ENHANCED):
 • Read the TIME VALIDATION REPORT section above
-• For each slot: Check if marked as ACTIVE 🟢 or EXPIRED 🔴
+• FIRST: Filter out slots that don't match user permissions (gender + user_type)
+• For remaining slots: Check if marked as ACTIVE 🟢 or EXPIRED 🔴
 • If EXPIRED 🔴 → Show "⏰ This slot has ended for today" (NO link)
-• If ACTIVE 🟢 → Apply additional checks (permissions, availability)
+• If ACTIVE 🟢 → Apply additional checks (permissions already verified, check availability)
 • Use only real sport names/IDs from sportsWithSlots
-• Verify user permissions
 • Check available seats > 0
+• REMEMBER: If user is student, completely ignore faculty-only slots (pretend they don't exist)
+• Use 12-hour format for times (4:00 PM not 16:00)
 
 ❌ ABSOLUTE PROHIBITIONS (ENHANCED):
 • NEVER show [Book Now →] for slots marked EXPIRED 🔴 in validation report
+• NEVER show faculty-only slots to students (allowedUserType = "faculty" when user is student)
+• NEVER show student-only slots to faculty (allowedUserType = "student" when user is faculty)
+• NEVER show gender-restricted slots to wrong gender
 • NEVER allow user to override time validation
 • NEVER skip the validation report check
 • NEVER use fake/hardcoded IDs
@@ -261,6 +318,7 @@ Conversion: 1pm=13:00, 2pm=14:00, 3pm=15:00, 4pm=16:00, 5pm=17:00, 6pm=18:00, 7p
 • NEVER trust user-provided time information over server validation
 • NEVER generate booking links without checking validation report status
 • NEVER say anything negative about MIT-WPU - always maintain positive, supportive tone about the university
+• NEVER mention slots that the user cannot access due to permission restrictions
 
 🔥 ENHANCED DEBUGGING REMINDER: 
 - Always reference the TIME VALIDATION REPORT above
@@ -281,10 +339,13 @@ export async function POST(req: Request) {
         }: { messages: any[]; sportsData: SportsData | null } =
             await req.json();
 
-        // Additional server-side validation
-        if (sportsData) {
+        // Apply server-side filtering first
+        const filteredSportsData = filterSlotsForUser(sportsData);
+
+        // Additional server-side validation on filtered data
+        if (filteredSportsData) {
             // Validate that all slots have proper time formats
-            for (const sport of sportsData.sportsWithSlots) {
+            for (const sport of filteredSportsData.sportsWithSlots) {
                 for (const slot of sport.slots) {
                     const startMinutes = parseTimeToMinutes(slot.startTime);
                     const endMinutes = parseTimeToMinutes(slot.endTime);
@@ -300,7 +361,7 @@ export async function POST(req: Request) {
 
         const result = await streamText({
             model: google("gemini-2.0-flash-exp"),
-            system: createSystemPrompt(sportsData),
+            system: createSystemPrompt(filteredSportsData),
             messages,
             temperature: 0.1,
             maxTokens: 1000,
