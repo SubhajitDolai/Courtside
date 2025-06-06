@@ -18,7 +18,94 @@ interface Sport {
   image_url: string | null
 }
 
-// ✅ Sports List Component (moved from separate file) - Now memoized
+// ✅ Individual Sport Card Component - Memoized for optimal performance
+const SportCard = React.memo(function SportCard({
+  sport,
+  index,
+  isLoading,
+  onViewSlots,
+}: {
+  sport: Sport
+  index: number
+  isLoading: boolean
+  onViewSlots: (sportId: string) => void
+}) {
+  return (
+    <Card 
+      className="group border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] overflow-hidden"
+    >
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+          {sport.name}
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {/* Sport Image */}
+        <div className="relative w-full h-48 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+          <Image
+            src={sport.image_url || '/mit.webp'}
+            alt={sport.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={index < 4} // ✅ Priority load first 4 images
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+          />
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Sport Info */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              <span>Book Now</span>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <Button
+            className="w-full h-11 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            disabled={isLoading}
+            onClick={() => onViewSlots(sport.id)}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader className="h-4 w-4 animate-spin" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>View Slots</span>
+              </div>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}, (prevProps, nextProps) => {
+  // ✅ Custom comparison function for optimal memoization
+  // Only re-render if sport data or loading state for this specific card changes
+  return (
+    prevProps.sport.id === nextProps.sport.id &&
+    prevProps.sport.name === nextProps.sport.name &&
+    prevProps.sport.image_url === nextProps.sport.image_url &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.index === nextProps.index
+  )
+})
+
+// ✅ Sports List Component - Now uses memoized individual cards
 const SportsList = React.memo(function SportsList({
   sports,
   loadingId,
@@ -45,68 +132,13 @@ const SportsList = React.memo(function SportsList({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {sports.map((sport, index) => (
-        <Card 
-          key={sport.id} 
-          className="group border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] overflow-hidden"
-        >
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-              {sport.name}
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            {/* Sport Image */}
-            <div className="relative w-full h-48 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-              <Image
-                src={sport.image_url || '/mit.webp'}
-                alt={sport.name}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={index < 4} // ✅ Priority load first 4 images
-                placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-              />
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-
-            {/* Sport Info */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>Available</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>Book Now</span>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <Button
-                className="w-full h-11 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                disabled={loadingId === sport.id}
-                onClick={() => handleViewSlots(sport.id)}
-              >
-                {loadingId === sport.id ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader className="h-4 w-4 animate-spin" />
-                    <span>Loading...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>View Slots</span>
-                  </div>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <SportCard
+          key={sport.id}
+          sport={sport}
+          index={index}
+          isLoading={loadingId === sport.id}
+          onViewSlots={handleViewSlots}
+        />
       ))}
     </div>
   )

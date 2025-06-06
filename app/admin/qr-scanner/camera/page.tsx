@@ -53,14 +53,6 @@ interface Booking {
   slots: Slot;
 }
 
-interface ScannerActivityBooking {
-  id: string;
-  checked_in_at: string | null;
-  checked_out_at: string | null;
-  status: string;
-  profiles: Profile[];
-}
-
 export default function CameraScannerPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -91,7 +83,7 @@ export default function CameraScannerPage() {
     USER_ERROR: 1500,        // User validation errors (medium delay)
     DATA_ERROR: 2000,        // QR/data validation errors (prevent spam)
     UI_ANIMATION: 3000       // UI animations and popups
-  }
+  } as const
 
   // Helper function to show popup message
   const showPopupMessage = useCallback((message: string, type: 'success' | 'error') => {
@@ -110,7 +102,7 @@ export default function CameraScannerPage() {
       setShowPopup(false)
       setShowFullscreenPopup(false)
     }, TIMEOUTS.UI_ANIMATION)
-  }, [])
+  }, [TIMEOUTS.UI_ANIMATION])
 
   // Helper function to get current IST timestamp
   const getCurrentISTTimestamp = () => {
@@ -139,8 +131,13 @@ export default function CameraScannerPage() {
         // Process bookings to create scan history entries
         const scanEntries: { id: string, action: string, timestamp: Date, user: string }[] = []
         
-        bookings.forEach((booking: any) => {
-          const profile = booking.profiles?.[0] || booking.profiles
+        bookings.forEach((booking: { 
+          id: string; 
+          checked_in_at: string | null; 
+          checked_out_at: string | null; 
+          profiles: { first_name: string; last_name: string } | { first_name: string; last_name: string }[]
+        }) => {
+          const profile = Array.isArray(booking.profiles) ? booking.profiles[0] : booking.profiles
           const userName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
           
           // Add check-in entry if exists
@@ -173,34 +170,6 @@ export default function CameraScannerPage() {
       console.error('Error processing scanner activity:', error)
     }
   }, [supabase])
-
-  // Helper function to format timestamp in IST
-  const formatISTTimestamp = (timestamp: string | null) => {
-    if (!timestamp) return '-'
-    try {
-      return new Date(timestamp).toLocaleString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: 'Asia/Kolkata'
-      })
-    } catch (error) {
-      console.error('Error formatting timestamp:', error)
-      return '-'
-    }
-  }
-
-  // Helper function to format time in 12hr format
-  const formatTime12hr = (time24: string) => {
-    if (!time24) return ''
-    const [hour, minute] = time24.split(':')
-    const date = new Date()
-    date.setHours(Number(hour), Number(minute))
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()
-  }
 
   // Get available cameras
   const getAvailableCameras = useCallback(async () => {
@@ -295,7 +264,7 @@ export default function CameraScannerPage() {
       setError('Failed to initialize camera. Please check permissions.')
       toast.error('Camera initialization failed')
     }
-  }, [currentCameraIndex, getAvailableCameras])
+  }, [currentCameraIndex, getAvailableCameras, TIMEOUTS.DOM_INIT])
 
   // Helper function to check if slot is over
   const isSlotOver = useCallback((booking: Booking) => {
@@ -361,7 +330,6 @@ export default function CameraScannerPage() {
       checked_out_at?: string | null;
     } = { status: booking.status }
     let successMessage: string = ''
-    let historyAction: string = action
 
     try {
       if (action === 'check-in') {
@@ -373,7 +341,6 @@ export default function CameraScannerPage() {
             checked_in_at: now
           }
           successMessage = `${userName} checked in!`
-          historyAction = 'check-in'
           console.log('✅ Check-in: booked → checked-in')
         } else if (booking.status === 'checked-in') {
           console.log('⚠️ Already checked in')
@@ -406,7 +373,6 @@ export default function CameraScannerPage() {
             checked_out_at: now
           }
           successMessage = `${userName} checked out!`
-          historyAction = 'check-out'
           console.log('✅ Check-out: checked-in → checked-out')
         } else if (booking.status === 'booked') {
           console.log('⚠️ Not checked in yet')
@@ -493,7 +459,7 @@ export default function CameraScannerPage() {
       // Restart scanner after system error
       setTimeout(() => initializeScanner(), TIMEOUTS.SYSTEM_ERROR)
     }
-  }, [supabase, initializeScanner, isSlotOver, showPopupMessage, fetchScannerActivity])
+  }, [supabase, initializeScanner, isSlotOver, showPopupMessage, fetchScannerActivity, TIMEOUTS.SYSTEM_ERROR, TIMEOUTS.USER_ERROR])
 
   // Handle successful QR scan
   const handleScanSuccess = useCallback(async (decodedText: string) => {
@@ -610,7 +576,7 @@ export default function CameraScannerPage() {
       // Add delay before restarting scanner to prevent rapid scanning
       setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
     }
-  }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage])
+  }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage, TIMEOUTS.DATA_ERROR])
 
   // Switch camera
   const switchCamera = useCallback(() => {
@@ -631,11 +597,11 @@ export default function CameraScannerPage() {
       })
       
       const track = stream.getVideoTracks()[0]
-      const capabilities = track.getCapabilities() as any
+      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
 
       if (capabilities.torch) {
         await track.applyConstraints({
-          advanced: [{ torch: !isFlashOn } as any]
+          advanced: [{ torch: !isFlashOn } as MediaTrackConstraintSet]
         })
         setIsFlashOn(!isFlashOn)
         toast.success(isFlashOn ? 'Flash disabled' : 'Flash enabled')
@@ -673,7 +639,7 @@ export default function CameraScannerPage() {
         qrReaderElement.innerHTML = ''
       }
     }
-  }, [fetchScannerActivity, initializeScanner])
+  }, [fetchScannerActivity, initializeScanner, TIMEOUTS.DOM_INIT])
 
   const handleGoBack = () => {
     start()
@@ -685,22 +651,22 @@ export default function CameraScannerPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
 
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
             <div
-              className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white shadow-xl"
+              className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white shadow-lg sm:shadow-xl md:shadow-2xl"
               onClick={handleGoBack}
             >
-              <Camera className="h-8 w-8 md:h-10 md:w-10" />
+              <Camera className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4 sm:mb-6">
             Camera
             <span className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent"> Scanner</span>
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-6">
+          <p className="text-lg sm:text-xl text-muted-foreground">
             Scan QR codes to check users in or out
           </p>
         </div>

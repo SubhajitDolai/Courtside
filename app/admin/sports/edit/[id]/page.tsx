@@ -59,7 +59,7 @@ type ValidatableField = keyof Omit<FormErrors, 'general'>
 // Helper function to validate if URL is valid for Next.js Image
 const isValidImageUrl = (url: string): boolean => {
   if (!url || !url.trim()) return false
-  
+
   try {
     const parsedUrl = new URL(url)
     return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:'
@@ -125,7 +125,7 @@ export default function EditSportPage() {
         try {
           new URL(data.imageUrl)
           const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg']
-          const hasValidExtension = validExtensions.some(ext => 
+          const hasValidExtension = validExtensions.some(ext =>
             data.imageUrl.toLowerCase().includes(ext)
           )
           if (!hasValidExtension && !data.imageUrl.includes('unsplash.com') && !data.imageUrl.includes('imgur.com')) {
@@ -141,10 +141,10 @@ export default function EditSportPage() {
   }, [])
 
   // Validate field on change
-  const validateField = useCallback((field: ValidatableField, value: any) => {
+  const validateField = useCallback((field: ValidatableField, value: string | number | boolean) => {
     const newFormData = { ...formData, [field]: value }
     const fieldErrors = validateForm(newFormData)
-    
+
     setErrors(prev => ({
       ...prev,
       [field]: fieldErrors[field],
@@ -153,9 +153,9 @@ export default function EditSportPage() {
   }, [formData, validateForm])
 
   // Handle form field changes
-  const handleFieldChange = useCallback((field: keyof FormData, value: any) => {
+  const handleFieldChange = useCallback((field: keyof FormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    
+
     if (touched[field] && (field === 'name' || field === 'imageUrl' || field === 'seatLimit')) {
       validateField(field, value)
     }
@@ -233,7 +233,7 @@ export default function EditSportPage() {
             seatLimit: data.seat_limit,
             isActive: data.is_active,
           })
-          
+
           // Set initial image state if there's an image
           if (data.image_url && isValidImageUrl(data.image_url)) {
             setImageState({
@@ -246,7 +246,8 @@ export default function EditSportPage() {
           setErrors({ general: error?.message || 'Sport not found' })
           toast.error(error?.message || 'Sport not found')
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        console.log('Error: ', error)
         setErrors({ general: 'Failed to load sport data' })
         toast.error('Failed to load sport data')
       } finally {
@@ -255,7 +256,7 @@ export default function EditSportPage() {
         setTimeout(() => setPageLoading(false), 500)
       }
     }
-    
+
     if (sportId) {
       fetchSport()
     }
@@ -286,17 +287,18 @@ export default function EditSportPage() {
 
       toast.success('Sport updated successfully!')
       router.push('/admin/sports')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating sport:', error)
-      
-      if (error.code === '23505') {
+
+      const dbError = error as { code?: string; message?: string }
+      if (dbError.code === '23505') {
         setErrors({ general: 'A sport with this name already exists' })
         toast.error('Sport name already exists')
-      } else if (error.message?.includes('network')) {
+      } else if (dbError.message?.includes('network')) {
         setErrors({ general: 'Network error. Please check your connection and try again.' })
         toast.error('Network error')
       } else {
-        setErrors({ general: error.message || 'Failed to update sport. Please try again.' })
+        setErrors({ general: dbError.message || 'Failed to update sport. Please try again.' })
         toast.error('Failed to update sport')
       }
     } finally {
@@ -322,9 +324,10 @@ export default function EditSportPage() {
 
       toast.success('Sport deleted successfully!')
       router.push('/admin/sports')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting sport:', error)
-      toast.error(error.message || 'Failed to delete sport')
+      const dbError = error as { message?: string }
+      toast.error(dbError.message || 'Failed to delete sport')
     } finally {
       setLoading(false)
       setDeleteOpen(false)
@@ -334,7 +337,7 @@ export default function EditSportPage() {
   // Handle form submission
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
-    
+
     setTouched({
       name: true,
       imageUrl: true,
@@ -363,7 +366,7 @@ export default function EditSportPage() {
               <Skeleton className="h-8 w-48" />
               <Skeleton className="h-4 w-80" />
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-6">
                 {/* Sport Name Skeleton */}
@@ -379,7 +382,7 @@ export default function EditSportPage() {
                     <Skeleton className="h-5 w-16" />
                   </div>
                   <Skeleton className="h-10 w-full" />
-                  
+
                   {/* Image Preview Skeleton */}
                   <div className="mt-4">
                     <Skeleton className="w-full h-48 rounded-lg" />
@@ -427,7 +430,7 @@ export default function EditSportPage() {
               <div>
                 <h3 className="text-lg font-semibold">Sport Not Found</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  The sport you're looking for doesn't exist or has been deleted.
+                  The sport you&apos;re looking for doesn&apos;t exist or has been deleted.
                 </p>
               </div>
               <Button onClick={() => router.push('/admin/sports')} variant="outline">
@@ -450,7 +453,7 @@ export default function EditSportPage() {
               Update the sport information below
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* General Error */}
@@ -526,7 +529,7 @@ export default function EditSportPage() {
                     </Button>
                   )}
                 </div>
-                
+
                 {errors.imageUrl && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
@@ -546,7 +549,7 @@ export default function EditSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {imageState.error && !imageState.loading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -567,7 +570,7 @@ export default function EditSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {formData.imageUrl && !imageState.error && isValidImageUrl(formData.imageUrl) && (
                         <Image
                           src={formData.imageUrl}
@@ -582,7 +585,7 @@ export default function EditSportPage() {
                           onLoadStart={handleImageLoadStart}
                         />
                       )}
-                      
+
                       {!isValidImageUrl(formData.imageUrl) && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -591,7 +594,7 @@ export default function EditSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {imageState.loaded && !imageState.loading && !imageState.error && (
                         <div className="absolute top-2 right-2">
                           <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
@@ -647,8 +650,8 @@ export default function EditSportPage() {
                     Active Status
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {formData.isActive 
-                      ? "Sport is active and available for booking" 
+                    {formData.isActive
+                      ? "Sport is active and available for booking"
                       : "Sport is inactive and hidden from users"
                     }
                   </p>
@@ -751,7 +754,7 @@ export default function EditSportPage() {
                   This action cannot be undone!
                 </p>
                 <p>
-                  This will permanently delete <strong>"{formData.name}"</strong> and all associated data.
+                  This will permanently delete <strong>&quot;{formData.name}&quot;</strong> and all associated data.
                 </p>
                 <div className="bg-destructive/10 p-3 rounded-md text-sm">
                   <strong>What will be deleted:</strong>
@@ -768,8 +771,8 @@ export default function EditSportPage() {
             <AlertDialogCancel disabled={loading}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <AlertDialogAction
+              onClick={handleDelete}
               disabled={loading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

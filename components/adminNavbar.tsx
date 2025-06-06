@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, Database, MessageSquare, QrCode } from "lucide-react";
+import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, MessageSquare, QrCode } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useTransition, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -9,16 +9,16 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader2, Trash2 } from 'lucide-react'
@@ -52,7 +52,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isDeleting, setIsDeleting] = useState(false)
-  
+
   // ✅ PAGINATION STATE
   const [displayedItems, setDisplayedItems] = useState(5) // Start with 5 items
   const [isLoading, setIsLoading] = useState(false)
@@ -90,17 +90,17 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
   }, [filteredFeedback, displayedItems])
 
   // ✅ LOAD MORE FUNCTION
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (isLoading || displayedItems >= filteredFeedback.length) return
-    
+
     setIsLoading(true)
-    
+
     // Simulate loading delay for better UX
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     setDisplayedItems(prev => Math.min(prev + 5, filteredFeedback.length))
     setIsLoading(false)
-  }
+  }, [isLoading, displayedItems, filteredFeedback.length])
 
   // ✅ INTERSECTION OBSERVER FOR INFINITE SCROLL
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
     }
 
     return () => observer.disconnect()
-  }, [isLoading, displayedItems, filteredFeedback.length])
+  }, [isLoading, displayedItems, filteredFeedback.length, loadMore])
 
   // ✅ RESET PAGINATION WHEN FILTERS CHANGE
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
   const deleteFeedback = async (feedbackId: string) => {
     try {
       setDeletingIds(prev => new Set([...prev, feedbackId]))
-      
+
       const { error } = await supabase
         .from('user_feedback')
         .delete()
@@ -161,17 +161,17 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
       // Remove from local state
       setFeedback(prev => prev.filter(item => item.id !== feedbackId))
-      
+
       // Remove from selected if it was selected
       setSelectedIds(prev => {
         const newSet = new Set(prev)
         newSet.delete(feedbackId)
         return newSet
       })
-      
+
       // Call parent callback if provided
       onFeedbackDeleted?.(feedbackId)
-      
+
       toast.success('Feedback deleted successfully')
     } catch (error) {
       console.error('Error deleting feedback:', error)
@@ -191,7 +191,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
     try {
       setIsDeleting(true)
-      
+
       const { error } = await supabase
         .from('user_feedback')
         .delete()
@@ -205,10 +205,10 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
       // Remove from local state
       setFeedback(prev => prev.filter(item => !selectedIds.has(item.id)))
-      
+
       // Clear selections
       setSelectedIds(new Set())
-      
+
       toast.success(`${selectedIds.size} feedback items deleted successfully`)
     } catch (error) {
       console.error('Error deleting feedback:', error)
@@ -235,7 +235,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
   const toggleSelectAll = () => {
     const visibleIds = currentItems.map(item => item.id)
     const allSelected = visibleIds.every(id => selectedIds.has(id))
-    
+
     setSelectedIds(prev => {
       const newSet = new Set(prev)
       if (allSelected) {

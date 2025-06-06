@@ -111,7 +111,7 @@ export default function EditSlotPage() {
     if (data.start_time && data.end_time) {
       const startTime = new Date(`1970-01-01T${data.start_time}:00`)
       const endTime = new Date(`1970-01-01T${data.end_time}:00`)
-      
+
       if (endTime <= startTime) {
         newErrors.end_time = 'End time must be after start time'
       }
@@ -131,12 +131,12 @@ export default function EditSlotPage() {
   }, [])
 
   // Validate field on change
-  const validateField = useCallback((field: ValidatableField, value: any) => {
+  const validateField = useCallback((field: ValidatableField, value: string | number | boolean) => {
     if (!slot) return
-    
+
     const newSlotData = { ...slot, [field]: value }
     const fieldErrors = validateForm(newSlotData)
-    
+
     setErrors(prev => ({
       ...prev,
       [field]: fieldErrors[field],
@@ -145,11 +145,11 @@ export default function EditSlotPage() {
   }, [slot, validateForm])
 
   // Handle form field changes
-  const handleFieldChange = useCallback((field: keyof SlotData, value: any) => {
+  const handleFieldChange = useCallback((field: keyof SlotData, value: string | number | boolean) => {
     if (!slot) return
-    
+
     setSlot(prev => prev ? { ...prev, [field]: value } : null)
-    
+
     if (touched[field] && (field === 'sport_id' || field === 'start_time' || field === 'end_time' || field === 'gender' || field === 'allowed_user_type')) {
       validateField(field, value)
     }
@@ -158,7 +158,7 @@ export default function EditSlotPage() {
   // Handle field blur (mark as touched)
   const handleFieldBlur = useCallback((field: ValidatableField) => {
     if (!slot) return
-    
+
     setTouched(prev => ({ ...prev, [field]: true }))
     validateField(field, slot[field])
   }, [slot, validateField])
@@ -187,7 +187,8 @@ export default function EditSlotPage() {
         }
 
         setSports(sportsResponse.data || [])
-      } catch (error: any) {
+      } catch (error: unknown) {
+        console.log('Error:', error)
         setErrors({ general: 'Failed to load slot data' })
         toast.error('Failed to load slot data')
       } finally {
@@ -228,17 +229,18 @@ export default function EditSlotPage() {
 
       toast.success('Slot updated successfully!')
       router.push('/admin/slots')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating slot:', error)
-      
-      if (error.code === '23505') {
+
+      const dbError = error as { code?: string; message?: string }
+      if (dbError.code === '23505') {
         setErrors({ general: 'A slot with this configuration already exists' })
         toast.error('Slot configuration already exists')
-      } else if (error.message?.includes('network')) {
+      } else if (dbError.message?.includes('network')) {
         setErrors({ general: 'Network error. Please check your connection and try again.' })
         toast.error('Network error')
       } else {
-        setErrors({ general: error.message || 'Failed to update slot. Please try again.' })
+        setErrors({ general: dbError.message || 'Failed to update slot. Please try again.' })
         toast.error('Failed to update slot')
       }
     } finally {
@@ -263,9 +265,10 @@ export default function EditSlotPage() {
 
       toast.success('Slot deleted successfully!')
       router.push('/admin/slots')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting slot:', error)
-      toast.error(error.message || 'Failed to delete slot')
+      const dbError = error as { message?: string }
+      toast.error(dbError.message || 'Failed to delete slot')
     } finally {
       setLoading(false)
       setDeleteOpen(false)
@@ -275,7 +278,7 @@ export default function EditSlotPage() {
   // Handle form submission
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!slot) return
 
     setTouched({
@@ -307,7 +310,7 @@ export default function EditSlotPage() {
               <Skeleton className="h-7 w-24" />
               <Skeleton className="h-4 w-64" />
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-6">
                 {/* Sport Selection Skeleton */}
@@ -371,7 +374,7 @@ export default function EditSlotPage() {
               <div>
                 <h3 className="text-lg font-semibold">Slot Not Found</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  The slot you're looking for doesn't exist or has been deleted.
+                  The slot you&apos;re looking for doesn&apos;t exist or has been deleted.
                 </p>
               </div>
               <Button onClick={() => router.push('/admin/slots')} variant="outline">
@@ -405,7 +408,7 @@ export default function EditSlotPage() {
               Update the slot information below
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* General Error */}
@@ -428,7 +431,7 @@ export default function EditSlotPage() {
                   onOpenChange={() => handleFieldBlur('sport_id')}
                   disabled={loading}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="sport_id"
                     className={cn(
                       "transition-colors",
@@ -523,7 +526,7 @@ export default function EditSlotPage() {
                   onOpenChange={() => handleFieldBlur('gender')}
                   disabled={loading}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="gender"
                     className={cn(
                       "transition-colors",
@@ -558,7 +561,7 @@ export default function EditSlotPage() {
                   onOpenChange={() => handleFieldBlur('allowed_user_type')}
                   disabled={loading}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="allowed_user_type"
                     className={cn(
                       "transition-colors",
@@ -588,8 +591,8 @@ export default function EditSlotPage() {
                     Active Status
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {slot.is_active 
-                      ? "Slot is active and available for booking" 
+                    {slot.is_active
+                      ? "Slot is active and available for booking"
                       : "Slot is inactive and hidden from users"
                     }
                   </p>
@@ -660,7 +663,7 @@ export default function EditSlotPage() {
                   <div><strong>Gender:</strong> {slot.gender === 'any' ? 'Any' : slot.gender.charAt(0).toUpperCase() + slot.gender.slice(1)}</div>
                   <div><strong>Allowed Users:</strong> {
                     slot.allowed_user_type === 'student' ? 'Students Only' :
-                    slot.allowed_user_type === 'faculty' ? 'Faculty Only' : 'Anyone'
+                      slot.allowed_user_type === 'faculty' ? 'Faculty Only' : 'Anyone'
                   }</div>
                   <div><strong>Status:</strong> {slot.is_active ? 'Active' : 'Inactive'}</div>
                 </div>
@@ -713,8 +716,8 @@ export default function EditSlotPage() {
             <AlertDialogCancel disabled={loading}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <AlertDialogAction
+              onClick={handleDelete}
               disabled={loading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

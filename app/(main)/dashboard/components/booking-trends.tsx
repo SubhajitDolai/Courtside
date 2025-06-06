@@ -1,8 +1,9 @@
 'use client'
 
 import { useTheme } from "next-themes";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { useMemo, useState } from 'react';
+import { TrendingUp } from 'lucide-react';
 
 const VIEW_OPTIONS = {
   WEEKLY: 'weekly',
@@ -123,78 +124,162 @@ export function BookingTrends({ bookings }: { bookings: any[] }) {
   
   if (displayData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        No booking trends data available
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-4 animate-in fade-in-0 duration-500">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-amber-500/10 flex items-center justify-center backdrop-blur-sm border border-muted/30 shadow-sm">
+            <TrendingUp className="w-8 h-8 text-blue-500/70" />
+          </div>
+          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+          </div>
+        </div>
+        <div className="text-center space-y-2">
+          <p className="font-medium text-sm text-foreground/80">No booking trends data available</p>
+          <p className="text-xs text-muted-foreground/70 max-w-xs leading-relaxed">Data will appear as bookings are made. Start by creating your first booking!</p>
+        </div>
       </div>
     );
   }
   
   return (
-    <>
-      <div className="flex justify-end mb-2">
-        <div className="flex space-x-1 rounded-md border border-input p-1 text-xs">
+    <div className="h-full flex flex-col space-y-3 sm:space-y-4">
+      {/* Header with view toggle and stats */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {/* Stats summary */}
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            <span className="text-muted-foreground hidden sm:inline">Total:</span>
+            <span className="font-semibold text-foreground">
+              {displayData.reduce((sum, item) => sum + item.value, 0)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+            <span className="text-muted-foreground hidden sm:inline">Avg:</span>
+            <span className="font-semibold text-foreground">
+              {Math.round(average)}
+            </span>
+          </div>
+        </div>
+        
+        {/* View toggle buttons */}
+        <div className="flex space-x-1 rounded-lg border border-border bg-muted/20 p-1 text-xs sm:text-sm backdrop-blur-sm">
           <button 
-            className={`rounded px-2 py-1 ${viewType === VIEW_OPTIONS.WEEKLY 
-              ? 'bg-primary text-primary-foreground' 
-              : 'hover:bg-muted/50'}`}
+            className={`rounded-md px-3 py-1.5 transition-all duration-200 font-medium relative overflow-hidden ${viewType === VIEW_OPTIONS.WEEKLY 
+              ? 'bg-background text-foreground shadow-sm border border-border' 
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-[1.02]'}`}
             onClick={() => setViewType(VIEW_OPTIONS.WEEKLY)}
           >
             Weekly
+            {viewType === VIEW_OPTIONS.WEEKLY && (
+              <div className="absolute inset-x-0 bottom-0 h-0.5 bg-blue-500 rounded-full"></div>
+            )}
           </button>
           <button 
-            className={`rounded px-2 py-1 ${viewType === VIEW_OPTIONS.MONTHLY 
-              ? 'bg-primary text-primary-foreground' 
-              : 'hover:bg-muted/50'}`}
+            className={`rounded-md px-3 py-1.5 transition-all duration-200 font-medium relative overflow-hidden ${viewType === VIEW_OPTIONS.MONTHLY 
+              ? 'bg-background text-foreground shadow-sm border border-border' 
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-[1.02]'}`}
             onClick={() => setViewType(VIEW_OPTIONS.MONTHLY)}
           >
             Monthly
+            {viewType === VIEW_OPTIONS.MONTHLY && (
+              <div className="absolute inset-x-0 bottom-0 h-0.5 bg-blue-500 rounded-full"></div>
+            )}
           </button>
         </div>
       </div>
       
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={displayData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={resolvedTheme === "dark" ? "#374151" : "#e2e8f0"} />
-          <XAxis 
-            dataKey="name" 
-            tick={{ fill: textColor }} 
-            tickFormatter={formatXAxisTick}
-          />
-          <YAxis tick={{ fill: textColor }} />
-          <Tooltip 
-            formatter={(value) => [`${value} bookings`, 'Count']}
-            contentStyle={{ 
-              backgroundColor: resolvedTheme === "dark" ? "#1f2937" : "#ffffff",
-              borderColor: resolvedTheme === "dark" ? "#374151" : "#e2e8f0",
-              color: textColor,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)"
+      {/* Chart container with responsive sizing */}
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart 
+            data={displayData} 
+            margin={{ 
+              top: 10, 
+              right: 10, 
+              left: 0, 
+              bottom: 10 
             }}
-          />
-          <Legend />
-          <ReferenceLine 
-            y={average} 
-            stroke="#f59e0b" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: 'Average', 
-              position: 'insideTopRight',
-              fill: '#f59e0b',
-              fontSize: 12
-            }} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="value" 
-            stroke="#3b82f6" 
-            strokeWidth={2}
-            name="Bookings"
-            dot={{ stroke: '#3b82f6', strokeWidth: 2, r: 4, fill: resolvedTheme === "dark" ? "#0f172a" : "#ffffff" }}
-            activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2, fill: resolvedTheme === "dark" ? "#0f172a" : "#ffffff" }}
-            animationDuration={500}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </>
+          >
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={resolvedTheme === "dark" ? "#374151" : "#e2e8f0"} 
+              opacity={0.6}
+            />
+            <XAxis 
+              dataKey="name" 
+              tick={{ 
+                fill: textColor, 
+                fontSize: 12 
+              }} 
+              tickFormatter={formatXAxisTick}
+              axisLine={false}
+              tickLine={false}
+              className="text-xs sm:text-sm"
+            />
+            <YAxis 
+              tick={{ 
+                fill: textColor, 
+                fontSize: 12 
+              }}
+              axisLine={false}
+              tickLine={false}
+              width={30}
+            />
+            <Tooltip 
+              formatter={(value) => [`${value} bookings`, 'Count']}
+              contentStyle={{ 
+                backgroundColor: resolvedTheme === "dark" ? "#0f172a" : "#ffffff",
+                borderColor: resolvedTheme === "dark" ? "#1e293b" : "#e2e8f0",
+                color: textColor,
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                borderRadius: "8px",
+                border: "1px solid",
+                fontSize: "12px"
+              }}
+              cursor={{ stroke: resolvedTheme === "dark" ? "#374151" : "#e2e8f0", strokeWidth: 1 }}
+            />
+            <ReferenceLine 
+              y={average} 
+              stroke="#f59e0b" 
+              strokeDasharray="4 4"
+              strokeWidth={1.5}
+              label={{ 
+                value: `Avg: ${Math.round(average)}`, 
+                position: 'insideTopRight',
+                fill: '#f59e0b',
+                fontSize: 11,
+                fontWeight: 500
+              }} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="value" 
+              stroke="#3b82f6" 
+              strokeWidth={3}
+              name="Bookings"
+              dot={{ 
+                stroke: '#3b82f6', 
+                strokeWidth: 2, 
+                r: 4, 
+                fill: resolvedTheme === "dark" ? "#0f172a" : "#ffffff",
+                className: "drop-shadow-sm"
+              }}
+              activeDot={{ 
+                r: 6, 
+                stroke: '#3b82f6', 
+                strokeWidth: 2, 
+                fill: '#3b82f6',
+                className: "drop-shadow-md"
+              }}
+              animationDuration={800}
+              animationEasing="ease-out"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
 

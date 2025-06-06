@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
-import { PencilIcon, Loader, User } from 'lucide-react'
+import { PencilIcon, User } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import BannedRedirect from '@/components/banned-redirect'
 
@@ -81,16 +81,16 @@ export default function ProfilePage() {
           {/* Loading Skeleton */}
           <div className="max-w-4xl mx-auto">
             {/* Header Section Skeleton */}
-            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-7 rounded-t-md">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-full animate-pulse bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-64" />
+            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-4 sm:p-6 rounded-t-md">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full animate-pulse bg-neutral-200 dark:bg-neutral-700 flex-shrink-0"></div>
+                  <div className="space-y-2 min-w-0 flex-1">
+                    <Skeleton className="h-5 sm:h-6 w-32 sm:w-48" />
+                    <Skeleton className="h-3 sm:h-4 w-40 sm:w-64" />
                   </div>
                 </div>
-                <Skeleton className="h-10 w-32 rounded-md" />
+                <Skeleton className="h-8 sm:h-10 w-12 sm:w-32 rounded-md flex-shrink-0" />
               </div>
             </div>
 
@@ -192,41 +192,42 @@ export default function ProfilePage() {
           {/* Profile Content */}
           <div className="max-w-4xl mx-auto">
             {/* Header Section */}
-            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-6 rounded-t-md">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12 border border-neutral-200 dark:border-neutral-700">
-                    <AvatarFallback className="bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-base font-medium">
+            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-4 sm:p-6 rounded-t-md">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                  <Avatar className="w-10 h-10 sm:w-12 sm:h-12 border border-neutral-200 dark:border-neutral-700 flex-shrink-0">
+                    <AvatarFallback className="bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-sm sm:text-base font-medium">
                       {profile.first_name?.[0]}{profile.last_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h1 className="text-2xl font-semibold text-neutral-900 dark:text-white">
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-lg sm:text-2xl font-semibold text-neutral-900 dark:text-white truncate">
                       {profile.first_name} {profile.last_name}
                     </h1>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                    <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1 truncate">
                       Personal information and preferences
                     </p>
                   </div>
                 </div>
                 
                 <Button 
-                  className="gap-2" 
+                  className="gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm h-8 sm:h-10 flex-shrink-0" 
                   onClick={handleEdit} 
                   disabled={loading}
                 >
                   {loading ? (
                     <>
-                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Updating...
+                      <span className="hidden sm:inline">Updating...</span>
                     </>
                   ) : (
                     <>
-                      <PencilIcon className="w-4 h-4 animate-pulse" />
-                      Edit Profile
+                      <PencilIcon className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse" />
+                      <span className="hidden sm:inline">Edit Profile</span>
+                      <span className="sm:hidden">Edit</span>
                     </>
                   )}
                 </Button>

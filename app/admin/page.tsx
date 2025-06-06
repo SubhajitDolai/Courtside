@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare } from 'lucide-react'
@@ -10,44 +10,44 @@ export default function AdminPage() {
   const router = useRouter()
   const { start } = useGlobalLoadingBar()
 
-  const cards = [
+  const cards = useMemo(() => [
     {
       title: 'Manage Sports',
       description: 'Add or edit sports options',
-      icon: <Trophy className="h-8 w-8 text-green-600 dark:text-green-400" />,
+      icon: <Trophy className="w-full h-full text-green-600 dark:text-green-400" />,
       href: '/admin/sports',
     },
     {
       title: 'Manage Slots',
       description: 'Set available time slots',
-      icon: <Clock className="h-8 w-8 text-blue-600 dark:text-blue-400" />,
+      icon: <Clock className="w-full h-full text-blue-600 dark:text-blue-400" />,
       href: '/admin/slots',
     },
     {
       title: 'Bookings History',
       description: 'View all time booking records',
-      icon: <History className="h-8 w-8 text-teal-600 dark:text-teal-400" />,
+      icon: <History className="w-full h-full text-teal-600 dark:text-teal-400" />,
       href: '/admin/bookings-history',
     },
     {
       title: 'Manage Feedback',
       description: 'View and manage user feedback',
-      icon: <MessageSquare className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />,
+      icon: <MessageSquare className="w-full h-full text-emerald-600 dark:text-emerald-400" />,
       href: '/admin/feedback',
     },
     {
       title: 'QR Scanner',
       description: 'Scan QR codes for check-in/out',
-      icon: <QrCode className="h-8 w-8 text-purple-600 dark:text-purple-400" />,
+      icon: <QrCode className="w-full h-full text-purple-600 dark:text-purple-400" />,
       href: '/admin/qr-scanner',
     },
     {
       title: 'Manage Bookings',
       description: 'View and manage user bookings',
-      icon: <ClipboardList className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />,
+      icon: <ClipboardList className="w-full h-full text-emerald-600 dark:text-emerald-400" />,
       href: '/admin/bookings',
     },
-  ]
+  ], [])
 
   const handleCardClick = (href: string) => {
     start()
@@ -57,26 +57,34 @@ export default function AdminPage() {
   // ✅ Prefetch admin routes for faster UX
   useEffect(() => {
     cards.forEach(card => router.prefetch(card.href))
-  }, [router])
+  }, [router, cards])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-800 px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full max-w-4xl">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl">
         {cards.map((card, index) => (
           <Card
             key={index}
             onClick={() => handleCardClick(card.href)}
-            className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 group h-32" // Adjusted height for rectangular shape
+            className="cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 border-0 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm shadow-lg group h-28 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden"
           >
-            <CardHeader className="flex flex-row items-center space-x-4 px-6 py-4">
-              <div className="p-3 rounded-full bg-neutral-100 dark:bg-neutral-800 group-hover:scale-110 transition-transform">
-                {card.icon}
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-neutral-100/30 dark:from-neutral-800/30 dark:via-transparent dark:to-neutral-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <CardHeader className="relative z-10 flex flex-col items-center justify-center text-center h-full px-3 sm:px-4 py-3 sm:py-4 space-y-2 sm:space-y-3">
+              {/* Icon container with enhanced styling */}
+              <div className="p-2 sm:p-3 md:p-4 rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md group-hover:shadow-lg">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10">
+                  {card.icon}
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-lg font-semibold text-neutral-900 dark:text-white">
+              
+              {/* Content */}
+              <div className="space-y-1">
+                <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-neutral-900 dark:text-white line-clamp-2 leading-tight">
                   {card.title}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                   {card.description}
                 </p>
               </div>

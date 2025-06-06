@@ -22,11 +22,11 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import Image from 'next/image'
-import { 
-  ImageIcon, 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  ImageIcon,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
   Upload,
   X
 } from 'lucide-react'
@@ -58,7 +58,7 @@ type ValidatableField = keyof Omit<FormErrors, 'general'>
 // Helper function to validate if URL is valid for Next.js Image
 const isValidImageUrl = (url: string): boolean => {
   if (!url || !url.trim()) return false
-  
+
   try {
     const parsedUrl = new URL(url)
     // Check if it's a valid absolute URL (http/https)
@@ -72,7 +72,7 @@ const isValidImageUrl = (url: string): boolean => {
 export default function AddSportPage() {
   // Page loading state
   const [pageLoading, setPageLoading] = useState(true)
-  
+
   // Form state
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -80,7 +80,7 @@ export default function AddSportPage() {
     seatLimit: 2,
     isActive: true,
   })
-  
+
   // UI state
   const [errors, setErrors] = useState<FormErrors>({})
   const [imageState, setImageState] = useState<ImageState>({
@@ -133,7 +133,7 @@ export default function AddSportPage() {
           new URL(data.imageUrl)
           // Additional check for image format
           const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg']
-          const hasValidExtension = validExtensions.some(ext => 
+          const hasValidExtension = validExtensions.some(ext =>
             data.imageUrl.toLowerCase().includes(ext)
           )
           if (!hasValidExtension && !data.imageUrl.includes('unsplash.com') && !data.imageUrl.includes('imgur.com')) {
@@ -149,10 +149,10 @@ export default function AddSportPage() {
   }, [])
 
   // Validate field on change
-  const validateField = useCallback((field: ValidatableField, value: any) => {
+  const validateField = useCallback((field: ValidatableField, value: string | number | boolean) => {
     const newFormData = { ...formData, [field]: value }
     const fieldErrors = validateForm(newFormData)
-    
+
     setErrors(prev => ({
       ...prev,
       [field]: fieldErrors[field],
@@ -161,9 +161,9 @@ export default function AddSportPage() {
   }, [formData, validateForm])
 
   // Handle form field changes
-  const handleFieldChange = useCallback((field: keyof FormData, value: any) => {
+  const handleFieldChange = useCallback((field: keyof FormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    
+
     // Validate only if field has been touched and is validatable
     if (touched[field] && (field === 'name' || field === 'imageUrl' || field === 'seatLimit')) {
       validateField(field, value)
@@ -227,7 +227,7 @@ export default function AddSportPage() {
   // Handle form submission
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Mark all validatable fields as touched
     setTouched({
       name: true,
@@ -255,7 +255,7 @@ export default function AddSportPage() {
     setErrors({})
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('sports')
         .insert({
           name: formData.name.trim(),
@@ -272,18 +272,19 @@ export default function AddSportPage() {
 
       toast.success('Sport added successfully!')
       router.push('/admin/sports')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding sport:', error)
-      
+
       // Handle specific database errors
-      if (error.code === '23505') {
+      const dbError = error as { code?: string; message?: string }
+      if (dbError.code === '23505') {
         setErrors({ general: 'A sport with this name already exists' })
         toast.error('Sport name already exists')
-      } else if (error.message?.includes('network')) {
+      } else if (dbError.message?.includes('network')) {
         setErrors({ general: 'Network error. Please check your connection and try again.' })
         toast.error('Network error')
       } else {
-        setErrors({ general: error.message || 'Failed to add sport. Please try again.' })
+        setErrors({ general: dbError.message || 'Failed to add sport. Please try again.' })
         toast.error('Failed to add sport')
       }
     } finally {
@@ -302,7 +303,7 @@ export default function AddSportPage() {
               <Skeleton className="h-8 w-48" />
               <Skeleton className="h-4 w-80" />
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-6">
                 {/* Sport Name Skeleton */}
@@ -359,7 +360,7 @@ export default function AddSportPage() {
               Fill in the information below to add a new sport
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* General Error */}
@@ -434,7 +435,7 @@ export default function AddSportPage() {
                     </Button>
                   )}
                 </div>
-                
+
                 {errors.imageUrl && (
                   <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
@@ -454,7 +455,7 @@ export default function AddSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {imageState.error && !imageState.loading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -475,7 +476,7 @@ export default function AddSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {formData.imageUrl && !imageState.error && isValidImageUrl(formData.imageUrl) && (
                         <Image
                           src={formData.imageUrl}
@@ -490,7 +491,7 @@ export default function AddSportPage() {
                           onLoadStart={handleImageLoadStart}
                         />
                       )}
-                      
+
                       {!isValidImageUrl(formData.imageUrl) && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -499,7 +500,7 @@ export default function AddSportPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {imageState.loaded && !imageState.loading && !imageState.error && (
                         <div className="absolute top-2 right-2">
                           <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
@@ -554,8 +555,8 @@ export default function AddSportPage() {
                     Active Status
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {formData.isActive 
-                      ? "Sport is active and available for booking" 
+                    {formData.isActive
+                      ? "Sport is active and available for booking"
                       : "Sport is inactive and hidden from users"
                     }
                   </p>

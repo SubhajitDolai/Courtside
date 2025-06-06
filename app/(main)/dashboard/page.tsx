@@ -48,7 +48,7 @@ export default async function DashboardPage() {
 
       supabase
         .from('slots')
-        .select('id, sport_id, start_time, end_time, gender, allowed_user_type')
+        .select('id, sport_id, start_time, end_time, gender, allowed_user_type, is_active')
     ])
 
     // Handle potential errors
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4 sm:mb-6">
-              Your
+              Analytics
               <span className="bg-gradient-to-r from-neutral-700 to-neutral-600 dark:from-neutral-400 dark:to-neutral-300 bg-clip-text text-transparent"> Dashboard</span>
             </h1>
           </div>

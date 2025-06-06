@@ -66,10 +66,10 @@ export default function AddSlotPage() {
   // Page loading state
   const [pageLoading, setPageLoading] = useState(true)
   const [sportsLoading, setSportsLoading] = useState(true)
-  
+
   // Data state
   const [sports, setSports] = useState<Sport[]>([])
-  
+
   // Form state
   const [formData, setFormData] = useState<FormData>({
     sport_id: '',
@@ -112,7 +112,7 @@ export default function AddSlotPage() {
         }
 
         setSports(data || [])
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching sports:', error)
         setErrors({ general: 'Failed to load sports list' })
         toast.error('Failed to load sports list')
@@ -147,7 +147,7 @@ export default function AddSlotPage() {
     if (data.start_time && data.end_time) {
       const startTime = new Date(`1970-01-01T${data.start_time}:00`)
       const endTime = new Date(`1970-01-01T${data.end_time}:00`)
-      
+
       if (endTime <= startTime) {
         newErrors.end_time = 'End time must be after start time'
       }
@@ -167,10 +167,10 @@ export default function AddSlotPage() {
   }, [])
 
   // Validate field on change
-  const validateField = useCallback((field: ValidatableField, value: any) => {
+  const validateField = useCallback((field: ValidatableField, value: string | number | boolean) => {
     const newFormData = { ...formData, [field]: value }
     const fieldErrors = validateForm(newFormData)
-    
+
     setErrors(prev => ({
       ...prev,
       [field]: fieldErrors[field],
@@ -179,9 +179,9 @@ export default function AddSlotPage() {
   }, [formData, validateForm])
 
   // Handle form field changes
-  const handleFieldChange = useCallback((field: keyof FormData, value: any) => {
+  const handleFieldChange = useCallback((field: keyof FormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    
+
     if (touched[field]) {
       validateField(field as ValidatableField, value)
     }
@@ -202,7 +202,7 @@ export default function AddSlotPage() {
   // Handle form submission
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Mark all fields as touched
     setTouched({
       sport_id: true,
@@ -247,18 +247,19 @@ export default function AddSlotPage() {
 
       toast.success('Slot added successfully!')
       router.push('/admin/slots')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding slot:', error)
-      
+
       // Handle specific database errors
-      if (error.code === '23505') {
+      const dbError = error as { code?: string; message?: string }
+      if (dbError.code === '23505') {
         setErrors({ general: 'A slot with this configuration already exists' })
         toast.error('Slot already exists')
-      } else if (error.message?.includes('network')) {
+      } else if (dbError.message?.includes('network')) {
         setErrors({ general: 'Network error. Please check your connection and try again.' })
         toast.error('Network error')
       } else {
-        setErrors({ general: error.message || 'Failed to add slot. Please try again.' })
+        setErrors({ general: dbError.message || 'Failed to add slot. Please try again.' })
         toast.error('Failed to add slot')
       }
     } finally {
@@ -277,7 +278,7 @@ export default function AddSlotPage() {
               <Skeleton className="h-7 w-36" />
               <Skeleton className="h-4 w-64" />
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-6">
                 {/* Sport Selection Skeleton */}
@@ -330,7 +331,7 @@ export default function AddSlotPage() {
               Create a new time slot for sports activities
             </p>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* General Error */}
@@ -353,7 +354,7 @@ export default function AddSlotPage() {
                   onOpenChange={() => handleFieldBlur('sport_id')}
                   disabled={submitting || sportsLoading}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="sport_id"
                     className={cn(
                       "transition-colors",
@@ -448,7 +449,7 @@ export default function AddSlotPage() {
                   onOpenChange={() => handleFieldBlur('gender')}
                   disabled={submitting}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="gender"
                     className={cn(
                       "transition-colors",
@@ -483,7 +484,7 @@ export default function AddSlotPage() {
                   onOpenChange={() => handleFieldBlur('allowed_user_type')}
                   disabled={submitting}
                 >
-                  <SelectTrigger 
+                  <SelectTrigger
                     id="allowed_user_type"
                     className={cn(
                       "transition-colors",
@@ -554,7 +555,7 @@ export default function AddSlotPage() {
                   <div><strong>Gender:</strong> {formData.gender === 'any' ? 'Any' : formData.gender.charAt(0).toUpperCase() + formData.gender.slice(1)}</div>
                   <div><strong>Allowed Users:</strong> {
                     formData.allowed_user_type === 'student' ? 'Students Only' :
-                    formData.allowed_user_type === 'faculty' ? 'Faculty Only' : 'Anyone'
+                      formData.allowed_user_type === 'faculty' ? 'Faculty Only' : 'Anyone'
                   }</div>
                 </div>
               </div>

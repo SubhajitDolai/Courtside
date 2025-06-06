@@ -300,10 +300,10 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
           <div className="p-6">
             <Tabs defaultValue="all" className="space-y-6" onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="booked">Active</TabsTrigger>
-                <TabsTrigger value="checked-in">In Progress</TabsTrigger>
-                <TabsTrigger value="checked-out">Completed</TabsTrigger>
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 sm:px-4">All</TabsTrigger>
+                <TabsTrigger value="booked" className="text-xs sm:text-sm px-2 sm:px-4">Active</TabsTrigger>
+                <TabsTrigger value="checked-in" className="text-xs sm:text-sm px-2 sm:px-4">In Progress</TabsTrigger>
+                <TabsTrigger value="checked-out" className="text-xs sm:text-sm px-2 sm:px-4">Completed</TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="space-y-4">

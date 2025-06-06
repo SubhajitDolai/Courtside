@@ -323,7 +323,7 @@ export default function SportSlotsPage() {
                         ) : (
                           <div className="flex items-center justify-center gap-2">
                             <Users className="h-4 w-4" />
-                            <span>Select Seats</span>
+                            <span>View Spots</span>
                           </div>
                         )}
                       </Button>

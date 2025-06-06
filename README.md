@@ -47,6 +47,16 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - ⚙️ **Facility Management** - Control sports and slot configurations
 - 📄 **Pagination** - Efficiently navigate through booking records
 - 🔄 **Daily Reset** - Automatic clearing of expired bookings at midnight
+- 📈 **Analytics Dashboard** - Comprehensive system-wide analytics and insights
+- 📊 **Advanced Charts** - Interactive visualizations with Recharts integration
+- 👥 **User Analytics** - Demographics, growth trends, and user type distribution
+- 🏆 **Sports Analytics** - Booking distribution and facility utilization metrics
+- ⏰ **Time-based Insights** - Slot utilization patterns and peak usage analysis
+- 🎨 **Modern UI** - Enhanced dashboard with gradient designs and responsive layouts
+- 📱 **QR Scanner System** - Advanced camera and manual entry check-in/check-out
+- 🔍 **IoT Integration** - Support for automated scanners and manual booking ID entry
+- 💬 **Feedback Management** - Collect and manage user feedback with comprehensive admin panel
+- 🚫 **User Access Control** - Ban/restrict user accounts with automatic logout functionality
 
 ## 🛠️ Tech Stack
 
@@ -65,6 +75,11 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | Analytics | Vercel Analytics + Speed Insights |
 | Animations | Motion + tw-animate-css |
 | Theme | next-themes (dark/light mode) |
+| Charts & Visualization | Recharts (React + D3.js) |
+| Data Processing | React useMemo for optimized calculations |
+| Error Handling | React Error Boundary for robust chart rendering |
+| QR Code Scanning | HTML5-QRCode library for camera-based scanning |
+| IoT Integration | Support for manual entry and automated scanner devices |
 | Deployment | Vercel (Edge Functions) |
 | AI Integration | Vercel AI SDK (Google Gemini) |
 
@@ -74,6 +89,9 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - **Supabase Realtime**: Replaced polling with efficient websocket connections
 - **Connection Pooling**: Automatic connection management for scalability
 - **Enhanced Time Validation**: Bulletproof server-side validation for bookings
+- **Chart Performance**: Memoized data processing and lazy loading for analytics
+- **SVG to Lucide Migration**: Consistent icon system with optimized rendering
+- **Component Optimization**: Error boundaries and Suspense for robust UI
 
 ## 🗂️ Project Structure
 
@@ -90,21 +108,105 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /sports/[id]/slots    # Sports slot booking
     /my-bookings          # Booking history and current bookings
     /profile              # User profile management
-    /dashboard            # Personalized user dashboard
+    /dashboard            # Analytics dashboard with comprehensive insights
     /rules                # Sports facility rules
     /terms                # Terms and conditions
   /admin               # Admin dashboard
     /bookings             # Manage bookings
+    /bookings-history     # Historical booking data and archives
     /slots                # Manage sports slots
     /sports               # Manage sports facilities
+    /feedback             # User feedback management system
+    /qr-scanner           # QR code scanning system
+      /camera             # Camera-based QR scanning
+      /manual             # Manual entry and IoT integration
   /assistant           # AI assistant for recommendations
-  /banned              # Restricted access page
+  /banned              # Restricted access page for suspended users
+  /api                 # API routes
+    /chat               # AI assistant chat functionality
+    /check-profile      # Profile validation endpoints
+    /reset-bookings     # Daily booking reset functionality
 /components            # Reusable UI components
 /utils/supabase        # Supabase client and utilities
 /components/ui         # Shadcn UI wrappers
 /hooks                 # Custom React hooks
 /lib                   # General utility functions
 ```
+
+## 📊 Analytics Dashboard Features
+
+### Overview Tab
+- **Key Metrics Cards**: Total users, active sports, available slots, and total bookings
+- **Booking Trends**: Weekly activity patterns with interactive charts
+- **Sports Distribution**: Visual breakdown of booking distribution across sports
+- **Real-time Data**: Live updates with Supabase Realtime integration
+
+### Bookings Tab
+- **Comprehensive Analysis**: Detailed booking patterns and trends
+- **Slot Utilization**: Time-based usage analytics and peak hour identification
+- **Interactive Charts**: Responsive visualizations with theme support
+
+### Users Tab
+- **Demographics Visualization**: Gender distribution with animated progress bars
+- **User Type Analysis**: Student vs Faculty breakdown with role-based insights
+- **Growth Analytics**: 
+  - Monthly registration trends with customizable time ranges
+  - Cumulative vs monthly view toggles
+  - Growth rate calculations and peak month identification
+  - Enhanced 500px height chart with improved spacing and controls
+  - Advanced statistics cards with gradient designs
+  - Responsive layout optimized for all screen sizes
+
+### Technical Features
+- **Consistent Icon System**: Migrated from SVG to Lucide React icons
+- **Performance Optimized**: Memoized calculations and efficient data processing
+- **Error Handling**: Robust error boundaries with fallback components
+- **Theme Support**: Full dark/light mode compatibility
+- **Responsive Design**: Mobile-first approach with enhanced tablet/desktop layouts
+
+## 📱 QR Scanner System
+
+### Camera Scanner
+- **Real-time QR Scanning**: HTML5-QRCode integration for live camera scanning
+- **Instant Verification**: Immediate booking validation and check-in/check-out
+- **Modern UI**: Gradient-designed interface with responsive controls
+- **Error Handling**: Robust error boundaries and fallback mechanisms
+- **Mobile Optimized**: Touch-friendly controls and responsive design
+
+### Manual Entry & IoT Integration
+- **Keyboard Input**: Manual booking ID entry for fallback scenarios
+- **IoT Device Support**: Compatible with automated scanner hardware
+- **Laser Scanner Ready**: Industrial-grade scanner integration capabilities
+- **Dual-Mode Operation**: Switch between camera and manual entry seamlessly
+
+### Admin Check-in Features
+- **Attendance Tracking**: Real-time check-in/check-out status updates
+- **Booking Validation**: Verify booking details before check-in
+- **Status Management**: Track user attendance with timestamp logging
+- **Quick Stats**: Fast check-in metrics and QR compatibility indicators
+
+## 💬 Feedback Management System
+
+### User Feedback Collection
+- **Comprehensive Feedback**: Collect user suggestions and complaints
+- **Admin Dashboard**: Centralized feedback management interface
+- **Real-time Updates**: Live feedback submission and admin notifications
+- **Responsive Design**: Mobile-friendly feedback collection forms
+
+### Admin Feedback Management
+- **Feedback Table**: Sortable and filterable feedback entries
+- **Status Tracking**: Mark feedback as read, resolved, or pending
+- **User Details**: Access to feedback author information
+- **Export Capabilities**: Download feedback data for analysis
+
+## 🚫 User Access Control
+
+### Banned User Management
+- **Account Restrictions**: Temporary or permanent account suspension
+- **Automatic Logout**: Immediate session termination for banned users
+- **Violation Categories**: Clear guidelines for policy violations
+- **Appeal Process**: Contact information for account restoration
+- **Admin Notifications**: Alerts for restricted access attempts
 
 ## 🧮 Database Schema
 
@@ -141,6 +243,13 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - Archived records from bookings
 - Admin-only access
 
+#### `user_feedback`
+- `id` (UUID, PK)
+- `user_id` (references profiles)
+- `feedback_text`, `rating`
+- `category`, `status`
+- `created_at`
+
 ## 📚 Core Logic
 
 ### Booking System
@@ -155,16 +264,42 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - Validates time and slot availability using server-side checks
 - Ensures security by never exposing raw database structures
 
+### QR Scanner System
+- **Camera Integration**: HTML5-QRCode library for real-time scanning
+- **Manual Fallback**: IoT device compatibility with manual ID entry
+- **Booking Validation**: Server-side verification of scanned booking IDs
+- **Attendance Tracking**: Automatic check-in/check-out with timestamp logging
+- **Error Handling**: Robust error boundaries for scanning failures
+
+### Feedback System
+- **User Feedback Collection**: Comprehensive feedback submission forms
+- **Admin Management**: Centralized dashboard for feedback review and response
+- **Status Tracking**: Mark feedback as pending, reviewed, or resolved
+- **Real-time Updates**: Live feedback submission with instant admin notifications
+
+### User Access Control
+- **Account Restrictions**: Ban/suspend users with policy violations
+- **Automatic Session Management**: Immediate logout for restricted accounts
+- **Appeal Process**: Clear guidelines for account restoration requests
+- **Admin Oversight**: Comprehensive user management and monitoring tools
+
 ### Authentication
 - Implements Supabase Auth (email/password)
 - Sessions are persisted via cookies
 - First-time users are redirected to complete their profile
 
+### Analytics & Visualization
+- Real-time dashboard with comprehensive system analytics
+- Interactive charts using Recharts with customizable time ranges
+- Optimized data processing with React useMemo for large datasets
+- Responsive visualizations that adapt to different screen sizes
+- Theme-aware charts with dark/light mode support
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v16+)
-- npm or yarn
+- npm or pnpm
 - Supabase account
 
 ### Installation
@@ -179,8 +314,10 @@ Courtside is a comprehensive full-stack web application designed to streamline t
    ```bash
    npm install
    # or
-   yarn install
+   pnpm install
    ```
+   
+   **Note**: The QR scanner functionality requires camera permissions. Ensure your deployment environment supports HTTPS for camera access.
 
 3. **Configure environment variables**
    
@@ -190,13 +327,14 @@ Courtside is a comprehensive full-stack web application designed to streamline t
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
    BACKUP_CRON_SECRET=your-custom-key-for-hitting-custom-api-everyday-at-12am-to-clear-bookings
+   GOOGLE_GENERATIVE_AI_API_KEY=your-google-ai-api-key
    ```
 
 4. **Run the development server**
    ```bash
    npm run dev
    # or
-   yarn dev
+   pnpm dev
    ```
 
 5. **Open your browser**
