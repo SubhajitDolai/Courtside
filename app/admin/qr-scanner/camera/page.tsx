@@ -62,6 +62,7 @@ export default function CameraScannerPage() {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isFlashOn, setIsFlashOn] = useState(false)
+  const [isFlashSupported, setIsFlashSupported] = useState<boolean | null>(null) // null = checking, true/false = result
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0)
   const [scanHistory, setScanHistory] = useState<{ id: string, action: string, timestamp: Date, user: string }[]>([])
@@ -73,6 +74,44 @@ export default function CameraScannerPage() {
   const [fullscreenMessage, setFullscreenMessage] = useState('')
   const [fullscreenType, setFullscreenType] = useState<'success' | 'error'>('success')
   const { start } = useGlobalLoadingBar()
+
+  // Barcode scanner sound function
+  const playBarcodeScanSound = useCallback(() => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+
+      // First tone
+      const osc1 = audioContext.createOscillator()
+      const gain1 = audioContext.createGain()
+      osc1.connect(gain1)
+      gain1.connect(audioContext.destination)
+
+      osc1.frequency.setValueAtTime(1200, audioContext.currentTime)
+      osc1.type = 'triangle'
+      gain1.gain.setValueAtTime(0.8, audioContext.currentTime)
+      gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15)
+
+      osc1.start(audioContext.currentTime)
+      osc1.stop(audioContext.currentTime + 0.15)
+
+      // Second tone
+      const osc2 = audioContext.createOscillator()
+      const gain2 = audioContext.createGain()
+      osc2.connect(gain2)
+      gain2.connect(audioContext.destination)
+
+      osc2.frequency.setValueAtTime(800, audioContext.currentTime + 0.1)
+      osc2.type = 'triangle'
+      gain2.gain.setValueAtTime(0.8, audioContext.currentTime + 0.1)
+      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+
+      osc2.start(audioContext.currentTime + 0.1)
+      osc2.stop(audioContext.currentTime + 0.3)
+    } catch (error) {
+      console.warn('Could not play barcode scan sound:', error)
+    }
+  }, [])
 
   // Timeout constants for consistency and better UX
   // Shorter delays = faster retry for critical errors
@@ -130,16 +169,16 @@ export default function CameraScannerPage() {
       if (bookings) {
         // Process bookings to create scan history entries
         const scanEntries: { id: string, action: string, timestamp: Date, user: string }[] = []
-        
-        bookings.forEach((booking: { 
-          id: string; 
-          checked_in_at: string | null; 
-          checked_out_at: string | null; 
+
+        bookings.forEach((booking: {
+          id: string;
+          checked_in_at: string | null;
+          checked_out_at: string | null;
           profiles: { first_name: string; last_name: string } | { first_name: string; last_name: string }[]
         }) => {
           const profile = Array.isArray(booking.profiles) ? booking.profiles[0] : booking.profiles
           const userName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
-          
+
           // Add check-in entry if exists
           if (booking.checked_in_at) {
             scanEntries.push({
@@ -149,7 +188,7 @@ export default function CameraScannerPage() {
               user: userName
             })
           }
-          
+
           // Add check-out entry if exists
           if (booking.checked_out_at) {
             scanEntries.push({
@@ -171,16 +210,62 @@ export default function CameraScannerPage() {
     }
   }, [supabase])
 
-  // Get available cameras
+  // Get available cameras with better device detection
   const getAvailableCameras = useCallback(async () => {
     try {
+      // First try to get camera permission for better device labels
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        stream.getTracks().forEach(track => track.stop()) // Clean up immediately
+      } catch {
+        console.warn('Camera permission not granted, will get limited device info')
+      }
+
       const devices = await navigator.mediaDevices.enumerateDevices()
       const videoDevices = devices.filter(device => device.kind === 'videoinput')
+
+      console.log(`Found ${videoDevices.length} cameras:`, videoDevices.map(d => ({
+        label: d.label || 'Unknown Camera',
+        deviceId: d.deviceId.substring(0, 8) + '...'
+      })))
+
       setCameras(videoDevices)
       return videoDevices
     } catch (error) {
       console.error('Error getting cameras:', error)
+      toast.error('Failed to detect cameras')
       return []
+    }
+  }, [])
+
+  // Check if flash/torch is supported on current camera
+  const checkFlashSupport = useCallback(async () => {
+    try {
+      setIsFlashSupported(null) // Set to checking state
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
+      })
+
+      const track = stream.getVideoTracks()[0]
+      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
+
+      const hasFlash = !!capabilities.torch
+      setIsFlashSupported(hasFlash)
+
+      // Clean up stream
+      stream.getTracks().forEach(t => t.stop())
+
+      console.log('Flash support detected:', hasFlash)
+      return hasFlash
+    } catch (error) {
+      console.error('Error checking flash support:', error)
+      setIsFlashSupported(false)
+      return false
     }
   }, [])
 
@@ -210,61 +295,152 @@ export default function CameraScannerPage() {
     try {
       const availableCameras = await getAvailableCameras()
 
-      // Prefer back camera for better QR code scanning
-      const preferredCamera = availableCameras.find(camera =>
-        camera.label.toLowerCase().includes('back') ||
-        camera.label.toLowerCase().includes('rear')
-      ) || availableCameras[currentCameraIndex] || availableCameras[0]
+      // Check flash support in parallel
+      checkFlashSupport()
 
-      const config = {
-        fps: 10, // Reduced FPS for better performance
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        disableFlip: false,
-        videoConstraints: {
-          deviceId: preferredCamera?.deviceId,
-          facingMode: 'environment', // Prefer back camera
-          width: { ideal: 1280, max: 1920 },
-          height: { ideal: 720, max: 1080 }
-        },
-        rememberLastUsedCamera: true,
-        supportedScanTypes: [0] // Only QR codes for better performance
+      // Get target camera with fallback logic
+      let targetCamera = availableCameras[currentCameraIndex] || availableCameras[0]
+
+      // Try to prefer back camera only if current index is 0 (auto-select)
+      if (currentCameraIndex === 0) {
+        const backCamera = availableCameras.find(camera =>
+          camera.label.toLowerCase().includes('back') ||
+          camera.label.toLowerCase().includes('rear')
+        )
+        if (backCamera) targetCamera = backCamera
       }
 
-      scannerRef.current = new Html5QrcodeScanner("qr-reader", config, false)
+      // Try multiple camera configurations with fallbacks
+      const cameraConfigs = [
+        // Primary: Specific camera with high resolution
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+          videoConstraints: {
+            deviceId: { exact: targetCamera?.deviceId },
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 }
+          },
+          rememberLastUsedCamera: true,
+          supportedScanTypes: [0]
+        },
+        // Fallback 1: Specific camera with lower resolution
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+          videoConstraints: {
+            deviceId: targetCamera?.deviceId,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          rememberLastUsedCamera: true,
+          supportedScanTypes: [0]
+        },
+        // Fallback 2: Environment facing camera (no specific device)
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: 'environment',
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          rememberLastUsedCamera: true,
+          supportedScanTypes: [0]
+        },
+        // Final fallback: Basic video only
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+          videoConstraints: {
+            video: true
+          },
+          rememberLastUsedCamera: false,
+          supportedScanTypes: [0]
+        }
+      ]
 
-      scannerRef.current.render(
-        (decodedText) => handleScanSuccess(decodedText),
-        (error) => {
-          // Only log actual errors, not routine scan attempts
-          // Common expected errors that should be ignored
-          const ignoredErrors = [
-            'NotFoundException',
-            'No QR code found',
-            'QR code parse error',
-            'Unable to detect a square in provided image'
-          ]
+      let scannerInitialized = false
+      let lastError = null
 
-          const shouldIgnore = ignoredErrors.some(ignoredError =>
-            error.toString().includes(ignoredError)
+      for (let i = 0; i < cameraConfigs.length && !scannerInitialized; i++) {
+        try {
+          console.log(`Trying camera config ${i + 1}/${cameraConfigs.length}:`, cameraConfigs[i].videoConstraints)
+
+          scannerRef.current = new Html5QrcodeScanner("qr-reader", cameraConfigs[i], false)
+
+          await scannerRef.current.render(
+            (decodedText) => handleScanSuccess(decodedText),
+            (error) => {
+              // Only log actual errors, not routine scan attempts
+              const ignoredErrors = [
+                'NotFoundException',
+                'No QR code found',
+                'QR code parse error',
+                'Unable to detect a square in provided image'
+              ]
+
+              const shouldIgnore = ignoredErrors.some(ignoredError =>
+                error.toString().includes(ignoredError)
+              )
+
+              if (!shouldIgnore) {
+                console.error('QR Scanner error:', error)
+              }
+            }
           )
 
-          if (!shouldIgnore) {
-            console.error('QR Scanner error:', error)
-          }
-        }
-      )
+          scannerInitialized = true
+          console.log(`Camera initialized successfully with config ${i + 1}`)
 
-      setScanning(true)
-      setScannerStatus('scanning')
-      setError(null)
+        } catch (configError) {
+          console.warn(`Config ${i + 1} failed:`, configError)
+          lastError = configError
+
+          // Clean up failed scanner instance
+          if (scannerRef.current) {
+            try {
+              await scannerRef.current.clear()
+              scannerRef.current = null
+            } catch (clearError) {
+              console.warn('Error clearing failed scanner:', clearError)
+            }
+          }
+
+          // Clear DOM for next attempt
+          const retryElement = document.getElementById("qr-reader")
+          if (retryElement) {
+            retryElement.innerHTML = ''
+          }
+
+          // Small delay before next attempt
+          await new Promise(resolve => setTimeout(resolve, 200))
+        }
+      }
+
+      if (scannerInitialized) {
+        setScanning(true)
+        setScannerStatus('scanning')
+        setError(null)
+      } else {
+        throw lastError || new Error('All camera configurations failed')
+      }
+
     } catch (error) {
       console.error('Failed to initialize scanner:', error)
       setScannerStatus('error')
       setError('Failed to initialize camera. Please check permissions.')
       toast.error('Camera initialization failed')
     }
-  }, [currentCameraIndex, getAvailableCameras, TIMEOUTS.DOM_INIT])
+  }, [currentCameraIndex, getAvailableCameras, checkFlashSupport, TIMEOUTS.DOM_INIT])
 
   // Helper function to check if slot is over
   const isSlotOver = useCallback((booking: Booking) => {
@@ -289,6 +465,9 @@ export default function CameraScannerPage() {
         qrReaderElement.innerHTML = ''
       }
 
+      // Reset flash state when stopping camera
+      setIsFlashOn(false)
+      setIsFlashSupported(null)
       setScanning(false)
       setScannerStatus('initializing')
       setError(null)
@@ -465,6 +644,9 @@ export default function CameraScannerPage() {
   const handleScanSuccess = useCallback(async (decodedText: string) => {
     console.log('🔍 QR Scan Success - Raw text:', decodedText)
 
+    // Play barcode scanner sound
+    playBarcodeScanSound()
+
     if (processing) {
       console.log('⚠️ Already processing, ignoring scan')
       return // Prevent multiple simultaneous scans
@@ -576,13 +758,16 @@ export default function CameraScannerPage() {
       // Add delay before restarting scanner to prevent rapid scanning
       setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
     }
-  }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage, TIMEOUTS.DATA_ERROR])
+  }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage, TIMEOUTS.DATA_ERROR, playBarcodeScanSound])
 
   // Switch camera
   const switchCamera = useCallback(() => {
     if (cameras.length > 1) {
       const nextIndex = (currentCameraIndex + 1) % cameras.length
       setCurrentCameraIndex(nextIndex)
+      // Reset flash state when switching cameras
+      setIsFlashOn(false)
+      setIsFlashSupported(null) // Reset support check
       // Scanner will reinitialize with the new camera
       initializeScanner()
       toast.success(`Switched to camera ${nextIndex + 1}`)
@@ -591,37 +776,129 @@ export default function CameraScannerPage() {
 
   // Toggle flashlight (if supported)
   const toggleFlash = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      })
-      
-      const track = stream.getVideoTracks()[0]
-      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
+    // Check if flash is supported first
+    if (isFlashSupported === false) {
+      toast.error('Flashlight not supported on this camera')
+      return
+    }
 
-      if (capabilities.torch) {
-        await track.applyConstraints({
+    if (isFlashSupported === null) {
+      toast.error('Checking flash support...')
+      return
+    }
+
+    try {
+      // Get the current active video track or create a new stream with the current camera
+      let videoTrack: MediaStreamTrack | null = null
+
+      try {
+        // Try to access camera with current camera device
+        const currentCamera = cameras[currentCameraIndex]
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: currentCamera?.deviceId,
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        })
+
+        videoTrack = stream.getVideoTracks()[0]
+      } catch (streamError) {
+        console.warn('Could not access current camera, trying fallback:', streamError)
+
+        // Fallback: create new stream with environment camera
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        })
+        videoTrack = fallbackStream.getVideoTracks()[0]
+      }
+
+      if (!videoTrack) {
+        throw new Error('No video track available')
+      }
+
+      // Double-check torch capability
+      const capabilities = videoTrack.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
+
+      if (!capabilities.torch) {
+        setIsFlashSupported(false)
+        toast.error('Flashlight not supported on this camera')
+        videoTrack.stop()
+        return
+      }
+
+      // Apply torch constraint with multiple approaches
+      let success = false
+
+      // Method 1: Advanced constraints (most compatible)
+      try {
+        await videoTrack.applyConstraints({
           advanced: [{ torch: !isFlashOn } as MediaTrackConstraintSet]
         })
+        success = true
+      } catch (constraintError) {
+        console.warn('Advanced constraint failed, trying direct:', constraintError)
+      }
+
+      // Method 2: Direct constraint (fallback)
+      if (!success) {
+        try {
+          await videoTrack.applyConstraints({
+            torch: !isFlashOn
+          } as MediaTrackConstraints)
+          success = true
+        } catch (altError) {
+          console.warn('Direct constraint failed:', altError)
+        }
+      }
+
+      if (success) {
         setIsFlashOn(!isFlashOn)
         toast.success(isFlashOn ? 'Flash disabled' : 'Flash enabled')
       } else {
-        toast.error('Flashlight not supported on this device')
+        toast.error('Failed to control flashlight')
       }
 
-      // Clean up stream
-      stream.getTracks().forEach(track => track.stop())
+      // Clean up track after a short delay to allow settings to apply
+      setTimeout(() => {
+        if (videoTrack && videoTrack.readyState === 'live') {
+          // Only stop if it's not actively being used by the scanner
+          const qrReaderElement = document.getElementById("qr-reader")
+          const videoElements = qrReaderElement?.querySelectorAll('video')
+
+          if (!videoElements || videoElements.length === 0) {
+            videoTrack.stop()
+          }
+        }
+      }, 500)
+
     } catch (error) {
       console.error('Flashlight error:', error)
-      toast.error('Failed to control flashlight')
+
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          toast.error('Camera permission denied')
+        } else if (error.name === 'NotFoundError') {
+          toast.error('No camera found')
+        } else if (error.name === 'NotSupportedError') {
+          setIsFlashSupported(false)
+          toast.error('Flashlight not supported')
+        } else {
+          toast.error('Failed to control flashlight')
+        }
+      } else {
+        toast.error('Failed to control flashlight')
+      }
     }
-  }, [isFlashOn])
+  }, [isFlashOn, isFlashSupported, cameras, currentCameraIndex])
 
   // Initialize on mount and cleanup on unmount
   useEffect(() => {
     // Fetch initial scan history
     fetchScannerActivity()
-    
+
     // Add a small delay to ensure DOM is ready
     const timeoutId = setTimeout(() => {
       initializeScanner()
@@ -752,11 +1029,39 @@ export default function CameraScannerPage() {
                           onClick={toggleFlash}
                           variant="outline"
                           size="sm"
-                          disabled={processing}
-                          className={`h-8 px-3 text-xs ${isFlashOn ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : ''}`}
+                          disabled={processing || isFlashSupported === false || isFlashSupported === null}
+                          className={`h-8 px-3 text-xs transition-all duration-200 ${
+                            isFlashOn 
+                              ? 'bg-yellow-50 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300'
+                              : isFlashSupported === false
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                            }`}
+                          title={
+                            isFlashSupported === false
+                              ? 'Flashlight not supported on this camera'
+                              : isFlashSupported === null
+                                ? 'Checking flash support...'
+                                : isFlashOn
+                                  ? 'Turn off flashlight'
+                                  : 'Turn on flashlight'
+                          }
                         >
-                          {isFlashOn ? <FlashlightOff className="h-3 w-3 mr-1" /> : <Flashlight className="h-3 w-3 mr-1" />}
-                          Flash
+                          {isFlashSupported === null ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : isFlashOn ? (
+                            <FlashlightOff className="h-3 w-3 mr-1" />
+                          ) : (
+                            <Flashlight className="h-3 w-3 mr-1" />
+                          )}
+                          {isFlashSupported === null
+                            ? 'Checking...'
+                            : isFlashSupported === false
+                              ? 'Flash Unavailable'
+                              : isFlashOn
+                                ? 'On'
+                                : 'Off'
+                          }
                         </Button>
 
                         <Button
