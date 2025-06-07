@@ -298,12 +298,12 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
         </Card>
       </div>
 
-      {/* Filters Section - Same as before */}
+      {/* Filters Section - Mobile Optimized */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <CardContent className="p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Search Input */}
-            <div className="relative">
+            <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search feedback, name, PRN..."
@@ -318,9 +318,9 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn("justify-start text-left font-normal h-10 text-sm", !dateFrom && "text-muted-foreground")}
+                  className={cn("justify-start text-left font-normal h-10 text-sm w-full", !dateFrom && "text-muted-foreground")}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">
                     {dateFrom ? format(dateFrom, "MMM dd, yyyy") : "From date"}
                   </span>
@@ -336,9 +336,9 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn("justify-start text-left font-normal h-10 text-sm", !dateTo && "text-muted-foreground")}
+                  className={cn("justify-start text-left font-normal h-10 text-sm w-full", !dateTo && "text-muted-foreground")}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">
                     {dateTo ? format(dateTo, "MMM dd, yyyy") : "To date"}
                   </span>
@@ -406,12 +406,16 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
       {/* Feedback List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-semibold">Feedback Submissions</h2>
+        {/* Mobile-Optimized Header - Always Row Layout */}
+        <div className="flex flex-row items-start justify-between gap-3 sm:items-center sm:gap-4">
+          <div className="flex flex-col gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:gap-3">
+            <h2 className="text-xl font-semibold sm:text-2xl">
+              <span className="hidden sm:inline">Feedback Submissions</span>
+              <span className="sm:hidden">Feedbacks</span>
+            </h2>
             {selectedIds.size > 0 && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-sm px-3 py-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary" className="text-xs px-2 py-1 sm:text-sm sm:px-3">
                   {selectedIds.size} selected
                 </Badge>
                 <AlertDialog>
@@ -419,29 +423,30 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="gap-2"
+                      className="gap-1.5 h-8 px-3 text-xs sm:gap-2 sm:h-9 sm:px-4 sm:text-sm"
                       disabled={isDeleting}
                     >
                       {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
                       ) : (
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       )}
-                      Delete Selected
+                      <span className="hidden sm:inline">Delete Selected</span>
+                      <span className="sm:hidden">Delete</span>
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="mx-4 max-w-lg">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Selected Feedback</AlertDialogTitle>
                       <AlertDialogDescription>
                         Are you sure you want to delete {selectedIds.size} feedback item{selectedIds.size === 1 ? '' : 's'}? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+                      <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={deleteBulkFeedback}
-                        className={cn(buttonVariants({ variant: "destructive" }))}
+                        className={cn(buttonVariants({ variant: "destructive" }), "w-full sm:w-auto")}
                       >
                         Delete {selectedIds.size} Item{selectedIds.size === 1 ? '' : 's'}
                       </AlertDialogAction>
@@ -451,20 +456,23 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          
+          {/* Controls Section - Always Flex Row */}
+          <div className="flex flex-row items-center gap-2 overflow-x-auto shrink-0 sm:gap-4">
             {filteredFeedback.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 sm:gap-2">
                 <Checkbox
                   checked={currentItems.length > 0 && currentItems.every(item => selectedIds.has(item.id))}
                   onCheckedChange={toggleSelectAll}
                   aria-label="Select all visible feedback"
                 />
-                <span className="text-sm text-muted-foreground">
-                  Select all visible
+                <span className="text-xs text-muted-foreground whitespace-nowrap sm:text-sm">
+                  <span className="hidden sm:inline">Select all visible</span>
+                  <span className="sm:hidden">Select all</span>
                 </span>
               </div>
             )}
-            <Badge variant="secondary" className="text-sm px-3 py-1">
+            <Badge variant="secondary" className="text-xs px-2 py-1 shrink-0 whitespace-nowrap sm:text-sm sm:px-3">
               Showing {currentItems.length} of {filteredFeedback.length} {filteredFeedback.length === 1 ? 'item' : 'items'}
             </Badge>
           </div>
@@ -485,43 +493,41 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
             {/* ✅ RENDER ONLY CURRENT ITEMS */}
             {currentItems.map((item) => (
               <Card key={item.id} className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <CardContent className="p-6">
-                  {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3">
+                <CardContent className="p-4 sm:p-6">
+                  {/* Single Row Header - All Elements in One Row */}
+                  <div className="flex items-center justify-between gap-2 mb-4 overflow-x-auto">
+                    <div className="flex items-center gap-2 shrink-0">
                       <Checkbox
                         checked={selectedIds.has(item.id)}
                         onCheckedChange={() => toggleSelection(item.id)}
                         aria-label={`Select feedback from ${item.user_name || 'Anonymous'}`}
                       />
-                      <div className="p-2 bg-muted/50 rounded-full">
-                        <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                      <div className="p-1.5 bg-muted/50 rounded-full sm:p-2">
+                        <MessageSquare className="h-4 w-4 text-muted-foreground sm:h-5 sm:w-5" />
                       </div>
-                      <div>
-                        <Badge variant="outline" className="font-mono text-sm">
-                          {format(new Date(item.created_at), 'MMM dd, yyyy • h:mm a')}
-                        </Badge>
-                      </div>
+                      <Badge variant="outline" className="font-mono text-xs shrink-0">
+                        {format(new Date(item.created_at), 'MMM dd, yyyy • h:mm a')}
+                      </Badge>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 shrink-0">
                       {/* Dynamic Expand Button - Only show for long messages */}
                       {shouldShowExpandButton(item.note) && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleRowExpansion(item.id)}
-                          className="gap-2 text-muted-foreground hover:text-foreground text-sm"
+                          className="gap-1.5 text-muted-foreground hover:text-foreground text-xs h-8 px-2 sm:gap-2 sm:text-sm sm:h-9 sm:px-3"
                         >
                           {expandedRows.has(item.id) ? (
                             <>
-                              <ChevronUp className="h-4 w-4" />
-                              Collapse
+                              <ChevronUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">Collapse</span>
                             </>
                           ) : (
                             <>
-                              <ChevronDown className="h-4 w-4" />
-                              Expand
+                              <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">Expand</span>
                             </>
                           )}
                         </Button>
@@ -533,18 +539,18 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            className="gap-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 h-8 px-2 sm:gap-2 sm:h-9 sm:px-3"
                             disabled={deletingIds.has(item.id)}
                           >
                             {deletingIds.has(item.id) ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
                             ) : (
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             )}
                             <span className="sr-only sm:not-sr-only">Delete</span>
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="mx-4 max-w-lg">
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete Feedback</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -557,11 +563,11 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                               </div>
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+                            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => deleteFeedback(item.id)}
-                              className={cn(buttonVariants({ variant: "destructive" }))}
+                              className={cn(buttonVariants({ variant: "destructive" }), "w-full sm:w-auto")}
                             >
                               Delete Feedback
                             </AlertDialogAction>
@@ -571,40 +577,40 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                     </div>
                   </div>
 
-                  {/* User Info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  {/* Responsive User Info Grid */}
+                  <div className="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
                     <div className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Name</p>
-                        <p className="text-base font-medium">{item.user_name || 'Anonymous'}</p>
+                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0 sm:h-5 sm:w-5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground sm:text-sm">Name</p>
+                        <p className="text-sm font-medium truncate sm:text-base">{item.user_name || 'Anonymous'}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Hash className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">PRN</p>
-                        <p className="text-base font-medium font-mono">{item.user_prn || 'N/A'}</p>
+                      <Hash className="h-4 w-4 text-muted-foreground flex-shrink-0 sm:h-5 sm:w-5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground sm:text-sm">PRN</p>
+                        <p className="text-sm font-medium font-mono truncate sm:text-base">{item.user_prn || 'N/A'}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="text-base font-medium">{item.email || 'N/A'}</p>
+                    <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0 sm:h-5 sm:w-5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground sm:text-sm">Email</p>
+                        <p className="text-sm font-medium truncate sm:text-base">{item.email || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
 
-                  <Separator className="my-4" />
+                  <Separator className="my-3 sm:my-4" />
 
-                  {/* Feedback Content - Neutral */}
+                  {/* Feedback Content - Mobile Optimized */}
                   <div>
-                    <p className="text-base font-medium mb-3">Feedback Message</p>
-                    <div className="bg-muted/20 border border-border rounded-lg p-4">
-                      <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                    <p className="text-sm font-medium mb-2 sm:text-base sm:mb-3">Feedback Message</p>
+                    <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:text-base">
                         {expandedRows.has(item.id) ? item.note : truncateText(item.note)}
                       </p>
                       {!expandedRows.has(item.id) && shouldShowExpandButton(item.note) && (
@@ -612,7 +618,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                           variant="link"
                           size="sm"
                           onClick={() => toggleRowExpansion(item.id)}
-                          className="mt-3 p-0 h-auto text-sm font-medium"
+                          className="mt-2 p-0 h-auto text-xs font-medium sm:mt-3 sm:text-sm"
                         >
                           Read more...
                         </Button>
@@ -625,19 +631,23 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
             {/* ✅ LOAD MORE TRIGGER & LOADING STATE */}
             {displayedItems < filteredFeedback.length && (
-              <div ref={loadMoreRef} className="flex justify-center py-8">
+              <div ref={loadMoreRef} className="flex justify-center py-6 sm:py-8">
                 {isLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="text-sm font-medium">Loading more feedback...</span>
+                    <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
+                    <span className="text-xs font-medium sm:text-sm">
+                      <span className="hidden sm:inline">Loading more feedback...</span>
+                      <span className="sm:hidden">Loading...</span>
+                    </span>
                   </div>
                 ) : (
                   <Button
                     variant="outline"
                     onClick={loadMore}
-                    className="px-6 py-2 text-sm font-medium"
+                    className="px-4 py-2 text-xs font-medium sm:px-6 sm:text-sm"
                   >
-                    Load More ({filteredFeedback.length - displayedItems} remaining)
+                    <span className="hidden sm:inline">Load More ({filteredFeedback.length - displayedItems} remaining)</span>
+                    <span className="sm:hidden">Load More ({filteredFeedback.length - displayedItems})</span>
                   </Button>
                 )}
               </div>
@@ -645,8 +655,8 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
 
             {/* ✅ END OF RESULTS MESSAGE */}
             {displayedItems >= filteredFeedback.length && filteredFeedback.length > 5 && (
-              <div className="text-center py-6 text-muted-foreground">
-                <p className="text-sm">You&apos;ve reached the end of the feedback list</p>
+              <div className="text-center py-4 text-muted-foreground sm:py-6">
+                <p className="text-xs sm:text-sm">You&apos;ve reached the end of the feedback list</p>
               </div>
             )}
           </div>

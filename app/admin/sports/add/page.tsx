@@ -296,7 +296,7 @@ export default function AddSportPage() {
   // Loading skeleton
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="w-full max-w-2xl">
           <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardHeader className="space-y-1 pb-6">
@@ -308,31 +308,40 @@ export default function AddSportPage() {
               <div className="space-y-6">
                 {/* Sport Name Skeleton */}
                 <div className="space-y-3">
-                  <Skeleton className="h-4 w-24" />
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* Image URL Skeleton */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
                   </div>
-                  <Skeleton className="h-10 w-full" />
+                  <div className="relative">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="absolute right-1 top-1 h-8 w-8 rounded-md" />
+                  </div>
                 </div>
 
                 {/* Seat Limit Skeleton */}
                 <div className="space-y-3">
-                  <Skeleton className="h-4 w-20" />
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-3 w-96" />
+                  <Skeleton className="h-3 w-full max-w-md" />
                 </div>
 
                 {/* Active Status Skeleton */}
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                   <div className="space-y-0.5">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-80" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-64" />
                   </div>
                   <Skeleton className="h-6 w-11 rounded-full" />
                 </div>
@@ -351,7 +360,7 @@ export default function AddSportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
       <div className="w-full max-w-2xl">
         <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <CardHeader className="space-y-1 pb-6">

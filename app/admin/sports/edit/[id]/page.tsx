@@ -359,57 +359,76 @@ export default function EditSportPage() {
   // Loading skeleton
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="w-full max-w-2xl">
           <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardHeader className="space-y-1 pb-6">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-80" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-4 w-64" />
             </CardHeader>
 
             <CardContent>
               <div className="space-y-6">
                 {/* Sport Name Skeleton */}
                 <div className="space-y-3">
-                  <Skeleton className="h-4 w-24" />
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* Image URL Skeleton */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
                   </div>
-                  <Skeleton className="h-10 w-full" />
-
+                  <div className="relative">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="absolute right-1 top-1 h-8 w-8 rounded-md" />
+                  </div>
+                  
                   {/* Image Preview Skeleton */}
                   <div className="mt-4">
-                    <Skeleton className="w-full h-48 rounded-lg" />
+                    <div className="relative w-full h-48 rounded-lg border-2 border-dashed border-muted-foreground/25 overflow-hidden bg-muted/20">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <Skeleton className="h-8 w-8 rounded-md" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Seat Limit Skeleton */}
                 <div className="space-y-3">
-                  <Skeleton className="h-4 w-20" />
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-3 w-96" />
+                  <Skeleton className="h-3 w-full max-w-md" />
                 </div>
 
                 {/* Active Status Skeleton */}
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                   <div className="space-y-0.5">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-80" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-64" />
                   </div>
                   <Skeleton className="h-6 w-11 rounded-full" />
                 </div>
 
                 {/* Submit Buttons Skeleton - THREE BUTTONS for edit page */}
-                <div className="flex gap-3 pt-6">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
+                <div className="flex flex-col gap-3 pt-6 sm:flex-row">
+                  <Skeleton className="h-10 w-full sm:flex-1" />
+                  <Skeleton className="h-10 w-full sm:flex-1" />
+                  <Skeleton className="h-10 w-full sm:flex-1" />
                 </div>
               </div>
             </CardContent>
@@ -422,7 +441,7 @@ export default function EditSportPage() {
   // Error state
   if (initialLoading === false && errors.general && !formData.name) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -444,7 +463,7 @@ export default function EditSportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
       <div className="w-full max-w-2xl">
         <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <CardHeader className="space-y-1 pb-6">
@@ -665,7 +684,7 @@ export default function EditSportPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-6">
+              <div className="flex flex-col gap-3 pt-6 sm:flex-row">
                 <Button
                   type="button"
                   variant="outline"
@@ -683,12 +702,14 @@ export default function EditSportPage() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="sm:hidden">Saving...</span>
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Changes
+                      <span className="hidden sm:inline">Save Changes</span>
+                      <span className="sm:hidden">Save</span>
                     </>
                   )}
                 </Button>

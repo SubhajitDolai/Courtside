@@ -356,7 +356,7 @@ export default function DashboardClient({
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="h-[500px] p-6 bg-gradient-to-br from-transparent via-muted/5 to-transparent">
+            <CardContent className="h-[700px] sm:h-[500] p-6 bg-gradient-to-br from-transparent via-muted/5 to-transparent">
               <UserGrowthChart profiles={profiles} />
             </CardContent>
           </Card>

@@ -271,7 +271,7 @@ export default function AddSlotPage() {
   // Loading skeleton
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="w-full max-w-md">
           <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardHeader className="space-y-1 pb-6">
@@ -283,36 +283,59 @@ export default function AddSlotPage() {
               <div className="space-y-6">
                 {/* Sport Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-12" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-8" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* Time Range Skeleton */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-3 rounded" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-3 w-2" />
+                    </div>
                     <Skeleton className="h-10 w-full" />
                   </div>
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-16" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-3 rounded" />
+                      <Skeleton className="h-4 w-14" />
+                      <Skeleton className="h-3 w-2" />
+                    </div>
                     <Skeleton className="h-10 w-full" />
                   </div>
                 </div>
 
                 {/* Gender Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-14" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* User Type Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
-                {/* Submit Button Skeleton */}
-                <Skeleton className="h-10 w-full" />
+                {/* Submit Buttons Skeleton */}
+                <div className="flex gap-3 pt-2">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -322,7 +345,7 @@ export default function AddSlotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
       <div className="w-full max-w-md">
         <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <CardHeader className="space-y-1 pb-6">

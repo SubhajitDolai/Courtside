@@ -102,7 +102,7 @@ export default function AdminBookingsPage() {
   }, [page, supabase])
 
   // Use our realtime hook
-  const { data: bookings, loading: loadingBookings, isConnected } = useRealtimeSubscription<Booking>(
+  const { data: bookings, loading: loadingBookings, isConnected, forceReconnect } = useRealtimeSubscription<Booking>(
     'bookings',     // table name
     [],             // initial data (empty array)
     fetchBookings   // fetch function
@@ -294,50 +294,46 @@ export default function AdminBookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-green-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-green-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-orange-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-orange-950/20">
       <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-8 pt-32">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg">
-                <ClipboardList className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-900 to-neutral-600 dark:from-white dark:to-neutral-300 bg-clip-text text-transparent">
-                  Manage Bookings
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  View and manage current bookings
-                </p>
-              </div>
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-orange-600 to-orange-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl">
+              <ClipboardList className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm rounded-lg border border-white/20 dark:border-neutral-700/20">
-              {showConnectionStatus && (
-                <>
-                  {debouncedIsConnected ? (
-                    <>
-                      <div className="relative">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full" />
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
-                      </div>
-                      <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                        <span className="hidden sm:inline">Live Bookings: {filteredBookings.length}</span>
-                        <span className="sm:hidden">Live Bookings: {filteredBookings.length}</span>
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-amber-500 rounded-full animate-pulse" />
-                      <span className="text-[10px] sm:text-xs font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                        <span className="hidden sm:inline">Connecting...</span>
-                        <span className="sm:hidden">Connecting</span>
-                      </span>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+          </div>
+          
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white mb-4 sm:mb-6">
+            Manage
+            <span className="bg-gradient-to-r from-orange-600 to-orange-500 dark:from-orange-400 dark:to-orange-300 bg-clip-text text-transparent"> Bookings</span>
+          </h1>
+
+          {/* Stats and Actions */}
+          <div className="flex items-center justify-center">
+            {showConnectionStatus && (
+              <div className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm rounded-lg border border-white/20 dark:border-neutral-700/20">
+                {debouncedIsConnected ? (
+                  <>
+                    <div className="relative">
+                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full" />
+                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full absolute inset-0 animate-ping" />
+                    </div>
+                    <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                      <span className="hidden sm:inline">Active Reservations: {filteredBookings.length}</span>
+                      <span className="sm:hidden">Active: {filteredBookings.length}</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-amber-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                      Connecting...
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -345,7 +341,7 @@ export default function AdminBookingsPage() {
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
           <CardHeader className="border-b border-neutral-100 dark:border-neutral-800 bg-gradient-to-r from-white to-neutral-50/50 dark:from-neutral-900 dark:to-neutral-800/50">
             <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-              <ClipboardList className="h-5 w-5 text-green-600 dark:text-green-500" />
+              <ClipboardList className="h-5 w-5 text-orange-600 dark:text-orange-500" />
               Current Bookings
             </CardTitle>
 
@@ -622,6 +618,45 @@ export default function AdminBookingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Reconnection Toast */}
+      {!isConnected && showConnectionStatus && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-800 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden">
+            <div className="px-4 py-3 flex items-center gap-3">
+              {/* Status indicator */}
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-amber-500 rounded-full animate-ping" />
+                  <div className="w-3 h-3 bg-amber-500 rounded-full absolute inset-0" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    Reconnecting...
+                  </span>
+                  <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                    Live updates paused
+                  </span>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="h-8 w-px bg-neutral-200 dark:bg-neutral-700" />
+
+              {/* Retry button */}
+              <button
+                onClick={forceReconnect}
+                className="px-3 py-1.5 text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 rounded-md hover:bg-amber-200 dark:hover:bg-amber-900/70 transition-colors duration-200 flex items-center gap-1.5"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ...existing dialogs... */}
       <AlertDialog open={deleteId !== null} onOpenChange={(o) => !deleting && setDeleteId(o ? deleteId : null)}>

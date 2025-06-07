@@ -107,19 +107,19 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
     setTimeout(() => inputRef.current?.focus(), 100)
   }
 
-  // Calculate message bubble width based on content length
+  // Calculate message bubble width based on content length with proper responsive constraints
   const getMessageWidth = (content: string) => {
     const length = content.length
-    if (length < 50) return 'max-w-[60%]'
-    if (length < 150) return 'max-w-[75%]'
-    return 'max-w-[85%]'
+    if (length < 50) return 'max-w-[85%] sm:max-w-[70%] md:max-w-[60%]'
+    if (length < 150) return 'max-w-[90%] sm:max-w-[80%] md:max-w-[75%]'
+    return 'max-w-[95%] sm:max-w-[85%] md:max-w-[80%]'
   }
 
   return (
-    <div className="h-full flex flex-col max-w-5xl mx-auto">
+    <div className="h-full flex flex-col max-w-5xl mx-auto relative">
       {/* Messages Area */}
       <div
-        className="flex-1 overflow-y-auto px-4 py-6"
+        className="flex-1 overflow-y-auto px-4 py-6 pb-30"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent',
@@ -215,10 +215,10 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                   </div>
 
                   {/* Message Content */}
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-1 min-w-0">
                     <div
                       className={cn(
-                        'relative group max-w-fit',
+                        'relative group max-w-fit min-w-0',
                         message.role === 'user'
                           ? 'ml-auto'
                           : 'mr-auto'
@@ -226,12 +226,10 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                     >
                       <div
                         className={cn(
-                          'px-4 py-3 relative',
+                          'px-3 py-2.5 sm:px-4 sm:py-3 relative overflow-hidden break-words min-w-0',
                           message.role === 'user'
                             ? 'bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-2xl rounded-tr-md shadow-md'
-                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-tl-md shadow-sm',
-                          // Dynamic padding based on content length
-                          message.content.length < 50 ? 'px-3 py-2.5' : 'px-4 py-3'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-tl-md shadow-sm'
                         )}
                       >
                         <div className={cn(
@@ -315,7 +313,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                               {message.content}
                             </ReactMarkdown>
                           ) : (
-                            <div className="whitespace-pre-wrap">{message.content}</div>
+                            <div className="whitespace-pre-wrap break-words overflow-wrap-anywhere">{message.content}</div>
                           )}
                         </div>
 
@@ -350,12 +348,12 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
 
               {/* Loading indicator - only show when loading and no assistant message is streaming */}
               {(status === 'submitted' || status === 'streaming') && (messages.length === 0 || messages[messages.length - 1]?.role === 'user') && (
-                <div className="flex gap-3 max-w-[60%]">
+                <div className="flex gap-3 max-w-[85%] sm:max-w-[70%] md:max-w-[60%]">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 mt-0.5 border border-primary/10">
                     <Bot className="w-4 h-4 text-primary animate-pulse" />
                   </div>
-                  <div className="flex-1">
-                    <div className="bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                  <div className="flex-1 min-w-0">
+                    <div className="bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-2xl rounded-tl-md px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">
                           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
@@ -376,7 +374,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 border-t bg-[#fbfbfa]/95 dark:bg-[#191919]/95 backdrop-blur-sm">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-[#fbfbfa]/95 dark:bg-[#191919]/95 backdrop-blur-sm">
         <div className="p-4 max-w-5xl mx-auto">
           <form onSubmit={handleSubmit} className="flex gap-3">
             <div className="flex-1 relative">

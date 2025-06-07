@@ -81,10 +81,10 @@ export default function AdminPage() {
               
               {/* Content */}
               <div className="space-y-1">
-                <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-neutral-900 dark:text-white line-clamp-2 leading-tight">
+                <CardTitle className="text-base font-medium sm:text-sm sm:font-bold md:text-base lg:text-lg text-neutral-900 dark:text-white line-clamp-2 leading-tight">
                   {card.title}
                 </CardTitle>
-                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                <p className="hidden sm:block text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                   {card.description}
                 </p>
               </div>

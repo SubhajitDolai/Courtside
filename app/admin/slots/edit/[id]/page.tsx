@@ -303,7 +303,7 @@ export default function EditSlotPage() {
   // Loading skeleton
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="w-full max-w-md">
           <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
             <CardHeader className="space-y-1 pb-6">
@@ -315,45 +315,68 @@ export default function EditSlotPage() {
               <div className="space-y-6">
                 {/* Sport Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-12" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-8" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* Time Range Skeleton */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-3 rounded" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-3 w-2" />
+                    </div>
                     <Skeleton className="h-10 w-full" />
                   </div>
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-16" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-3 rounded" />
+                      <Skeleton className="h-4 w-14" />
+                      <Skeleton className="h-3 w-2" />
+                    </div>
                     <Skeleton className="h-10 w-full" />
                   </div>
                 </div>
 
                 {/* Gender Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-14" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* User Type Selection Skeleton */}
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-2" />
+                  </div>
                   <Skeleton className="h-10 w-full" />
                 </div>
 
                 {/* Active Status Skeleton */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
                   <Skeleton className="h-6 w-11 rounded-full" />
-                  <Skeleton className="h-4 w-12" />
                 </div>
 
-                {/* Submit Buttons Skeleton - THREE BUTTONS for edit page */}
-                <div className="flex gap-3 pt-2">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
+                {/* Submit Buttons Skeleton - Responsive Layout */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Skeleton className="h-10 w-full sm:flex-1" />
+                  <Skeleton className="h-10 w-full sm:flex-1" />
+                  <Skeleton className="h-10 w-full sm:flex-1" />
                 </div>
               </div>
             </CardContent>
@@ -366,7 +389,7 @@ export default function EditSlotPage() {
   // Error state
   if (initialLoading === false && errors.general && !slot) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -389,7 +412,7 @@ export default function EditSlotPage() {
 
   if (!slot) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="flex flex-col items-center space-y-2">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Loading slot...</p>
@@ -399,7 +422,7 @@ export default function EditSlotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
       <div className="w-full max-w-md">
         <Card className="shadow-lg border-0 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <CardHeader className="space-y-1 pb-6">
@@ -606,30 +629,32 @@ export default function EditSlotPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => router.push('/admin/slots')}
                   disabled={loading}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={!isFormValid || loading}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      <span className="sm:hidden">Saving...</span>
+                      <span className="hidden sm:inline">Saving...</span>
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Changes
+                      <span className="sm:hidden">Save</span>
+                      <span className="hidden sm:inline">Save Changes</span>
                     </>
                   )}
                 </Button>
@@ -638,7 +663,7 @@ export default function EditSlotPage() {
                   variant="destructive"
                   onClick={() => setDeleteOpen(true)}
                   disabled={loading}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete

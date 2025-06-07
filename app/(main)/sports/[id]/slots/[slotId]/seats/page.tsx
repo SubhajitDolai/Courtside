@@ -430,14 +430,14 @@ export default function SeatsPage() {
         <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
             {/* Header Skeleton - EXACTLY MATCHING */}
-            <div className="text-center mb-10 sm:mb-15 md:mb-15 lg:mb-13">
+            <div className="text-center mb-8 sm:mb-12">
               <div className="flex items-center justify-center mb-4 sm:mb-6">
                 <Skeleton className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl" />
               </div>
-              <Skeleton className="h-9 sm:h-11 md:h-13 lg:h-16 w-80 sm:w-96 md:w-[30rem] lg:w-[36rem] mx-auto mb-4 sm:mb-6" />
+              <Skeleton className="h-9 sm:h-11 md:h-14 lg:h-16 w-80 sm:w-96 md:w-[30rem] lg:w-[36rem] mx-auto mb-4 sm:mb-6" />
 
               {/* Breadcrumb info skeleton - EXACTLY MATCHING */}
-              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-4 w-4 rounded" />
                   <Skeleton className="h-4 w-20" /> {/* Sport name */}
@@ -469,7 +469,7 @@ export default function SeatsPage() {
             <div className="max-w-4xl mx-auto space-y-8">
               {/* Seat Selection Card Skeleton */}
               <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-                <div className="px-3 sm:px-6 py-5 sm:py-6 border-b border-neutral-200 dark:border-neutral-800">
+                <div className="px-3 sm:px-6 py-4 sm:py-5 border-b border-neutral-200 dark:border-neutral-800">
                   <div className="flex items-start sm:items-center justify-between gap-3">
                     {/* Left side - Title and description skeleton */}
                     <div className="flex-1 min-w-0">
@@ -496,10 +496,10 @@ export default function SeatsPage() {
                     ))}
                   </div>
 
-                  {/* Seats Grid Skeleton */}
+                  {/* Seats Grid Skeleton - Dynamic like actual UI */}
                   <div className="flex justify-center">
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4 sm:gap-5 max-w-fit mx-auto">
-                      {Array.from({ length: 24 }).map((_, i) => (
+                    <div className="grid gap-4 sm:gap-5 max-w-fit mx-auto grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+                      {Array.from({ length: 16 }).map((_, i) => (
                         <Skeleton key={i} className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-lg" />
                       ))}
                     </div>
