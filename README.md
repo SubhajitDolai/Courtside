@@ -78,7 +78,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | Charts & Visualization | Recharts (React + D3.js) |
 | Data Processing | React useMemo for optimized calculations |
 | Error Handling | React Error Boundary for robust chart rendering |
-| QR Code Scanning | HTML5-QRCode library for camera-based scanning |
+| QR Code Scanning | QR-Scanner library for camera-based scanning |
 | IoT Integration | Support for manual entry and automated scanner devices |
 | Deployment | Vercel (Edge Functions) |
 | AI Integration | Vercel AI SDK (Google Gemini) |

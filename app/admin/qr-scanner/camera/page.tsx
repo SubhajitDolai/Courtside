@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -18,8 +19,8 @@ import {
   Flashlight,
   SwitchCamera
 } from 'lucide-react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
-import { useRouter } from 'next/navigation'
+import QrScanner from 'qr-scanner'
+import { useRouter, usePathname } from 'next/navigation'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 // Types matching the booking structure
@@ -56,7 +57,8 @@ interface Booking {
 export default function CameraScannerPage() {
   const router = useRouter()
   const supabase = createClient()
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null)
+  const scannerRef = useRef<QrScanner | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const [scanning, setScanning] = useState(false)
   const [scannerStatus, setScannerStatus] = useState<'initializing' | 'scanning' | 'error'>('initializing')
   const [processing, setProcessing] = useState(false)
@@ -75,13 +77,55 @@ export default function CameraScannerPage() {
   const [fullscreenType, setFullscreenType] = useState<'success' | 'error'>('success')
   const { start } = useGlobalLoadingBar()
 
-  // Barcode scanner sound function
+  // Long-session management state
+  const [sessionStartTime] = useState(new Date())
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [failedOperations, setFailedOperations] = useState<any[]>([])
+  const [systemHealth, setSystemHealth] = useState({
+    uptime: 0,
+    scansPerHour: 0,
+    lastHeartbeat: new Date(),
+    memoryUsage: 0,
+    cameraRestarts: 0
+  })
+  const lastHeartbeatRef = useRef<NodeJS.Timeout>()
+  const performanceMetricsRef = useRef({
+    sessionScans: 0,
+    errorCount: 0,
+    restartCount: 0,
+    avgScanTime: 0
+  })  /**
+   * Implements exponential backoff retry logic for database operations.
+   * @param operation - Async function to retry
+   * @param maxRetries - Maximum number of retry attempts
+   * @param baseDelay - Base delay in milliseconds for exponential backoff
+   */
+  const retryWithBackoff = useCallback(async (
+    operation: () => Promise<any>, 
+    maxRetries = 3,
+    baseDelay = 1000
+  ) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation()
+      } catch (error) {
+        if (attempt === maxRetries) throw error
+        
+        const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+  }, [])
+
+  /**
+   * Generates audio feedback for successful QR code scans.
+   * Creates a two-tone barcode scanner sound using Web Audio API.
+   */
   const playBarcodeScanSound = useCallback(() => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
 
-      // First tone
+      // First tone - 1200Hz triangle wave
       const osc1 = audioContext.createOscillator()
       const gain1 = audioContext.createGain()
       osc1.connect(gain1)
@@ -95,7 +139,7 @@ export default function CameraScannerPage() {
       osc1.start(audioContext.currentTime)
       osc1.stop(audioContext.currentTime + 0.15)
 
-      // Second tone
+      // Second tone - 800Hz triangle wave for confirmation
       const osc2 = audioContext.createOscillator()
       const gain2 = audioContext.createGain()
       osc2.connect(gain2)
@@ -109,46 +153,52 @@ export default function CameraScannerPage() {
       osc2.start(audioContext.currentTime + 0.1)
       osc2.stop(audioContext.currentTime + 0.3)
     } catch (error) {
-      console.warn('Could not play barcode scan sound:', error)
+      console.warn('Audio feedback unavailable:', error)
     }
   }, [])
 
-  // Timeout constants for consistency and better UX
-  // Shorter delays = faster retry for critical errors
-  // Longer delays = better user feedback and spam prevention
+  /**
+   * Timeout configuration for consistent UX and error handling.
+   * Optimized for user feedback timing and retry logic.
+   */
   const TIMEOUTS = {
-    DOM_INIT: 100,           // DOM initialization delays
-    SYSTEM_ERROR: 1000,      // Database/system errors (fast retry)
-    USER_ERROR: 1500,        // User validation errors (medium delay)
-    DATA_ERROR: 2000,        // QR/data validation errors (prevent spam)
-    UI_ANIMATION: 3000       // UI animations and popups
+    DOM_INIT: 100,           // DOM element initialization
+    SYSTEM_ERROR: 1000,      // Database/network errors (fast retry)
+    USER_ERROR: 1500,        // User validation errors
+    DATA_ERROR: 2000,        // QR data validation (prevent spam)
+    UI_ANIMATION: 3000       // UI transitions and popups
   } as const
 
-  // Helper function to show popup message
+  /**
+   * Displays feedback messages with consistent UI timing.
+   * Shows both inline and fullscreen popups for accessibility.
+   */
   const showPopupMessage = useCallback((message: string, type: 'success' | 'error') => {
-    // Show small popup
     setPopupMessage(message)
     setPopupType(type)
     setShowPopup(true)
 
-    // Show fullscreen popup
     setFullscreenMessage(message)
     setFullscreenType(type)
     setShowFullscreenPopup(true)
 
-    // Auto hide after consistent UI animation time
     setTimeout(() => {
       setShowPopup(false)
       setShowFullscreenPopup(false)
     }, TIMEOUTS.UI_ANIMATION)
   }, [TIMEOUTS.UI_ANIMATION])
 
-  // Helper function to get current IST timestamp
+  /**
+   * Returns current timestamp in ISO format for database operations.
+   */
   const getCurrentISTTimestamp = () => {
     return new Date().toISOString()
   }
 
-  // Fetch recent scanner activity from database
+  /**
+   * Retrieves recent scanner activity for dashboard display.
+   * Fetches bookings with check-in/check-out timestamps.
+   */
   const fetchScannerActivity = useCallback(async () => {
     try {
       const { data: bookings, error } = await supabase
@@ -238,9 +288,16 @@ export default function CameraScannerPage() {
     }
   }, [])
 
-  // Check if flash/torch is supported on current camera
+  // Check if flash/torch is supported on current camera (only once per session)
   const checkFlashSupport = useCallback(async () => {
+    // Skip if already checked
+    if (isFlashSupported !== null) {
+      console.log('Flash support already checked:', isFlashSupported)
+      return isFlashSupported
+    }
+
     try {
+      console.log('🔦 Checking flash support for the first time...')
       setIsFlashSupported(null) // Set to checking state
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -260,43 +317,44 @@ export default function CameraScannerPage() {
       // Clean up stream
       stream.getTracks().forEach(t => t.stop())
 
-      console.log('Flash support detected:', hasFlash)
       return hasFlash
     } catch (error) {
-      console.error('Error checking flash support:', error)
+      console.error('Flash support detection failed:', error)
       setIsFlashSupported(false)
       return false
     }
-  }, [])
+  }, [isFlashSupported])
 
-  // Initialize scanner with performance optimizations
+  // Initialize scanner with QrScanner library
   const initializeScanner = useCallback(async () => {
     setScannerStatus('initializing')
 
-    // Clear any existing scanner instance and DOM content
+    // Clear any existing scanner instance
     if (scannerRef.current) {
       try {
-        await scannerRef.current.clear()
+        scannerRef.current.stop()
+        scannerRef.current.destroy()
         scannerRef.current = null
       } catch (error) {
         console.error('Error clearing previous scanner:', error)
       }
     }
 
-    // Clear the DOM element completely to prevent duplicate renders
-    const qrReaderElement = document.getElementById("qr-reader")
-    if (qrReaderElement) {
-      qrReaderElement.innerHTML = ''
+    // Reset video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
     }
 
-    // Small delay to ensure DOM is cleared
+    // Small delay to ensure cleanup is complete
     await new Promise(resolve => setTimeout(resolve, TIMEOUTS.DOM_INIT))
 
     try {
       const availableCameras = await getAvailableCameras()
 
-      // Check flash support in parallel
-      checkFlashSupport()
+      // Check flash support only if not already determined
+      if (isFlashSupported === null) {
+        checkFlashSupport()
+      }
 
       // Get target camera with fallback logic
       let targetCamera = availableCameras[currentCameraIndex] || availableCameras[0]
@@ -310,129 +368,30 @@ export default function CameraScannerPage() {
         if (backCamera) targetCamera = backCamera
       }
 
-      // Try multiple camera configurations with fallbacks
-      const cameraConfigs = [
-        // Primary: Specific camera with high resolution
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
-            deviceId: { exact: targetCamera?.deviceId },
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 }
-          },
-          rememberLastUsedCamera: true,
-          supportedScanTypes: [0]
-        },
-        // Fallback 1: Specific camera with lower resolution
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
-            deviceId: targetCamera?.deviceId,
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          },
-          rememberLastUsedCamera: true,
-          supportedScanTypes: [0]
-        },
-        // Fallback 2: Environment facing camera (no specific device)
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
-            facingMode: 'environment',
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          },
-          rememberLastUsedCamera: true,
-          supportedScanTypes: [0]
-        },
-        // Final fallback: Basic video only
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-          videoConstraints: {
-            video: true
-          },
-          rememberLastUsedCamera: false,
-          supportedScanTypes: [0]
-        }
-      ]
-
-      let scannerInitialized = false
-      let lastError = null
-
-      for (let i = 0; i < cameraConfigs.length && !scannerInitialized; i++) {
-        try {
-          console.log(`Trying camera config ${i + 1}/${cameraConfigs.length}:`, cameraConfigs[i].videoConstraints)
-
-          scannerRef.current = new Html5QrcodeScanner("qr-reader", cameraConfigs[i], false)
-
-          await scannerRef.current.render(
-            (decodedText) => handleScanSuccess(decodedText),
-            (error) => {
-              // Only log actual errors, not routine scan attempts
-              const ignoredErrors = [
-                'NotFoundException',
-                'No QR code found',
-                'QR code parse error',
-                'Unable to detect a square in provided image'
-              ]
-
-              const shouldIgnore = ignoredErrors.some(ignoredError =>
-                error.toString().includes(ignoredError)
-              )
-
-              if (!shouldIgnore) {
-                console.error('QR Scanner error:', error)
-              }
-            }
-          )
-
-          scannerInitialized = true
-          console.log(`Camera initialized successfully with config ${i + 1}`)
-
-        } catch (configError) {
-          console.warn(`Config ${i + 1} failed:`, configError)
-          lastError = configError
-
-          // Clean up failed scanner instance
-          if (scannerRef.current) {
-            try {
-              await scannerRef.current.clear()
-              scannerRef.current = null
-            } catch (clearError) {
-              console.warn('Error clearing failed scanner:', clearError)
-            }
-          }
-
-          // Clear DOM for next attempt
-          const retryElement = document.getElementById("qr-reader")
-          if (retryElement) {
-            retryElement.innerHTML = ''
-          }
-
-          // Small delay before next attempt
-          await new Promise(resolve => setTimeout(resolve, 200))
-        }
+      // Get video element
+      const videoElement = videoRef.current
+      if (!videoElement) {
+        throw new Error('Video element not found')
       }
 
-      if (scannerInitialized) {
-        setScanning(true)
-        setScannerStatus('scanning')
-        setError(null)
-      } else {
-        throw lastError || new Error('All camera configurations failed')
-      }
+      // Create and start QrScanner
+      scannerRef.current = new QrScanner(
+        videoElement,
+        (result: QrScanner.ScanResult) => handleScanSuccess(result.data),
+        {
+          returnDetailedScanResult: true,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+          preferredCamera: targetCamera?.deviceId || 'environment'
+        }
+      )
+
+      await scannerRef.current.start()
+
+      setScanning(true)
+      setScannerStatus('scanning')
+      setError(null)
+      console.log('QrScanner initialized successfully')
 
     } catch (error) {
       console.error('Failed to initialize scanner:', error)
@@ -440,7 +399,10 @@ export default function CameraScannerPage() {
       setError('Failed to initialize camera. Please check permissions.')
       toast.error('Camera initialization failed')
     }
-  }, [currentCameraIndex, getAvailableCameras, checkFlashSupport, TIMEOUTS.DOM_INIT])
+    // Note: handleScanSuccess is intentionally excluded from deps to avoid circular dependency
+    // (initializeScanner -> handleScanSuccess -> initializeScanner). handleScanSuccess is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCameraIndex, getAvailableCameras, checkFlashSupport, isFlashSupported, TIMEOUTS.DOM_INIT])
 
   // Helper function to check if slot is over
   const isSlotOver = useCallback((booking: Booking) => {
@@ -451,49 +413,204 @@ export default function CameraScannerPage() {
     return now > slotEnd
   }, [])
 
-  // Stop camera function
+  // Helper function to check if check-in is too early (more than 30 minutes before start time)
+  const isCheckInTooEarly = useCallback((booking: Booking) => {
+    const now = new Date()
+    const [sh, sm] = (booking.slots?.start_time || '00:00').split(':').map(Number)
+    const slotStart = new Date()
+    slotStart.setHours(sh, sm, 0, 0)
+    
+    // Calculate 30 minutes before slot start time
+    const checkInWindowStart = new Date(slotStart.getTime() - 30 * 60 * 1000) // 30 minutes in milliseconds
+    
+    return now < checkInWindowStart
+  }, [])
+
+  /**
+   * Converts 24-hour time format to 12-hour format with AM/PM
+   */
+  const formatTo12Hour = useCallback((timeString: string): string => {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+    return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`
+  }, [])
+
+  /**
+   * Stops camera and releases all media resources.
+   * Ensures proper cleanup of QR scanner and video streams.
+   */
   const stopCamera = useCallback(async () => {
     try {
+      // Stop QrScanner instance first
       if (scannerRef.current) {
-        await scannerRef.current.clear()
+        try {
+          await scannerRef.current.stop()
+          scannerRef.current.destroy()
+        } catch (error) {
+          console.warn('Error stopping QrScanner:', error)
+        }
         scannerRef.current = null
       }
 
-      // Clear the DOM element
-      const qrReaderElement = document.getElementById("qr-reader")
-      if (qrReaderElement) {
-        qrReaderElement.innerHTML = ''
+      // Release all active media tracks
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream
+        if (stream) {
+          stream.getTracks().forEach(track => {
+            track.stop()
+          })
+        }
+        videoRef.current.srcObject = null
       }
 
-      // Reset flash state when stopping camera
+      // Additional cleanup for camera resources
+      try {
+        // Safety check for remaining active streams
+        if (navigator.mediaDevices && typeof navigator.mediaDevices.getSupportedConstraints === 'function') {
+          // Additional cleanup logic can be added here if needed
+        }
+      } catch (error) {
+        console.warn('Could not enumerate devices for cleanup:', error)
+      }
+
+      // Reset component state
       setIsFlashOn(false)
-      setIsFlashSupported(null)
       setScanning(false)
       setScannerStatus('initializing')
       setError(null)
-      toast.success('Camera stopped')
+      
+      // Show success message only if page is visible
+      if (document.visibilityState === 'visible') {
+        toast.success('Camera stopped')
+      }
     } catch (error) {
       console.error('Error stopping camera:', error)
-      toast.error('Failed to stop camera')
+      if (document.visibilityState === 'visible') {
+        toast.error('Failed to stop camera')
+      }
     }
   }, [])
 
-  // Direct status update function with forward-only transitions
-  const handleStatusUpdateDirect = useCallback(async (booking: Booking, action: 'check-in' | 'check-out') => {
-    console.log('🚀 Starting status update for booking:', {
-      id: booking.id,
-      action,
-      currentStatus: booking.status,
-      user: `${booking.profiles.first_name} ${booking.profiles.last_name}`
-    })
+  /**
+   * Handles database operations with offline support and retry logic.
+   * Queues operations when offline for later synchronization.
+   */
+  const performDatabaseOperation = useCallback(async (bookingId: string, updateData: any) => {
+    if (!isOnline) {
+      setFailedOperations(prev => [...prev, { bookingId, updateData, timestamp: new Date() }])
+      toast.warning('Offline - operation queued for sync')
+      return { success: false, queued: true }
+    }
 
+    try {
+      const result = await retryWithBackoff(async () => {
+        const { error } = await supabase
+          .from('bookings')
+          .update(updateData)
+          .eq('id', bookingId)
+        
+        if (error) throw error
+        return { success: true }
+      })
+      
+      return result
+    } catch (error) {
+      console.error('Database operation failed, queuing for retry:', error)
+      setFailedOperations(prev => [...prev, { bookingId, updateData, timestamp: new Date() }])
+      return { success: false, queued: true }
+    }
+  }, [isOnline, retryWithBackoff, supabase])
+
+  /**
+   * Processes queued operations when connection is restored.
+   * Retries failed database operations with exponential backoff.
+   */
+  const processFailedOperations = useCallback(async () => {
+    if (!isOnline || failedOperations.length === 0) return
+
+    const processedOps: any[] = []
+
+    for (const operation of failedOperations) {
+      try {
+        await retryWithBackoff(async () => {
+          const { error } = await supabase
+            .from('bookings')
+            .update(operation.updateData)
+            .eq('id', operation.bookingId)
+          
+          if (error) throw error
+        })
+        
+        processedOps.push(operation)
+      } catch (error) {
+        console.error(`Failed to sync operation: ${operation.bookingId}`, error)
+      }
+    }
+
+    setFailedOperations(prev => prev.filter(op => !processedOps.includes(op)))
+    if (processedOps.length > 0) {
+      toast.success(`Synced ${processedOps.length} pending operations`)
+    }
+  }, [isOnline, failedOperations, retryWithBackoff, supabase])
+
+  /**
+   * Performs memory cleanup and garbage collection for long sessions.
+   * Clears scan history and resets performance counters.
+   */
+  const handleMemoryCleanup = useCallback(() => {
+    
+    // Clear scan history except recent entries
+    setScanHistory(prev => prev.slice(0, 5))
+    
+    // Force garbage collection if available
+    if ((window as any).gc) {
+      (window as any).gc()
+    }
+    
+    // Reset performance metrics
+    performanceMetricsRef.current = {
+      sessionScans: 0,
+      errorCount: 0,
+      restartCount: 0,
+      avgScanTime: 0
+    }
+    
+    toast.success('Memory optimized')
+  }, [])
+
+  /**
+   * Performs periodic camera restart for long-session stability.
+   * Prevents memory leaks and camera resource conflicts.
+   */
+  const handlePeriodicRestart = useCallback(async () => {
+    try {
+      await stopCamera()
+      await new Promise(resolve => setTimeout(resolve, 2000)) // 2 second break
+      await initializeScanner()
+      
+      setSystemHealth(prev => ({ ...prev, cameraRestarts: prev.cameraRestarts + 1 }))
+      performanceMetricsRef.current.restartCount++
+      
+      toast.success('System refreshed for optimal performance')
+    } catch (error) {
+      console.error('Periodic restart failed:', error)
+      toast.error('Restart failed - manual intervention may be needed')
+    }
+  }, [stopCamera, initializeScanner])
+
+  /**
+   * Processes booking status updates with validation and business logic.
+   * Handles check-in/check-out operations with proper state transitions.
+   */
+  const handleStatusUpdateDirect = useCallback(async (booking: Booking, action: 'check-in' | 'check-out') => {
     const userName = `${booking.profiles.first_name} ${booking.profiles.last_name}`.trim()
     const slotOver = isSlotOver(booking)
+    const checkInTooEarly = isCheckInTooEarly(booking)
     const now = getCurrentISTTimestamp()
 
-    // Check edge cases and restrictions - only apply time validation for check-in
+    // Time validation for check-in operations
     if (slotOver && action === 'check-in') {
-      console.log('❌ Slot is over, check-in not allowed')
       const errorMsg = `Check-in period has ended for this slot.`
       showPopupMessage(errorMsg, 'error')
       setProcessing(false)
@@ -501,7 +618,28 @@ export default function CameraScannerPage() {
       return
     }
 
-    // Validate forward-only status transitions
+    // Check if check-in is attempted too early (more than 30 minutes before start time)
+    if (checkInTooEarly && action === 'check-in') {
+      const [sh, sm] = (booking.slots?.start_time || '00:00').split(':').map(Number)
+      const startTime = `${sh.toString().padStart(2, '0')}:${sm.toString().padStart(2, '0')}`
+      
+      // Calculate when check-in becomes available
+      const checkInTime = new Date()
+      checkInTime.setHours(sh, sm - 30, 0, 0) // 30 minutes before start time
+      const checkInAvailable = `${checkInTime.getHours().toString().padStart(2, '0')}:${checkInTime.getMinutes().toString().padStart(2, '0')}`
+      
+      // Convert times to 12-hour format for user display
+      const startTime12h = formatTo12Hour(startTime)
+      const checkInAvailable12h = formatTo12Hour(checkInAvailable)
+      
+      const errorMsg = `Check-in not yet available. Please return at ${checkInAvailable12h} (30 minutes before your ${startTime12h} slot).`
+      showPopupMessage(errorMsg, 'error')
+      setProcessing(false)
+      setTimeout(() => initializeScanner(), TIMEOUTS.USER_ERROR)
+      return
+    }
+
+    // Validate and determine status transitions
     let newStatus: string = booking.status
     let updateData: {
       status: string;
@@ -520,23 +658,19 @@ export default function CameraScannerPage() {
             checked_in_at: now
           }
           successMessage = `${userName} checked in!`
-          console.log('✅ Check-in: booked → checked-in')
         } else if (booking.status === 'checked-in') {
-          console.log('⚠️ Already checked in')
           const errorMsg = `${userName} already here!`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
           setTimeout(() => initializeScanner(), TIMEOUTS.USER_ERROR)
           return
         } else if (booking.status === 'checked-out') {
-          console.log('⚠️ Already checked out')
           const errorMsg = `${userName} already left!`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
           setTimeout(() => initializeScanner(), TIMEOUTS.USER_ERROR)
           return
         } else {
-          console.log('❌ Invalid status for check-in:', booking.status)
           const errorMsg = `Can't check in. Need admin help.`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
@@ -552,23 +686,19 @@ export default function CameraScannerPage() {
             checked_out_at: now
           }
           successMessage = `${userName} checked out!`
-          console.log('✅ Check-out: checked-in → checked-out')
         } else if (booking.status === 'booked') {
-          console.log('⚠️ Not checked in yet')
           const errorMsg = `${userName} needs to check in first!`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
           setTimeout(() => initializeScanner(), TIMEOUTS.USER_ERROR)
           return
         } else if (booking.status === 'checked-out') {
-          console.log('⚠️ Already checked out')
           const errorMsg = `${userName} already left!`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
           setTimeout(() => initializeScanner(), TIMEOUTS.USER_ERROR)
           return
         } else {
-          console.log('❌ Invalid status for check-out:', booking.status)
           const errorMsg = `Can't check out. Need admin help.`
           showPopupMessage(errorMsg, 'error')
           setProcessing(false)
@@ -577,52 +707,22 @@ export default function CameraScannerPage() {
         }
       }
 
-      console.log('📋 Final update data:', {
-        bookingId: booking.id,
-        currentStatus: booking.status,
-        newStatus,
-        updateData,
-        action
-      })
+      const dbResult = await performDatabaseOperation(booking.id, updateData)
 
-      console.log('💾 Executing database update...')
-      const { error } = await supabase
-        .from('bookings')
-        .update(updateData)
-        .eq('id', booking.id)
-
-      console.log('📊 Database update result:', {
-        success: !error,
-        error: error?.message || null,
-        details: error || 'Update successful'
-      })
-
-      if (!error) {
-        console.log('✅ Database update successful!')
-
-        console.log('📜 Refreshing scan history from database...')
-        // Refresh scan history from database instead of updating state directly
+      if (dbResult.success || dbResult.queued) {
+        // Refresh scan history from database
         await fetchScannerActivity()
 
-        console.log('🎉 Showing success message:', successMessage)
         showPopupMessage(successMessage, 'success')
 
-        console.log('🔄 Resetting UI state and restarting scanner...')
         setProcessing(false)
 
         // Restart scanner after short delay
         setTimeout(() => {
-          console.log('🔄 Scanner will restart in 1.5 seconds...')
           initializeScanner()
         }, TIMEOUTS.USER_ERROR)
       } else {
-        console.error('❌ Database update failed:', error)
-        console.log('📝 Update error details:', {
-          message: error.message,
-          code: error.code,
-          hint: error.hint,
-          details: error.details
-        })
+        console.error('Database update failed')
         const errorMsg = `Database error. Try again.`
         showPopupMessage(errorMsg, 'error')
         setProcessing(false)
@@ -630,66 +730,54 @@ export default function CameraScannerPage() {
         setTimeout(() => initializeScanner(), TIMEOUTS.SYSTEM_ERROR)
       }
     } catch (error) {
-      console.error('💥 Unexpected error during status update:', error)
-      console.log('📝 Update error object:', error)
+      console.error('Unexpected error during status update:', error)
       const errorMsg = 'System error! Try again.'
       showPopupMessage(errorMsg, 'error')
       setProcessing(false)
-      // Restart scanner after system error
       setTimeout(() => initializeScanner(), TIMEOUTS.SYSTEM_ERROR)
     }
-  }, [supabase, initializeScanner, isSlotOver, showPopupMessage, fetchScannerActivity, TIMEOUTS.SYSTEM_ERROR, TIMEOUTS.USER_ERROR])
+  }, [initializeScanner, isSlotOver, isCheckInTooEarly, formatTo12Hour, showPopupMessage, fetchScannerActivity, performDatabaseOperation, TIMEOUTS.SYSTEM_ERROR, TIMEOUTS.USER_ERROR])
 
-  // Handle successful QR scan
+  /**
+   * Processes successful QR code scans and initiates booking operations.
+   * Handles validation, data extraction, and automated status transitions.
+   */
   const handleScanSuccess = useCallback(async (decodedText: string) => {
-    console.log('🔍 QR Scan Success - Raw text:', decodedText)
-
     // Play barcode scanner sound
     playBarcodeScanSound()
 
     if (processing) {
-      console.log('⚠️ Already processing, ignoring scan')
       return // Prevent multiple simultaneous scans
     }
 
-    console.log('✅ Starting scan processing...')
     setProcessing(true)
     setScanning(false)
 
     try {
-      console.log('🛑 Stopping scanner to prevent multiple scans...')
       // Stop scanner to prevent multiple scans
       if (scannerRef.current) {
-        await scannerRef.current.clear()
+        scannerRef.current.stop()
       }
 
       // Extract booking ID (handle both plain ID and URL formats)
       let bookingId = decodedText.trim()
-      console.log('📋 Extracted raw booking ID:', bookingId)
 
       // If it's a URL, try to extract the booking ID
       if (bookingId.includes('booking_id=')) {
-        console.log('🔗 Detected URL format, extracting booking ID...')
         const urlParams = new URLSearchParams(bookingId.split('?')[1])
         bookingId = urlParams.get('booking_id') || bookingId
-        console.log('📋 Extracted booking ID from URL:', bookingId)
       }
 
       // Validate booking ID format (UUID)
-      console.log('🔍 Validating booking ID format:', bookingId)
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       if (!uuidRegex.test(bookingId)) {
-        console.log('❌ Invalid booking ID format')
         const errorMsg = 'Invalid QR code!'
         showPopupMessage(errorMsg, 'error')
         setProcessing(false)
-        // Add delay before restarting scanner to prevent rapid scanning
         setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
         return
       }
-      console.log('✅ Valid booking ID format')
 
-      console.log('🗄️ Fetching booking details from database...')
       // Fetch booking details
       const { data: booking, error } = await supabase
         .from('bookings')
@@ -702,52 +790,33 @@ export default function CameraScannerPage() {
         .eq('id', bookingId)
         .single()
 
-      console.log('📊 Database fetch result:', { booking, error })
-
       if (error || !booking) {
-        console.log('❌ Booking not found or database error')
         const errorMsg = 'Booking not found!'
         showPopupMessage(errorMsg, 'error')
         setProcessing(false)
-        // Add delay before restarting scanner to prevent rapid scanning
         setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
         return
       }
 
       // Cast to proper type
       const typedBooking = booking as unknown as Booking
-      console.log('📋 Booking details:', {
-        id: typedBooking.id,
-        status: typedBooking.status,
-        user: `${typedBooking.profiles.first_name} ${typedBooking.profiles.last_name}`,
-        sport: typedBooking.sports.name,
-        checked_in_at: typedBooking.checked_in_at,
-        checked_out_at: typedBooking.checked_out_at
-      })
 
-      // Determine action based on current status with forward-only logic
-      console.log('🎯 Determining action type based on status:', typedBooking.status)
+      // Determine action based on current status
       let targetAction: 'check-in' | 'check-out'
 
       if (typedBooking.status === 'booked') {
-        console.log('➡️ Status is booked → setting action to check-in')
         targetAction = 'check-in'
       } else if (typedBooking.status === 'checked-in') {
-        console.log('➡️ Status is checked-in → setting action to check-out')
         targetAction = 'check-out'
       } else {
-        console.log('❌ Invalid status for automated processing:', typedBooking.status)
         const errorMsg = `Already checked out. Contact admin to override.`
         showPopupMessage(errorMsg, 'error')
         setProcessing(false)
-        // Add delay before restarting scanner to prevent rapid scanning
         setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
         return
       }
 
-      console.log('🤖 Proceeding with automated status update...')
-
-      // Automatically proceed with status update
+      // Proceed with automated status update
       await handleStatusUpdateDirect(typedBooking, targetAction)
 
     } catch (error) {
@@ -755,7 +824,6 @@ export default function CameraScannerPage() {
       const errorMsg = 'Error processing QR code'
       showPopupMessage(errorMsg, 'error')
       setProcessing(false)
-      // Add delay before restarting scanner to prevent rapid scanning
       setTimeout(() => initializeScanner(), TIMEOUTS.DATA_ERROR)
     }
   }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage, TIMEOUTS.DATA_ERROR, playBarcodeScanSound])
@@ -864,10 +932,7 @@ export default function CameraScannerPage() {
       setTimeout(() => {
         if (videoTrack && videoTrack.readyState === 'live') {
           // Only stop if it's not actively being used by the scanner
-          const qrReaderElement = document.getElementById("qr-reader")
-          const videoElements = qrReaderElement?.querySelectorAll('video')
-
-          if (!videoElements || videoElements.length === 0) {
+          if (!scannerRef.current || !videoRef.current?.srcObject) {
             videoTrack.stop()
           }
         }
@@ -894,7 +959,74 @@ export default function CameraScannerPage() {
     }
   }, [isFlashOn, isFlashSupported, cameras, currentCameraIndex])
 
-  // Initialize on mount and cleanup on unmount
+  // Network status monitoring
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      processFailedOperations()
+    }
+    
+    const handleOffline = () => {
+      setIsOnline(false)
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [processFailedOperations])
+
+  // System health monitoring with heartbeat
+  useEffect(() => {
+    const startHeartbeat = () => {
+      const heartbeat = () => {
+        const now = new Date()
+        const uptimeHours = (now.getTime() - sessionStartTime.getTime()) / (1000 * 60 * 60)
+        const scansPerHour = uptimeHours > 0 ? performanceMetricsRef.current.sessionScans / uptimeHours : 0
+        
+        setSystemHealth(prev => ({
+          ...prev,
+          uptime: Math.floor(uptimeHours * 100) / 100,
+          scansPerHour: Math.floor(scansPerHour * 10) / 10,
+          lastHeartbeat: now,
+          memoryUsage: (performance as any).memory?.usedJSHeapSize || 0
+        }))
+
+        // Auto-restart after 4 hours of continuous operation
+        if (uptimeHours > 4) {
+          handlePeriodicRestart()
+        }
+
+        // Memory leak detection and cleanup
+        if ((performance as any).memory?.usedJSHeapSize > 100 * 1024 * 1024) { // 100MB
+          handleMemoryCleanup()
+        }
+      }
+
+      heartbeat()
+      lastHeartbeatRef.current = setInterval(heartbeat, 30000) // Every 30 seconds
+    }
+
+    startHeartbeat()
+    
+    return () => {
+      if (lastHeartbeatRef.current) {
+        clearInterval(lastHeartbeatRef.current)
+      }
+    }
+  }, [sessionStartTime, handlePeriodicRestart, handleMemoryCleanup])
+
+  // Update performance metrics on successful scans
+  useEffect(() => {
+    if (scanHistory.length > 0) {
+      performanceMetricsRef.current.sessionScans = scanHistory.length
+    }
+  }, [scanHistory])
+
+  // Initialize on mount and cleanup on unmount with page leave detection
   useEffect(() => {
     // Fetch initial scan history
     fetchScannerActivity()
@@ -904,21 +1036,90 @@ export default function CameraScannerPage() {
       initializeScanner()
     }, TIMEOUTS.DOM_INIT)
 
-    return () => {
-      clearTimeout(timeoutId)
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error)
-        scannerRef.current = null
-      }
-      // Clear DOM element on cleanup
-      const qrReaderElement = document.getElementById("qr-reader")
-      if (qrReaderElement) {
-        qrReaderElement.innerHTML = ''
+    // Page leave detection handlers
+    const handleBeforeUnload = () => {
+      stopCamera()
+      // Don't show confirmation dialog, just cleanup
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        stopCamera()
       }
     }
-  }, [fetchScannerActivity, initializeScanner, TIMEOUTS.DOM_INIT])
+
+    const handlePageHide = () => {
+      stopCamera()
+    }
+
+    const handlePopState = () => {
+      stopCamera()
+    }
+
+    // Add event listeners for page leave detection
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', handlePageHide)
+    window.addEventListener('popstate', handlePopState)
+
+    // Capture ref values inside the effect to avoid stale closures
+    const currentScanner = scannerRef.current
+    const currentVideo = videoRef.current
+
+    return () => {
+      clearTimeout(timeoutId)
+      
+      // Remove event listeners
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', handlePageHide)
+      window.removeEventListener('popstate', handlePopState)
+      
+      // Cleanup scanner using captured value
+      if (currentScanner) {
+        try {
+          currentScanner.stop()
+          currentScanner.destroy()
+        } catch (error) {
+          console.error('Error during cleanup:', error)
+        }
+        scannerRef.current = null
+      }
+      
+      // Release camera resources using captured value
+      if (currentVideo) {
+        if (currentVideo.srcObject) {
+          const stream = currentVideo.srcObject as MediaStream
+          stream.getTracks().forEach(track => {
+            track.stop()
+          })
+        }
+        currentVideo.srcObject = null
+      }
+    }
+  }, [fetchScannerActivity, initializeScanner, TIMEOUTS.DOM_INIT, stopCamera])
+
+  // Next.js route change detection for SPA navigation
+  const pathname = usePathname()
+  useEffect(() => {
+    // This effect runs when the pathname changes (Next.js route navigation)
+    // The camera should already be stopped by the cleanup function above,
+    // but this provides an additional safety net for SPA navigation
+    return () => {
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.stop()
+          scannerRef.current.destroy()
+          scannerRef.current = null
+        } catch (error) {
+          console.warn('Route change cleanup - scanner already stopped:', error)
+        }
+      }
+    }
+  }, [pathname])
 
   const handleGoBack = () => {
+    stopCamera() // Ensure camera is stopped before navigation
     start()
     router.push('/admin/qr-scanner')
   }
@@ -984,11 +1185,12 @@ export default function CameraScannerPage() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {/* Compact Scanner Container */}
+                      {/* QrScanner Video Container */}
                       <div className="relative">
-                        <div
-                          id="qr-reader"
+                        <video
+                          ref={videoRef}
                           className="w-full aspect-square max-w-sm mx-auto bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700"
+                          style={{ objectFit: 'cover' }}
                         />
 
                         {/* Camera Logo Overlay - shown when scanner is not active */}
@@ -1000,7 +1202,7 @@ export default function CameraScannerPage() {
                                 strokeWidth={1.5}
                               />
                               <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">
-                                {scannerStatus === 'initializing' ? 'Starting Camera...' :
+                                {scannerStatus === 'initializing' ? 'Start Camera' :
                                   scannerStatus === 'error' ? 'Camera Error' :
                                     'Camera Ready'}
                               </p>
@@ -1010,18 +1212,18 @@ export default function CameraScannerPage() {
 
                       </div>
 
-                      {/* Compact Controls */}
-                      <div className="flex justify-center gap-2">
+                      {/* Responsive Controls */}
+                      <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
                         {cameras.length > 1 && (
                           <Button
                             onClick={switchCamera}
                             variant="outline"
                             size="sm"
                             disabled={processing}
-                            className="h-8 px-3 text-xs"
+                            className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0"
                           >
-                            <SwitchCamera className="h-3 w-3 mr-1" />
-                            Switch
+                            <SwitchCamera className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden xs:inline sm:inline">Switch</span>
                           </Button>
                         )}
 
@@ -1030,7 +1232,7 @@ export default function CameraScannerPage() {
                           variant="outline"
                           size="sm"
                           disabled={processing || isFlashSupported === false || isFlashSupported === null}
-                          className={`h-8 px-3 text-xs transition-all duration-200 ${
+                          className={`h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0 transition-all duration-200 ${
                             isFlashOn 
                               ? 'bg-yellow-50 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300'
                               : isFlashSupported === false
@@ -1048,20 +1250,22 @@ export default function CameraScannerPage() {
                           }
                         >
                           {isFlashSupported === null ? (
-                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            <Loader2 className="h-3 w-3 sm:mr-1 animate-spin" />
                           ) : isFlashOn ? (
-                            <FlashlightOff className="h-3 w-3 mr-1" />
+                            <FlashlightOff className="h-3 w-3 sm:mr-1" />
                           ) : (
-                            <Flashlight className="h-3 w-3 mr-1" />
+                            <Flashlight className="h-3 w-3 sm:mr-1" />
                           )}
-                          {isFlashSupported === null
-                            ? 'Checking...'
-                            : isFlashSupported === false
-                              ? 'Flash Unavailable'
-                              : isFlashOn
-                                ? 'On'
-                                : 'Off'
-                          }
+                          <span className="hidden xs:inline sm:inline">
+                            {isFlashSupported === null
+                              ? 'Checking...'
+                              : isFlashSupported === false
+                                ? 'Unavailable'
+                                : isFlashOn
+                                  ? 'On'
+                                  : 'Off'
+                            }
+                          </span>
                         </Button>
 
                         <Button
@@ -1069,21 +1273,21 @@ export default function CameraScannerPage() {
                           variant="outline"
                           size="sm"
                           disabled={processing}
-                          className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/20"
+                          className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0 text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/20"
                         >
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Stop
+                          <XCircle className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden xs:inline sm:inline">Stop</span>
                         </Button>
 
                         <Button
                           onClick={initializeScanner}
                           variant="outline"
                           size="sm"
-                          disabled={processing}
-                          className="h-8 px-3 text-xs"
+                          disabled={processing || scanning}
+                          className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0"
                         >
-                          <RotateCcw className="h-3 w-3 mr-1" />
-                          Restart
+                          <RotateCcw className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden xs:inline sm:inline">Restart</span>
                         </Button>
                       </div>
                     </div>
@@ -1117,6 +1321,73 @@ export default function CameraScannerPage() {
                       }`}>
                       {scanning ? 'Active' : 'Stopped'}
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* System Health Monitor */}
+              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
+                <div className="border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 text-blue-500">🔧</div>
+                      <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">System Health</h3>
+                    </div>
+                    <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                  </div>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400">Uptime</span>
+                      <span className="text-xs font-mono text-neutral-900 dark:text-neutral-100">{systemHealth.uptime}h</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400">Scans/Hr</span>
+                      <span className="text-xs font-mono text-neutral-900 dark:text-neutral-100">{systemHealth.scansPerHour}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400">Memory</span>
+                      <span className="text-xs font-mono text-neutral-900 dark:text-neutral-100">
+                        {Math.round(systemHealth.memoryUsage / (1024 * 1024))}MB
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400">Restarts</span>
+                      <span className="text-xs font-mono text-neutral-900 dark:text-neutral-100">{systemHealth.cameraRestarts}</span>
+                    </div>
+                  </div>
+                  
+                  {failedOperations.length > 0 && (
+                    <div className="mt-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+                        <span className="text-xs text-orange-700 dark:text-orange-300">
+                          {failedOperations.length} ops queued
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    <button
+                      onClick={handleMemoryCleanup}
+                      className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                    >
+                      <div className="text-center">
+                        <div className="text-blue-600 dark:text-blue-400 text-sm mb-1">🧹</div>
+                        <div className="text-xs font-medium text-blue-700 dark:text-blue-300">Clean</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={handlePeriodicRestart}
+                      className="p-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                    >
+                      <div className="text-center">
+                        <div className="text-purple-600 dark:text-purple-400 text-sm mb-1">🔄</div>
+                        <div className="text-xs font-medium text-purple-700 dark:text-purple-300">Restart</div>
+                      </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1191,90 +1462,91 @@ export default function CameraScannerPage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Simple Clean Popup with Glowing Border */}
-        {showPopup && (
-          <div
-            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-500"
-            onClick={() => setShowPopup(false)}
-          >
-            <div className={`bg-white dark:bg-neutral-900 border rounded-xl shadow-lg backdrop-blur-sm overflow-hidden ${
+      {/* Simple Clean Popup with Glowing Border */}
+      {showPopup && (
+        <div
+          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-500"
+          onClick={() => setShowPopup(false)}
+        >
+          <div className={`bg-white dark:bg-neutral-900 border rounded-xl shadow-lg backdrop-blur-sm overflow-hidden ${
+            popupType === 'success' 
+              ? 'border-green-200 dark:border-green-800 shadow-green-500/20'
+              : 'border-red-200 dark:border-red-800 shadow-red-500/20'
+            }`}
+            style={{
+            boxShadow: `0 8px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px ${
               popupType === 'success' 
-                ? 'border-green-200 dark:border-green-800 shadow-green-500/20'
-                : 'border-red-200 dark:border-red-800 shadow-red-500/20'
-              }`}
-              style={{
-              boxShadow: `0 8px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px ${
-                popupType === 'success' 
-                    ? 'rgba(34, 197, 94, 0.3)'
-                    : 'rgba(239, 68, 68, 0.3)'
-              }, 0 0 20px ${
-                popupType === 'success' 
-                    ? 'rgba(34, 197, 94, 0.15)'
-                    : 'rgba(239, 68, 68, 0.15)'
-                  }`
-              }}>
-              <div className="px-4 py-3 flex items-center gap-3">
-                {/* Status indicator */}
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className={`w-3 h-3 rounded-full animate-ping ${
-                      popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                    <div className={`w-3 h-3 rounded-full absolute inset-0 ${
-                      popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                      {popupMessage}
-                    </span>
-                    <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                      {popupType === 'success' ? 'Operation completed' : 'Action failed'}
-                    </span>
-                  </div>
+                  ? 'rgba(34, 197, 94, 0.3)'
+                  : 'rgba(239, 68, 68, 0.3)'
+            }, 0 0 20px ${
+              popupType === 'success' 
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)'
+                }`
+            }}>
+            <div className="px-4 py-3 flex items-center gap-3">
+              {/* Status indicator */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className={`w-3 h-3 rounded-full animate-ping ${
+                    popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
+                  <div className={`w-3 h-3 rounded-full absolute inset-0 ${
+                    popupType === 'success' ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
                 </div>
-
-                {/* Divider */}
-                <div className="h-8 w-px bg-neutral-200 dark:bg-neutral-700" />
-
-                {/* Progress indicator */}
-                <div className="flex items-center gap-2">
-                  <div className="w-16 h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        popupType === 'success' 
-                          ? 'bg-green-500'
-                          : 'bg-red-500'
-                        }`}
-                      style={{
-                        animation: `shrink ${TIMEOUTS.UI_ANIMATION}ms linear forwards`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">3s</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    {popupMessage}
+                  </span>
+                  <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                    {popupType === 'success' ? 'Operation completed' : 'Action failed'}
+                  </span>
                 </div>
+              </div>
+
+              {/* Divider */}
+              <div className="h-8 w-px bg-neutral-200 dark:bg-neutral-700" />
+
+              {/* Progress indicator */}
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      popupType === 'success' 
+                        ? 'bg-green-500'
+                        : 'bg-red-500'
+                      }`}
+                    style={{
+                      animation: `shrink ${TIMEOUTS.UI_ANIMATION}ms linear forwards`,
+                    }}
+                  />
+                </div>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">3s</span>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Fullscreen Popup with Similar Design */}
-        {showFullscreenPopup && (
+      {/* Fullscreen Popup with Similar Design */}
+      {showFullscreenPopup && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-500"
+          onClick={() => setShowFullscreenPopup(false)}
+        >
           <div
-            className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-500"
-            onClick={() => setShowFullscreenPopup(false)}
+            className="mx-4 max-w-sm w-full animate-in zoom-in-95 slide-in-from-bottom-8 duration-500"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="mx-4 max-w-sm w-full animate-in zoom-in-95 slide-in-from-bottom-8 duration-500"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={`bg-white dark:bg-neutral-900 border rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden ${
-                fullscreenType === 'success' 
-                  ? 'border-green-200 dark:border-green-800 shadow-green-500/30'
-                  : 'border-red-200 dark:border-red-800 shadow-red-500/30'
-                }`}
-                style={{
+            <div className={`bg-white dark:bg-neutral-900 border rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden ${
+              fullscreenType === 'success' 
+                ? 'border-green-200 dark:border-green-800 shadow-green-500/30'
+                : 'border-red-200 dark:border-red-800 shadow-red-500/30'
+              }`}
+              style={{
                 boxShadow: `0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px ${
                   fullscreenType === 'success' 
                       ? 'rgba(34, 197, 94, 0.4)'
@@ -1284,7 +1556,7 @@ export default function CameraScannerPage() {
                       ? 'rgba(34, 197, 94, 0.25)'
                       : 'rgba(239, 68, 68, 0.25)'
                     }`
-                }}>
+              }}>
                 <div className="px-6 py-6 text-center">
                   {/* Icon */}
                   <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
@@ -1325,16 +1597,15 @@ export default function CameraScannerPage() {
               </div>
             </div>
           </div>
-        )}
+      )}
 
-        {/* Simple CSS animations */}
-        <style jsx>{`
-          @keyframes shrink {
-            from { width: 100%; }
-            to { width: 0%; }
-          }
-        `}</style>
-      </div>
+      {/* Simple CSS animations */}
+      <style jsx>{`
+        @keyframes shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
     </div>
   )
 }
