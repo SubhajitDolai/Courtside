@@ -18,12 +18,12 @@ export default function ForgotPasswordPage() {
 
     const supabase = createClient();
 
-    // ✅ Restrict to mitwpu.edu.in emails
-    if (!email.endsWith('@mitwpu.edu.in')) {
-      toast.error('Only mitwpu.edu.in emails are allowed');
-      setLoading(false);
-      return;
-    }
+    // // ✅ Restrict to mitwpu.edu.in emails
+    // if (!email.endsWith('@mitwpu.edu.in')) {
+    //   toast.error('Only mitwpu.edu.in emails are allowed');
+    //   setLoading(false);
+    //   return;
+    // }
 
     // ✅ Check if email exists in 'profiles' table
     const { data: user, error: fetchError } = await supabase

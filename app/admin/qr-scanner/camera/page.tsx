@@ -9,15 +9,15 @@ import { toast } from 'sonner'
 import {
   Camera,
   QrCode,
-  XCircle,
   Loader2,
   Clock,
   Zap,
   AlertCircle,
   RotateCcw,
-  FlashlightOff,
-  Flashlight,
-  SwitchCamera
+  SwitchCamera,
+  CameraOff,
+  Settings,
+  Trash2
 } from 'lucide-react'
 import QrScanner from 'qr-scanner'
 import { useRouter, usePathname } from 'next/navigation'
@@ -63,10 +63,9 @@ export default function CameraScannerPage() {
   const [scannerStatus, setScannerStatus] = useState<'initializing' | 'scanning' | 'error'>('initializing')
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isFlashOn, setIsFlashOn] = useState(false)
-  const [isFlashSupported, setIsFlashSupported] = useState<boolean | null>(null) // null = checking, true/false = result
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0)
+  const [switchingCamera, setSwitchingCamera] = useState(false)
   const [scanHistory, setScanHistory] = useState<{ id: string, action: string, timestamp: Date, user: string }[]>([])
   const [totalScans, setTotalScans] = useState(0)
   const [showPopup, setShowPopup] = useState(false)
@@ -78,13 +77,13 @@ export default function CameraScannerPage() {
   const { start } = useGlobalLoadingBar()
 
   // Long-session management state
-  const [sessionStartTime] = useState(new Date())
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [sessionStartTime] = useState(() => new Date()) // Use lazy initialization
+  const [isOnline, setIsOnline] = useState(true) // Initialize to true to avoid hydration mismatch
   const [failedOperations, setFailedOperations] = useState<any[]>([])
   const [systemHealth, setSystemHealth] = useState({
     uptime: 0,
     scansPerHour: 0,
-    lastHeartbeat: new Date(),
+    lastHeartbeat: new Date(0), // Initialize with epoch to avoid hydration mismatch
     memoryUsage: 0,
     cameraRestarts: 0
   })
@@ -288,93 +287,131 @@ export default function CameraScannerPage() {
     }
   }, [])
 
-  // Check if flash/torch is supported on current camera (only once per session)
-  const checkFlashSupport = useCallback(async () => {
-    // Skip if already checked
-    if (isFlashSupported !== null) {
-      console.log('Flash support already checked:', isFlashSupported)
-      return isFlashSupported
-    }
-
-    try {
-      console.log('🔦 Checking flash support for the first time...')
-      setIsFlashSupported(null) // Set to checking state
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        }
-      })
-
-      const track = stream.getVideoTracks()[0]
-      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
-
-      const hasFlash = !!capabilities.torch
-      setIsFlashSupported(hasFlash)
-
-      // Clean up stream
-      stream.getTracks().forEach(t => t.stop())
-
-      return hasFlash
-    } catch (error) {
-      console.error('Flash support detection failed:', error)
-      setIsFlashSupported(false)
-      return false
-    }
-  }, [isFlashSupported])
-
-  // Initialize scanner with QrScanner library
+  // Initialize scanner with QrScanner library - Improved for reliable camera switching
   const initializeScanner = useCallback(async () => {
     setScannerStatus('initializing')
-
-    // Clear any existing scanner instance
-    if (scannerRef.current) {
-      try {
-        scannerRef.current.stop()
-        scannerRef.current.destroy()
-        scannerRef.current = null
-      } catch (error) {
-        console.error('Error clearing previous scanner:', error)
-      }
-    }
-
-    // Reset video element
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
-
-    // Small delay to ensure cleanup is complete
-    await new Promise(resolve => setTimeout(resolve, TIMEOUTS.DOM_INIT))
+    setError(null)
 
     try {
-      const availableCameras = await getAvailableCameras()
-
-      // Check flash support only if not already determined
-      if (isFlashSupported === null) {
-        checkFlashSupport()
+      // Enhanced cleanup sequence for better camera switching
+      if (scannerRef.current) {
+        try {
+          // Stop scanner and ensure it's fully destroyed
+          await scannerRef.current.stop()
+          scannerRef.current.destroy()
+          scannerRef.current = null
+        } catch (error) {
+          console.warn('Error clearing previous scanner:', error)
+          // Force null the reference even if cleanup fails
+          scannerRef.current = null
+        }
       }
 
-      // Get target camera with fallback logic
-      let targetCamera = availableCameras[currentCameraIndex] || availableCameras[0]
-
-      // Try to prefer back camera only if current index is 0 (auto-select)
-      if (currentCameraIndex === 0) {
-        const backCamera = availableCameras.find(camera =>
-          camera.label.toLowerCase().includes('back') ||
-          camera.label.toLowerCase().includes('rear')
-        )
-        if (backCamera) targetCamera = backCamera
+      // Enhanced video element cleanup
+      if (videoRef.current) {
+        // Stop any active media streams
+        if (videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream
+          stream.getTracks().forEach(track => {
+            try {
+              track.stop()
+            } catch (e) {
+              console.warn('Error stopping media track:', e)
+            }
+          })
+        }
+        videoRef.current.srcObject = null
+        // Ensure video element is ready for new stream
+        videoRef.current.load()
       }
 
-      // Get video element
+      // Extended delay for better camera resource cleanup
+      await new Promise(resolve => setTimeout(resolve, TIMEOUTS.DOM_INIT * 2))
+
+      // Get available cameras with retry logic
+      let availableCameras: MediaDeviceInfo[] = []
+      let retryCount = 0
+      const maxRetries = 3
+
+      while (retryCount < maxRetries) {
+        try {
+          availableCameras = await getAvailableCameras()
+          if (availableCameras.length > 0) break
+        } catch (error) {
+          console.warn(`Camera detection attempt ${retryCount + 1} failed:`, error)
+        }
+        retryCount++
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 500 * retryCount))
+        }
+      }
+
+      if (availableCameras.length === 0) {
+        throw new Error('No cameras detected. Please check camera permissions.')
+      }
+
+      // Enhanced camera selection logic with validation
+      let targetCamera: MediaDeviceInfo | undefined
+      
+      // Validate current camera index
+      if (currentCameraIndex < availableCameras.length) {
+        targetCamera = availableCameras[currentCameraIndex]
+      } else {
+        // Reset to first camera if index is out of bounds
+        setCurrentCameraIndex(0)
+        targetCamera = availableCameras[0]
+      }
+
+      // Smart camera preference for initial selection
+      const BACK_CAMERA_KEYWORDS = [
+        'back',
+        'rear',
+        'environment',
+        'main',
+        'triple',
+        'wide',
+        'ultra wide',
+        'camera 1',
+        '0, facing back',
+        'rear camera',
+        'external',
+        'usb',         // often used in webcams
+        'webcam',      // common in laptops
+        'hd',          // e.g., "HD Webcam"
+        'logitech',    // popular external webcams
+        'facetime'     // MacBook internal webcam
+      ]
+
+      if (currentCameraIndex === 0 && availableCameras.length > 1) {
+        const backCamera = availableCameras.find(camera => {
+          const label = camera.label.toLowerCase()
+          return BACK_CAMERA_KEYWORDS.some(keyword => label.includes(keyword))
+        })
+
+        if (backCamera) {
+          targetCamera = backCamera
+          console.log('Auto-selected camera:', backCamera.label)
+        } else {
+          // Fallback to second camera
+          targetCamera = availableCameras[1] || availableCameras[0]
+          console.warn('No match found, defaulting to:', targetCamera.label || 'Unnamed camera')
+        }
+      }
+
+      // Validate video element availability
       const videoElement = videoRef.current
       if (!videoElement) {
-        throw new Error('Video element not found')
+        throw new Error('Video element not available')
       }
 
-      // Create and start QrScanner
+      // Ensure video element is in a clean state
+      if (videoElement.srcObject) {
+        videoElement.srcObject = null
+      }
+
+      console.log(`Initializing scanner with camera: ${targetCamera?.label || 'Unknown'} (${targetCamera?.deviceId?.substring(0, 8) || 'No ID'}...)`)
+
+      // Create QrScanner with enhanced reliability
       scannerRef.current = new QrScanner(
         videoElement,
         (result: QrScanner.ScanResult) => handleScanSuccess(result.data),
@@ -386,23 +423,94 @@ export default function CameraScannerPage() {
         }
       )
 
-      await scannerRef.current.start()
+      // Enhanced scanner startup with retry logic
+      let startRetries = 0
+      const maxStartRetries = 3
+
+      while (startRetries < maxStartRetries) {
+        try {
+          await scannerRef.current.start()
+          break
+        } catch (startError) {
+          console.warn(`Scanner start attempt ${startRetries + 1} failed:`, startError)
+          startRetries++
+          
+          if (startRetries < maxStartRetries) {
+            // Clean up the failed instance
+            if (scannerRef.current) {
+              try {
+                scannerRef.current.destroy()
+              } catch (e) {
+                console.warn('Error destroying failed scanner:', e)
+              }
+            }
+            
+            // Wait before retry with exponential backoff
+            await new Promise(resolve => setTimeout(resolve, 1000 * startRetries))
+            
+            // Recreate scanner for retry
+            scannerRef.current = new QrScanner(
+              videoElement,
+              (result: QrScanner.ScanResult) => handleScanSuccess(result.data),
+              {
+                returnDetailedScanResult: true,
+                highlightScanRegion: true,
+                highlightCodeOutline: true,
+                preferredCamera: targetCamera?.deviceId || 'environment'
+              }
+            )
+          } else {
+            throw startError
+          }
+        }
+      }
+
+      // Verify scanner is actually running
+      if (!scannerRef.current || !videoElement.srcObject) {
+        throw new Error('Scanner failed to start properly')
+      }
 
       setScanning(true)
       setScannerStatus('scanning')
       setError(null)
-      console.log('QrScanner initialized successfully')
+      console.log('QrScanner initialized successfully with enhanced reliability')
 
     } catch (error) {
       console.error('Failed to initialize scanner:', error)
       setScannerStatus('error')
-      setError('Failed to initialize camera. Please check permissions.')
-      toast.error('Camera initialization failed')
+      setSwitchingCamera(false)
+      
+      // Enhanced error messaging
+      let errorMessage = 'Failed to initialize camera.'
+      if (error instanceof Error) {
+        if (error.message.includes('permission')) {
+          errorMessage = 'Camera permission denied. Please allow camera access.'
+        } else if (error.message.includes('NotFoundError') || error.message.includes('No cameras')) {
+          errorMessage = 'No cameras found. Please connect a camera device.'
+        } else if (error.message.includes('NotReadableError')) {
+          errorMessage = 'Camera is being used by another application.'
+        } else if (error.message.includes('OverconstrainedError')) {
+          errorMessage = 'Camera does not support required settings.'
+        } else {
+          errorMessage = `Camera error: ${error.message}`
+        }
+      }
+      
+      setError(errorMessage)
+      toast.error(errorMessage)
+      
+      // Auto-retry for specific recoverable errors
+      if (error instanceof Error && 
+          (error.message.includes('NotReadableError') || 
+           error.message.includes('being used'))) {
+        console.log('Scheduling auto-retry for recoverable camera error...')
+        setTimeout(() => initializeScanner(), 3000)
+      }
     }
     // Note: handleScanSuccess is intentionally excluded from deps to avoid circular dependency
     // (initializeScanner -> handleScanSuccess -> initializeScanner). handleScanSuccess is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentCameraIndex, getAvailableCameras, checkFlashSupport, isFlashSupported, TIMEOUTS.DOM_INIT])
+  }, [currentCameraIndex, getAvailableCameras, TIMEOUTS.DOM_INIT])
 
   // Helper function to check if slot is over
   const isSlotOver = useCallback((booking: Booking) => {
@@ -475,9 +583,9 @@ export default function CameraScannerPage() {
       }
 
       // Reset component state
-      setIsFlashOn(false)
       setScanning(false)
       setScannerStatus('initializing')
+      setSwitchingCamera(false)
       setError(null)
       
       // Show success message only if page is visible
@@ -829,138 +937,48 @@ export default function CameraScannerPage() {
   }, [processing, supabase, initializeScanner, handleStatusUpdateDirect, showPopupMessage, TIMEOUTS.DATA_ERROR, playBarcodeScanSound])
 
   // Switch camera
-  const switchCamera = useCallback(() => {
-    if (cameras.length > 1) {
-      const nextIndex = (currentCameraIndex + 1) % cameras.length
-      setCurrentCameraIndex(nextIndex)
-      // Reset flash state when switching cameras
-      setIsFlashOn(false)
-      setIsFlashSupported(null) // Reset support check
-      // Scanner will reinitialize with the new camera
-      initializeScanner()
-      toast.success(`Switched to camera ${nextIndex + 1}`)
-    }
-  }, [cameras.length, currentCameraIndex, initializeScanner])
-
-  // Toggle flashlight (if supported)
-  const toggleFlash = useCallback(async () => {
-    // Check if flash is supported first
-    if (isFlashSupported === false) {
-      toast.error('Flashlight not supported on this camera')
+  const switchCamera = useCallback(async () => {
+    // Prevent spamming - don't allow switching if already in progress or processing
+    if (switchingCamera || processing) {
       return
     }
 
-    if (isFlashSupported === null) {
-      toast.error('Checking flash support...')
+    // Handle single camera case
+    if (cameras.length <= 1) {
+      toast.info('Only one camera available')
       return
     }
 
+    setSwitchingCamera(true)
+    
     try {
-      // Get the current active video track or create a new stream with the current camera
-      let videoTrack: MediaStreamTrack | null = null
-
-      try {
-        // Try to access camera with current camera device
-        const currentCamera = cameras[currentCameraIndex]
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            deviceId: currentCamera?.deviceId,
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        })
-
-        videoTrack = stream.getVideoTracks()[0]
-      } catch (streamError) {
-        console.warn('Could not access current camera, trying fallback:', streamError)
-
-        // Fallback: create new stream with environment camera
-        const fallbackStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        })
-        videoTrack = fallbackStream.getVideoTracks()[0]
-      }
-
-      if (!videoTrack) {
-        throw new Error('No video track available')
-      }
-
-      // Double-check torch capability
-      const capabilities = videoTrack.getCapabilities() as MediaTrackCapabilities & { torch?: boolean }
-
-      if (!capabilities.torch) {
-        setIsFlashSupported(false)
-        toast.error('Flashlight not supported on this camera')
-        videoTrack.stop()
-        return
-      }
-
-      // Apply torch constraint with multiple approaches
-      let success = false
-
-      // Method 1: Advanced constraints (most compatible)
-      try {
-        await videoTrack.applyConstraints({
-          advanced: [{ torch: !isFlashOn } as MediaTrackConstraintSet]
-        })
-        success = true
-      } catch (constraintError) {
-        console.warn('Advanced constraint failed, trying direct:', constraintError)
-      }
-
-      // Method 2: Direct constraint (fallback)
-      if (!success) {
-        try {
-          await videoTrack.applyConstraints({
-            torch: !isFlashOn
-          } as MediaTrackConstraints)
-          success = true
-        } catch (altError) {
-          console.warn('Direct constraint failed:', altError)
-        }
-      }
-
-      if (success) {
-        setIsFlashOn(!isFlashOn)
-        toast.success(isFlashOn ? 'Flash disabled' : 'Flash enabled')
-      } else {
-        toast.error('Failed to control flashlight')
-      }
-
-      // Clean up track after a short delay to allow settings to apply
-      setTimeout(() => {
-        if (videoTrack && videoTrack.readyState === 'live') {
-          // Only stop if it's not actively being used by the scanner
-          if (!scannerRef.current || !videoRef.current?.srcObject) {
-            videoTrack.stop()
-          }
-        }
-      }, 500)
-
+      const nextIndex = (currentCameraIndex + 1) % cameras.length
+      const nextCamera = cameras[nextIndex]
+      
+      console.log(`Switching to camera ${nextIndex + 1}: ${nextCamera?.label || 'Unknown'}`)
+      
+      setCurrentCameraIndex(nextIndex)
+      
+      // Reinitialize scanner with the new camera
+      await initializeScanner()
+      
+      toast.success(`Switched to camera ${nextIndex + 1}`)
     } catch (error) {
-      console.error('Flashlight error:', error)
-
-      // Provide more specific error messages
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          toast.error('Camera permission denied')
-        } else if (error.name === 'NotFoundError') {
-          toast.error('No camera found')
-        } else if (error.name === 'NotSupportedError') {
-          setIsFlashSupported(false)
-          toast.error('Flashlight not supported')
-        } else {
-          toast.error('Failed to control flashlight')
-        }
-      } else {
-        toast.error('Failed to control flashlight')
-      }
+      console.error('Failed to switch camera:', error)
+      toast.error('Failed to switch camera')
+    } finally {
+      // Add a small delay to prevent rapid successive calls
+      setTimeout(() => {
+        setSwitchingCamera(false)
+      }, 1000) // 1 second delay before allowing next switch
     }
-  }, [isFlashOn, isFlashSupported, cameras, currentCameraIndex])
+  }, [cameras, currentCameraIndex, switchingCamera, processing, initializeScanner])
 
   // Network status monitoring
   useEffect(() => {
+    // Set initial online status on client side only
+    setIsOnline(navigator.onLine)
+    
     const handleOnline = () => {
       setIsOnline(true)
       processFailedOperations()
@@ -981,6 +999,12 @@ export default function CameraScannerPage() {
 
   // System health monitoring with heartbeat
   useEffect(() => {
+    // Initialize lastHeartbeat on client side
+    setSystemHealth(prev => ({
+      ...prev,
+      lastHeartbeat: new Date()
+    }))
+    
     const startHeartbeat = () => {
       const heartbeat = () => {
         const now = new Date()
@@ -1178,7 +1202,7 @@ export default function CameraScannerPage() {
                       </div>
                       <p className="text-sm font-medium text-red-900 dark:text-red-100 mb-1">Scanner Error</p>
                       <p className="text-xs text-red-600 dark:text-red-400 mb-3">{error}</p>
-                      <Button onClick={initializeScanner} size="sm" className="h-8 px-3 text-xs">
+                      <Button onClick={handlePeriodicRestart} size="sm" className="h-8 px-3 text-xs">
                         <RotateCcw className="h-3 w-3 mr-1" />
                         Retry
                       </Button>
@@ -1219,63 +1243,28 @@ export default function CameraScannerPage() {
                             onClick={switchCamera}
                             variant="outline"
                             size="sm"
-                            disabled={processing}
+                            disabled={processing || switchingCamera}
                             className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0"
                           >
-                            <SwitchCamera className="h-3 w-3 sm:mr-1" />
-                            <span className="hidden xs:inline sm:inline">Switch</span>
+                            {switchingCamera ? (
+                              <Loader2 className="h-3 w-3 animate-spin sm:mr-1" />
+                            ) : (
+                              <SwitchCamera className="h-3 w-3 sm:mr-1" />
+                            )}
+                            <span className="hidden xs:inline sm:inline">
+                              {switchingCamera ? 'Switching...' : 'Switch'}
+                            </span>
                           </Button>
                         )}
-
-                        <Button
-                          onClick={toggleFlash}
-                          variant="outline"
-                          size="sm"
-                          disabled={processing || isFlashSupported === false || isFlashSupported === null}
-                          className={`h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0 transition-all duration-200 ${
-                            isFlashOn 
-                              ? 'bg-yellow-50 border-yellow-200 text-yellow-700 shadow-sm dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300'
-                              : isFlashSupported === false
-                                ? 'opacity-50 cursor-not-allowed'
-                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
-                            }`}
-                          title={
-                            isFlashSupported === false
-                              ? 'Flashlight not supported on this camera'
-                              : isFlashSupported === null
-                                ? 'Checking flash support...'
-                                : isFlashOn
-                                  ? 'Turn off flashlight'
-                                  : 'Turn on flashlight'
-                          }
-                        >
-                          {isFlashSupported === null ? (
-                            <Loader2 className="h-3 w-3 sm:mr-1 animate-spin" />
-                          ) : isFlashOn ? (
-                            <FlashlightOff className="h-3 w-3 sm:mr-1" />
-                          ) : (
-                            <Flashlight className="h-3 w-3 sm:mr-1" />
-                          )}
-                          <span className="hidden xs:inline sm:inline">
-                            {isFlashSupported === null
-                              ? 'Checking...'
-                              : isFlashSupported === false
-                                ? 'Unavailable'
-                                : isFlashOn
-                                  ? 'On'
-                                  : 'Off'
-                            }
-                          </span>
-                        </Button>
 
                         <Button
                           onClick={stopCamera}
                           variant="outline"
                           size="sm"
-                          disabled={processing}
+                          disabled={processing || !scanning}
                           className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0 text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/20"
                         >
-                          <XCircle className="h-3 w-3 sm:mr-1" />
+                          <CameraOff className="h-3 w-3 sm:mr-1" />
                           <span className="hidden xs:inline sm:inline">Stop</span>
                         </Button>
 
@@ -1286,8 +1275,8 @@ export default function CameraScannerPage() {
                           disabled={processing || scanning}
                           className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0"
                         >
-                          <RotateCcw className="h-3 w-3 sm:mr-1" />
-                          <span className="hidden xs:inline sm:inline">Restart</span>
+                          <Camera className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden xs:inline sm:inline">Start</span>
                         </Button>
                       </div>
                     </div>
@@ -1330,7 +1319,7 @@ export default function CameraScannerPage() {
                 <div className="border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 text-blue-500">🔧</div>
+                      <Settings className="h-4 w-4 text-blue-500" />
                       <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">System Health</h3>
                     </div>
                     <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
@@ -1375,7 +1364,7 @@ export default function CameraScannerPage() {
                       className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                     >
                       <div className="text-center">
-                        <div className="text-blue-600 dark:text-blue-400 text-sm mb-1">🧹</div>
+                        <Trash2 className="h-4 w-4 text-blue-600 dark:text-blue-400 mx-auto mb-1" />
                         <div className="text-xs font-medium text-blue-700 dark:text-blue-300">Clean</div>
                       </div>
                     </button>
@@ -1384,7 +1373,7 @@ export default function CameraScannerPage() {
                       className="p-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
                     >
                       <div className="text-center">
-                        <div className="text-purple-600 dark:text-purple-400 text-sm mb-1">🔄</div>
+                        <RotateCcw className="h-4 w-4 text-purple-600 dark:text-purple-400 mx-auto mb-1" />
                         <div className="text-xs font-medium text-purple-700 dark:text-purple-300">Restart</div>
                       </div>
                     </button>
