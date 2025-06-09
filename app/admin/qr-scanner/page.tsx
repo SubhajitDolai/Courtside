@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Camera, Keyboard, QrCode, ArrowRight, Zap } from 'lucide-react'
+import { Camera, QrCode, ArrowRight, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
@@ -88,34 +88,34 @@ export default function QRScannerPage() {
             </CardContent>
           </Card>
 
-          {/* Manual/IoT Input */}
+          {/* IoT Laser Scanner */}
           <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-white to-emerald-50/50 dark:from-neutral-900 dark:to-emerald-950/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <CardHeader className="text-center pb-4 relative">
               <div className="mx-auto w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Keyboard className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+                <Zap className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <CardTitle className="text-xl font-semibold">Manual Entry</CardTitle>
+              <CardTitle className="text-xl font-semibold">IoT Laser Scanner</CardTitle>
             </CardHeader>
             
             <CardContent className="text-center space-y-6 relative">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Enter booking ID manually or use IoT scanner for automated input
+                Automated laser scanner for hands-free QR code detection and instant check-in/out
               </p>
               
               <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground bg-emerald-50/50 dark:bg-emerald-950/20 rounded-lg p-3">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                  Keyboard input support
+                  Automatic laser scanning
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                  IoT device compatible
+                  Hands-free operation
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                  Fallback option
+                  IoT device integration
                 </div>
               </div>
               
@@ -123,9 +123,9 @@ export default function QRScannerPage() {
                 className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={start}
               >
-                <Link href="/admin/qr-scanner/manual" className="flex items-center gap-2">
-                  <Keyboard className="h-4 w-4" />
-                  Open Manual Entry
+                <Link href="/admin/qr-scanner/iot" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Open IoT Scanner
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -149,8 +149,8 @@ export default function QRScannerPage() {
                 </div>
                 <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 hidden sm:block" />
                 <div className="flex items-center gap-2">
-                  <Keyboard className="h-5 w-5 text-emerald-500" />
-                  <span className="text-sm font-medium">Manual Backup</span>
+                  <Zap className="h-5 w-5 text-emerald-500" />
+                  <span className="text-sm font-medium">IoT Laser Scanner</span>
                 </div>
               </div>
             </CardContent>

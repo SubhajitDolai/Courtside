@@ -53,8 +53,9 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🏆 **Sports Analytics** - Booking distribution and facility utilization metrics
 - ⏰ **Time-based Insights** - Slot utilization patterns and peak usage analysis
 - 🎨 **Modern UI** - Enhanced dashboard with gradient designs and responsive layouts
-- 📱 **QR Scanner System** - Advanced camera and manual entry check-in/check-out
-- 🔍 **IoT Integration** - Support for automated scanners and manual booking ID entry
+- 📱 **Enhanced QR Scanner System** - Professional dual-mode scanning interface with camera and automated scanner options
+- 🔍 **IoT Integration** - Automated laser scanner support with manual booking ID entry fallback
+- 🎵 **Audio Feedback** - Professional scanner beep sounds with success/error tone differentiation
 - 💬 **Feedback Management** - Collect and manage user feedback with comprehensive admin panel
 - 🚫 **User Access Control** - Ban/restrict user accounts with automatic logout functionality
 
@@ -78,8 +79,8 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | Charts & Visualization | Recharts (React + D3.js) |
 | Data Processing | React useMemo for optimized calculations |
 | Error Handling | React Error Boundary for robust chart rendering |
-| QR Code Scanning | QR-Scanner library for camera-based scanning |
-| IoT Integration | Support for manual entry and automated scanner devices |
+| QR Code Scanning | QR-Scanner library + Professional audio feedback system |
+| IoT Integration | Automated scanner devices with emerald-themed UI enhancements |
 | Deployment | Vercel (Edge Functions) |
 | AI Integration | Vercel AI SDK (Google Gemini) |
 
@@ -117,9 +118,9 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /slots                # Manage sports slots
     /sports               # Manage sports facilities
     /feedback             # User feedback management system
-    /qr-scanner           # QR code scanning system
-      /camera             # Camera-based QR scanning
-      /manual             # Manual entry and IoT integration
+    /qr-scanner           # Professional QR code scanning system
+      /camera             # Camera-based QR scanning with modern UI
+      /iot                # Automated scanner with emerald-themed interface
   /assistant           # AI assistant for recommendations
   /banned              # Restricted access page for suspended users
   /api                 # API routes
@@ -167,17 +168,26 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 ## 📱 QR Scanner System
 
 ### Camera Scanner
-- **Real-time QR Scanning**: HTML5-QRCode integration for live camera scanning
-- **Instant Verification**: Immediate booking validation and check-in/check-out
-- **Modern UI**: Gradient-designed interface with responsive controls
-- **Error Handling**: Robust error boundaries and fallback mechanisms
-- **Mobile Optimized**: Touch-friendly controls and responsive design
+- **Real-time QR Scanning**: HTML5-QRCode integration for live camera scanning with enhanced accuracy
+- **Instant Verification**: Immediate booking validation and check-in/check-out with audio feedback
+- **Modern UI**: Gradient-designed interface with responsive controls and emerald accent colors
+- **Error Handling**: Robust error boundaries with user-friendly fallback mechanisms
+- **Mobile Optimized**: Touch-friendly controls with professional responsive design
 
-### Manual Entry & IoT Integration
-- **Keyboard Input**: Manual booking ID entry for fallback scenarios
-- **IoT Device Support**: Compatible with automated scanner hardware
-- **Laser Scanner Ready**: Industrial-grade scanner integration capabilities
-- **Dual-Mode Operation**: Switch between camera and manual entry seamlessly
+### Automated Scanner (IoT)
+- **Professional Interface**: Clean emerald-themed design with enhanced user experience
+- **Dual Input Methods**: Manual booking ID entry and automated QR code scanning support
+- **Enhanced Input Design**: Pulsing border effects with professional cursor styling and accessibility features
+- **Audio Feedback System**: Professional scanner beep sounds with success/error tone differentiation
+- **System Health Monitoring**: Real-time scanner status with visual indicators and diagnostic capabilities
+- **Manual Controls**: Start/stop scanner operations with intuitive button interface
+
+### Shared Features
+- **Booking Validation**: Instant verification of booking details and user permissions
+- **Status Management**: Real-time check-in/check-out tracking with timestamp logging
+- **User-Friendly Language**: Replaced technical "IoT" terminology with accessible "Automated Scanner" branding
+- **Theme Consistency**: Full dark/light mode support with emerald color scheme throughout
+- **Enterprise-Grade Design**: Professional appearance suitable for institutional environments
 
 ### Admin Check-in Features
 - **Attendance Tracking**: Real-time check-in/check-out status updates
