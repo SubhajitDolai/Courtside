@@ -96,7 +96,7 @@ export default function BookingDetailsModal({ booking, isOpen, onClose }: Bookin
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
-        <DialogHeader>
+        <DialogHeader className="pr-5">
           <div className="flex items-center justify-between">
             <DialogTitle>Booking Details</DialogTitle>
             {getStatusBadge(booking.status)}
@@ -160,6 +160,10 @@ export default function BookingDetailsModal({ booking, isOpen, onClose }: Bookin
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Type:</span>
                 <span className="capitalize">{booking.profiles?.user_type || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Department:</span>
+                <span className="capitalize">{booking.profiles?.course || 'N/A'}</span>
               </div>
             </div>
           </div>

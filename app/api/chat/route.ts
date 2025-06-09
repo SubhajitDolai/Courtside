@@ -153,7 +153,7 @@ const buildFacilityOverview = (sportsData: SportsData | null): string => {
     const timeValidation = validateSlotTimes(filteredSportsData);
 
     const userInfo = sportsData.currentUser 
-        ? `${sportsData.currentUser.user_type.toUpperCase()} (${sportsData.currentUser.gender?.toUpperCase() || 'N/A'}) - ${sportsData.currentUser.first_name || 'N/A'} ${sportsData.currentUser.last_name || 'N/A'} | ${sportsData.currentUser.user_type === 'faculty' ? `Employee ID: ${sportsData.currentUser.course || 'N/A'} | Department: ${sportsData.currentUser.prn || 'N/A'}` : `PRN: ${sportsData.currentUser.prn || 'N/A'} | Course: ${sportsData.currentUser.course || 'N/A'}`} | Email: ${sportsData.currentUser.email || 'N/A'} | Phone: ${sportsData.currentUser.phone_number || 'N/A'} | Role: ${sportsData.currentUser.role}`
+        ? `${sportsData.currentUser.user_type.toUpperCase()} (${sportsData.currentUser.gender?.toUpperCase() || 'N/A'}) - ${sportsData.currentUser.first_name || 'N/A'} ${sportsData.currentUser.last_name || 'N/A'} | ${sportsData.currentUser.user_type === 'faculty' ? `Department: ${sportsData.currentUser.course || 'N/A'} | Employee ID: ${sportsData.currentUser.prn || 'N/A'}` : `PRN: ${sportsData.currentUser.prn || 'N/A'} | Course: ${sportsData.currentUser.course || 'N/A'}`} | Email: ${sportsData.currentUser.email || 'N/A'} | Phone: ${sportsData.currentUser.phone_number || 'N/A'} | Role: ${sportsData.currentUser.role}`
         : "GUEST";
 
     return `📊 LIVE DATA: ${filteredSportsData?.facilityStats.totalSports || 0} sports, ${

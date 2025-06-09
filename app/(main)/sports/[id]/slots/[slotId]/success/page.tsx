@@ -116,23 +116,94 @@ export default function BookingSuccessPage() {
               <div className="flex items-center justify-center mb-4 sm:mb-6">
                 <Skeleton className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl" />
               </div>
-              <Skeleton className="h-12 w-64 mx-auto mb-4" />
-              <Skeleton className="h-6 w-48 mx-auto" />
+              
+              {/* Single title skeleton - MUCH BETTER */}
+              <Skeleton className="h-9 sm:h-11 md:h-13 lg:h-15 w-80 sm:w-96 md:w-[30rem] lg:w-[36rem] mx-auto mb-4 sm:mb-6" />
+              <Skeleton className="h-5 sm:h-6 lg:h-7 w-90 sm:w-160 mx-auto" />
             </div>
 
             {/* Content Skeleton */}
             <div className="max-w-2xl mx-auto space-y-6">
-              <Card className="border border-neutral-200 dark:border-neutral-800">
-                <CardHeader>
+              {/* Booking Details Card Skeleton */}
+              <Card className="border border-neutral-200 dark:border-neutral-800 shadow-sm">
+                <CardHeader className="text-center pb-4">
                   <Skeleton className="h-6 w-48 mx-auto" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Skeleton className="h-16 w-full rounded-lg" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
+                  {/* Basic Info Grid Skeleton */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-5 w-24" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-5 w-12" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-12" />
+                      <Skeleton className="h-5 w-28" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-5 w-32" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-5 w-20" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-12" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Timeline Skeleton */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <div className="ml-6 space-y-1">
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-36" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Booking ID Skeleton */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-24" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-12 flex-1 rounded" />
+                      <Skeleton className="h-8 w-8 rounded" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
+
+              {/* Important Notes Card Skeleton */}
+              <Card className="border border-amber-200 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-900/20">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                      <Skeleton className="h-4 w-4/5" />
+                      <Skeleton className="h-4 w-11/12" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons Skeleton */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Skeleton className="h-10 flex-1 rounded" />
+                <Skeleton className="h-10 flex-1 rounded" />
+              </div>
             </div>
           </div>
         </div>
@@ -303,22 +374,22 @@ export default function BookingSuccessPage() {
             {/* ✅ Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button
-                onClick={handleGoBack}
-                variant="outline"
-                className="flex-1 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Seats
-              </Button>
-
-              <Button
                 onClick={() => {
                   start()
                   router.push('/my-bookings')
                 }}
-                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 dark:from-emerald-600 dark:to-emerald-700 dark:hover:from-emerald-700 dark:hover:to-emerald-800 text-white"
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 dark:from-emerald-600 dark:to-emerald-700 dark:hover:from-emerald-700 dark:hover:to-emerald-800 text-white order-1 sm:order-2"
               >
                 View My Bookings
+              </Button>
+
+              <Button
+                onClick={handleGoBack}
+                variant="outline"
+                className="flex-1 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 order-2 sm:order-1"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Spots
               </Button>
             </div>
           </div>

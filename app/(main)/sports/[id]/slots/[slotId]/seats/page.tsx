@@ -836,20 +836,20 @@ export default function SeatsPage() {
             {/* Action Buttons - Clean & Prominent */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
-                onClick={handleGoBack}
-                variant="outline"
-                className="flex-1 h-14 sm:h-12 rounded-lg border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 font-medium text-base"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Slots
-              </Button>
-
-              <Button
                 onClick={() => setIsInviteOpen(true)}
-                className="flex-1 h-14 sm:h-12 rounded-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                className="flex-1 h-14 sm:h-12 rounded-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-base order-1 sm:order-2"
               >
                 <Users className="w-4 h-4 mr-2 animate-pulse" />
                 Invite Friends
+              </Button>
+
+              <Button
+                onClick={handleGoBack}
+                variant="outline"
+                className="flex-1 h-14 sm:h-12 rounded-lg border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 font-medium text-base order-2 sm:order-1"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Slots
               </Button>
             </div>
           </div>

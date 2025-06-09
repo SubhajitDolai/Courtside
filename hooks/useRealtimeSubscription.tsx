@@ -222,12 +222,12 @@ export function useRealtimeSubscription<T>(
             setIsConnected(false)
             setError(`Connection ${status.toLowerCase()}`)
             
-            // Retry after 2 seconds
+            // OPTIMIZED: Faster retry for better performance
             retryTimeoutRef.current = setTimeout(() => {
               if (isMountedRef.current) {
                 setupSubscription()
               }
-            }, 2000)
+            }, 1000)
             break
             
           case 'CLOSED':

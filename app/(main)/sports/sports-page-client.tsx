@@ -225,21 +225,21 @@ export default function SportsPageClient({ sports: initialSports }: { sports: Sp
     fetchSports     // fetch function
   )
 
-  // ✅ Debounce connection status to prevent flickering
+  // ✅ Debounce connection status to prevent flickering - OPTIMIZED: Reduced delay
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedIsConnected(isConnected)
-    }, 500) // Debounce connection status by 500ms
+    }, 200) // Reduced from 500ms to 200ms for faster response
     
     return () => clearTimeout(timer)
   }, [isConnected])
 
-  // Show connection status after initial load
+  // Show connection status after initial load - OPTIMIZED: Reduced delay for faster loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowConnectionStatus(true)
       setIsLoading(false)
-    }, 2000)
+    }, 800) // Reduced from 2000ms to 800ms for faster loading
     return () => clearTimeout(timer)
   }, [])
 

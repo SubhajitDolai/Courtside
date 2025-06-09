@@ -88,7 +88,7 @@ export default function BookingsHistoryTable({ filters }: BookingsHistoryTablePr
         .from('bookings_history')
         .select(`
           id, booking_date, status, created_at, seat_number, checked_in_at, checked_out_at,
-          profiles ( first_name, last_name, prn, gender, user_type, email, phone_number ),
+          profiles ( first_name, last_name, prn, gender, user_type, email, phone_number, course ),
           sports ( name ),
           slots ( start_time, end_time )
         `, { count: 'exact' })

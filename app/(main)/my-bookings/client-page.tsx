@@ -70,8 +70,6 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
         slots ( start_time, end_time )
       `)
       .eq('user_id', userId)
-      .order('booking_date', { ascending: false })
-      .order('created_at', { ascending: false })
 
     if (error) {
       console.error(error)
@@ -79,11 +77,49 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
       return initialBookings
     }
 
-    return (data || []).map(item => ({
+    const bookingsWithSports = (data || []).map(item => ({
       ...item,
       sports: item.sports || null,
       slots: item.slots || null
     })) as unknown as Booking[]
+
+    // Sort bookings by proximity to current time
+    const now = new Date()
+    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes()
+
+    return bookingsWithSports.sort((a, b) => {
+      // Helper function to calculate time difference in minutes
+      const getTimeDifference = (booking: typeof bookingsWithSports[0]) => {
+        const startTime = booking.slots?.start_time
+        if (!startTime) return Infinity
+        
+        const [hour, minute] = startTime.split(':').map(Number)
+        const bookingTimeInMinutes = hour * 60 + minute
+        
+        // Return absolute difference from current time
+        return Math.abs(currentTimeInMinutes - bookingTimeInMinutes)
+      }
+
+      const diffA = getTimeDifference(a)
+      const diffB = getTimeDifference(b)
+
+      // First sort by time proximity (closest to current time first)
+      if (diffA !== diffB) {
+        return diffA - diffB
+      }
+
+      // If time difference is the same, sort by status priority
+      const statusPriority = { 'checked-in': 0, 'booked': 1, 'checked-out': 2 }
+      const priorityA = statusPriority[a.status as keyof typeof statusPriority] ?? 3
+      const priorityB = statusPriority[b.status as keyof typeof statusPriority] ?? 3
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB
+      }
+
+      // Finally, sort by creation date (most recent first)
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    })
   }, [supabase, userId, initialBookings])
 
   // ✅ Use Realtime subscription with initial data
