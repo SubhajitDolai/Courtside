@@ -80,11 +80,11 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
   }
 
   const quickSuggestions = [
-    "What can I play today?",
-    "Book badminton at 4 PM",
-    "Show facility status",
-    "Find available slots",
-    "What are the facility rules?",
+    "What slots are active right now?",
+    "I want to book a badminton slot at 5pm",
+    "Which sports can I book today?",
+    "What time does booking open?",
+    "How do I check slot availability?",
     "What's popular today?"
   ]
 

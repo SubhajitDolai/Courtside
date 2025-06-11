@@ -293,7 +293,7 @@ export default function IoTScannerPage() {
       setError(errorMessage)
       toast.error(errorMessage)
     }
-  }, [TIMEOUTS.DOM_INIT, manuallyStopped])
+  }, [manuallyStopped])
 
   // Helper function to check if slot is over
   const isSlotOver = useCallback((booking: Booking) => {
@@ -635,7 +635,7 @@ export default function IoTScannerPage() {
       setProcessing(false)
       setTimeout(() => initializeScanner(), TIMEOUTS.SYSTEM_ERROR)
     }
-  }, [initializeScanner, isSlotOver, isCheckInTooEarly, formatTo12Hour, showPopupMessage, fetchScannerActivity, performDatabaseOperation, TIMEOUTS.SYSTEM_ERROR, TIMEOUTS.USER_ERROR])
+  }, [initializeScanner, isSlotOver, isCheckInTooEarly, formatTo12Hour, showPopupMessage, fetchScannerActivity, performDatabaseOperation, TIMEOUTS.SYSTEM_ERROR, TIMEOUTS.USER_ERROR, manuallyStopped])
 
   /**
    * Processes successful QR code scans and initiates booking operations.
@@ -899,16 +899,17 @@ export default function IoTScannerPage() {
       window.removeEventListener('pagehide', handlePageHide)
       window.removeEventListener('popstate', handlePopState)
     }
-  }, [fetchScannerActivity, initializeScanner, TIMEOUTS.DOM_INIT, stopScanner, maintainFocus])
+  }, [fetchScannerActivity, initializeScanner, TIMEOUTS.DOM_INIT, stopScanner, maintainFocus, manuallyStopped])
 
   // Next.js route change detection for SPA navigation
   const pathname = usePathname()
   useEffect(() => {
     // This effect runs when the pathname changes (Next.js route navigation)
+    const currentInputRef = inputRef.current
     return () => {
-      if (inputRef.current) {
-        inputRef.current.blur()
-        inputRef.current.value = ''
+      if (currentInputRef) {
+        currentInputRef.blur()
+        currentInputRef.value = ''
       }
     }
   }, [pathname])

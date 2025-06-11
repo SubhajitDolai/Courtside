@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader, Copy, Check, Calendar, Clock, User, Tag, InfoIcon, AlertCircle, QrCode, Download } from 'lucide-react'
+import { Loader, Copy, Check, Calendar, Clock, User, Tag, InfoIcon, AlertCircle, QrCode, Download, History } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+import Link from 'next/link'
 import BannedRedirect from '@/components/banned-redirect'
 import { Skeleton } from '@/components/ui/skeleton'
 import QRCode from 'qrcode'
@@ -329,8 +330,19 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
       <div className="max-w-6xl mx-auto">
         <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden">
           <div className="px-6 py-5 border-b border-neutral-200 dark:border-neutral-800">
-            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Reservations</h2>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Manage your sports facility bookings</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Reservations</h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Manage your sports facility bookings</p>
+              </div>
+              <Link 
+                href="/my-bookings/booking-history"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
+              >
+                <History className="h-4 w-4 animate-pulse" />
+                View History
+              </Link>
+            </div>
           </div>
 
           <div className="p-6">
