@@ -6,7 +6,8 @@ import { createClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider';
 
 // Create a client component that uses useSearchParams
 function SetPasswordForm() {
@@ -22,6 +23,7 @@ function SetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const { start } = useGlobalLoadingBar();
   
   // Get the token from the URL
   const token = searchParams.get('token');
@@ -95,6 +97,7 @@ function SetPasswordForm() {
       if (error) throw error;
       
       toast.success('Password set successfully!');
+      start(); // Start the loading bar for redirect
       router.push('/'); // Send them to the landing page
     } catch (err: unknown) {
       console.error('Error setting password:', err);
@@ -219,7 +222,14 @@ function SetPasswordForm() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Setting Password...' : 'Set Password & Continue'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader className="h-4 w-4 animate-spin" />
+                  Setting Password...
+                </div>
+              ) : (
+                'Set Password & Continue'
+              )}
             </Button>
           </div>
         </form>

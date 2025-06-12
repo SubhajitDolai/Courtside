@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
 import { resetPassword } from './actions';
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider';
 
 export default function ClientResetPassword() {
   const [password, setPassword] = useState('');
@@ -16,6 +17,7 @@ export default function ClientResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { start } = useGlobalLoadingBar();
 
   const code = searchParams.get('code');
   if (!code) {
@@ -41,6 +43,7 @@ export default function ClientResetPassword() {
 
     if (result.status === 'success') {
       toast.success('Password reset successfully.');
+      start(); // Start loading bar for redirect
       router.push('/login');
     } else {
       toast.error(result.status);
@@ -76,7 +79,14 @@ export default function ClientResetPassword() {
               </div>
             </div>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Resetting...' : 'Reset Password'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader className="h-4 w-4 animate-spin" />
+                  Resetting...
+                </div>
+              ) : (
+                'Reset Password'
+              )}
             </Button>
           </form>
         </CardContent>

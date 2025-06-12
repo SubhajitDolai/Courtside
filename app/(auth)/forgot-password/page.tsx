@@ -7,14 +7,18 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { createClient } from '@/utils/supabase/client'
+import { Loader } from 'lucide-react'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const { start, finish } = useGlobalLoadingBar()
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    start(); // Start the global loading bar
 
     const supabase = createClient();
 
@@ -35,6 +39,7 @@ export default function ForgotPasswordPage() {
     if (fetchError || !user) {
       toast.error('This email is not registered');
       setLoading(false);
+      finish(); // Finish the loading bar on error
       return;
     }
 
@@ -44,6 +49,7 @@ export default function ForgotPasswordPage() {
     });
 
     setLoading(false);
+    finish(); // Finish the loading bar
 
     if (error) {
       console.error(error)
@@ -72,7 +78,14 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Sending...' : 'Send reset link'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader className="h-4 w-4 animate-spin" />
+                  Sending...
+                </div>
+              ) : (
+                'Send reset link'
+              )}
             </Button>
           </form>
         </CardContent>
