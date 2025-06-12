@@ -160,3 +160,13 @@
 .fade-in-soft {
   animation: fade-in-soft 0.8s ease-out;
 }
+
+/* Shimmer effect for premium UI */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}

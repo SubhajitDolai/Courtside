@@ -12,18 +12,17 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signup } from '@/app/(auth)/login/actions'
-import { Loader, Eye, EyeOff } from "lucide-react"
+import { Loader, Eye, EyeOff, Mail, CheckCircle2, ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { motion } from "framer-motion"
 
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
@@ -32,6 +31,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const { start, finish } = useGlobalLoadingBar()
   const router = useRouter()
 
@@ -41,6 +41,9 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     start()
 
     const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    setUserEmail(email) // Store email for display in dialog
+    
     const res = await signup(formData)
 
     setIsLoading(false)
@@ -121,21 +124,136 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
         </Card>
       </div>
 
-      {/* ✅ Success Alert Dialog */}
+      {/* Success Alert Dialog - World-Class Design */}
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Check your inbox 📩</AlertDialogTitle>
-            <AlertDialogDescription>
-              We sent a verification link to your college email. <br />
-              Please open your inbox and activate your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => router.push('/login')}>
-              Okay
+        <AlertDialogContent className="w-[95vw] max-w-md mx-auto border bg-background backdrop-blur-xl shadow-2xl overflow-hidden">
+          {/* Clean minimal background */}
+          <motion.div 
+            className="absolute inset-0 opacity-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.2 }}
+            transition={{ duration: 1.0, ease: "easeOut" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          </motion.div>
+
+          <div className="relative z-10 space-y-4">
+            {/* Success Icon - Centered & Clean */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                delay: 0.1 
+              }}
+              className="flex justify-center"
+            >
+              {/* Ripple effect background */}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.2, 1], opacity: [0, 0.3, 0] }}
+                transition={{ 
+                  duration: 0.8,
+                  delay: 0.3,
+                  ease: "easeOut"
+                }}
+                className="absolute w-20 h-20 rounded-full bg-emerald-400 opacity-20"
+              />
+              
+              {/* Main icon container */}
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/50 flex items-center justify-center shadow-lg ring-1 ring-emerald-200/50 dark:ring-emerald-800/50">
+                <motion.div
+                  initial={{ scale: 0, rotate: -90 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ 
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 10,
+                    delay: 0.4 
+                  }}
+                >
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Content with staggered animations */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="text-center space-y-3 pb-4"
+            >
+              <AlertDialogTitle className="text-2xl font-bold tracking-tight text-foreground leading-tight">
+                Check Your Email
+              </AlertDialogTitle>
+              
+              <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+                We&apos;ve sent a verification link to your inbox. Click the link in your email to activate your Courtside account.
+              </AlertDialogDescription>
+            </motion.div>
+
+            {/* Email Card - Clean Design */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+            >
+              <div className="relative overflow-hidden rounded-md border bg-muted/30 backdrop-blur-sm">
+                {/* Subtle shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_ease-in-out_infinite]" />
+                
+                <div className="p-3 flex items-center gap-3 min-h-[60px]">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                    <Mail className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Verification email sent to
+                    </p>
+                    <p className="text-sm font-medium text-foreground truncate mt-0.5">
+                      {userEmail || 'your@email.com'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Pro Tip - Clean Design */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.5 }}
+            >
+              <div className="p-3 rounded-md bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 min-h-[60px] flex items-center justify-center">
+                <p className="text-xs text-amber-700 dark:text-amber-300 text-center">
+                  <span className="font-medium">Quick tip:</span> Can&apos;t find the email? Check your spam or junk folder
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Footer with CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
+            className="relative z-10"
+          >
+            <AlertDialogAction 
+              onClick={() => {
+                start()
+                router.push('/login')
+              }}
+              className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium rounded-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <span>Continue to Login</span>
+              <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />
             </AlertDialogAction>
-          </AlertDialogFooter>
+          </motion.div>
         </AlertDialogContent>
       </AlertDialog>
     </>
