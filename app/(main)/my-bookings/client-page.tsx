@@ -201,6 +201,14 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
     return now >= slotStart
   }
 
+  const isSlotActuallyStarted = (slotStartTime: string) => {
+    const now = new Date()
+    const [hour, minute] = slotStartTime.split(':').map(Number)
+    const slotStart = new Date()
+    slotStart.setHours(hour, minute, 0, 0)
+    return now >= slotStart
+  }
+
   const formatTime12hr = (time24: string) => {
     const [hour, minute] = time24.split(':')
     const date = new Date()
@@ -365,6 +373,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredBookings.map((booking) => {
                       const slotStarted = booking.slots?.start_time ? isSlotStarted(booking.slots.start_time) : false
+                      const slotActuallyStarted = booking.slots?.start_time ? isSlotActuallyStarted(booking.slots.start_time) : false
                       const startTime = booking.slots?.start_time ? formatTime12hr(booking.slots.start_time) : 'N/A'
                       const endTime = booking.slots?.end_time ? formatTime12hr(booking.slots.end_time) : 'N/A'
                       const bookingDate = booking.booking_date ? formatDate(booking.booking_date) : 'N/A'
@@ -409,7 +418,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                             <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                               <User className="h-4 w-4" />
                               <span>Spot #{booking.seat_number}</span>
-                              {slotStarted && (
+                              {slotActuallyStarted && (
                                 <Badge variant="outline" className="ml-auto text-xs text-rose-600 border-rose-200 dark:text-rose-400 dark:border-rose-800">
                                   Started
                                 </Badge>

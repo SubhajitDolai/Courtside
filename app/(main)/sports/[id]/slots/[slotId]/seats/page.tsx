@@ -288,7 +288,7 @@ export default function SeatsPage() {
     //     'Unknown time'
 
     //   // Replace the existing toast message in the existingSportBooking check:
-    //   toast.error(`Booking limit reached! You've already secured your ${sportName} spot today (${timeInfo}). Try exploring other sports or come back tomorrow for another session! 🎯`)
+    //   toast.error(`Booking limit reached! You've already secured your ${sportName} spot today (${timeInfo}). Try exploring other sports or come back tomorrow for another session!`)
     //   setIsBooking(false)
     //   return
     // }
@@ -311,7 +311,7 @@ export default function SeatsPage() {
     }
 
     if (existing) {
-      toast.error(`You've already secured spot #${existing.seat_number} for this session! 🎯`)
+      toast.error(`You've already secured spot #${existing.seat_number} for this session!`)
       setIsBooking(false)
       return
     }

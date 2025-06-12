@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Copy, Check, ClipboardList, Search, Loader } from 'lucide-react'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+import { getTodayDateInIST } from '@/lib/date'
 
 // Define types
 interface Profile {
@@ -78,17 +79,19 @@ export default function AdminBookingsPage() {
   const perPage = 50
 
   const fetchBookings = useCallback(async () => {
+    const today = getTodayDateInIST() // Get today's date
     const from = (page - 1) * perPage
     const to = from + perPage - 1
 
     const { data, error } = await supabase
       .from('bookings')
       .select(`
-      id, status, created_at, seat_number, checked_in_at, checked_out_at,
-      profiles ( first_name, last_name, prn, gender, user_type, phone_number ),
-      sports ( name ),
-      slots ( start_time, end_time )
-    `)
+        id, status, created_at, seat_number, checked_in_at, checked_out_at,
+        profiles ( first_name, last_name, prn, gender, user_type, phone_number ),
+        sports ( name ),
+        slots ( start_time, end_time )
+      `)
+      .eq('booking_date', today) // Filter by today's date(only show todays bookings)
       .order('created_at', { ascending: false })
       .range(from, to)
 
