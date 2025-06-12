@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import BannedRedirect from '@/components/banned-redirect'
 import { Skeleton } from '@/components/ui/skeleton'
 import QRCode from 'qrcode'
 import QRCodeComponent from 'react-qr-code'
+import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 // Define the Booking type
 interface Booking {
@@ -47,6 +48,8 @@ interface MyBookingsClientProps {
 
 export default function MyBookingsClient({ initialBookings, userId }: MyBookingsClientProps) {
   const supabase = createClient()
+  const router = useRouter()
+  const { start } = useGlobalLoadingBar()
   const [canceling, setCanceling] = useState<string | null>(null)
   const [showBookingId, setShowBookingId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -335,13 +338,16 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                 <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">Your Reservations</h2>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Manage your sports facility bookings</p>
               </div>
-              <Link 
-                href="/my-bookings/booking-history"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
+              <button
+                onClick={() => {
+                  start()
+                  router.push('/my-bookings/booking-history')
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
               >
                 <History className="h-4 w-4 animate-pulse" />
-                View History
-              </Link>
+                <span className="hidden sm:inline">View History</span>
+              </button>
             </div>
           </div>
 
