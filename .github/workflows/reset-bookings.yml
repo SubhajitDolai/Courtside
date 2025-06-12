@@ -3,16 +3,36 @@ name: Reset Bookings Cron Job
 on:
   schedule:
     - cron: '0 18 * * *' # Runs every day at 12 AM Asia/Kolkata (UTC+5:30 is 18:00 UTC)
+  workflow_dispatch: # Enables manual trigger
 
 jobs:
   reset-bookings:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # Stops the job after 10 minutes if it doesn't complete
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Call Reset Bookings API
+      - name: Call Reset Bookings API with Retry Logic
         env:
-          SECRET_KEY: ${{ secrets.BACKUP_CRON_SECRET }} # Use GitHub Secrets for your secret key
+          SECRET_KEY: ${{ secrets.BACKUP_CRON_SECRET }}
+          API_URL: ${{ secrets.RESET_BOOKINGS_API_URL }}
         run: |
-          curl -X POST "https://courtside-xi.vercel.app/api/reset-bookings?secret=$SECRET_KEY"
+          for i in {1..3}; do
+            response=$(curl -X POST -s -w "%{http_code}" -o response_body.txt "$API_URL?secret=$SECRET_KEY")
+            echo "Attempt $i: API Response Code: $response"
+            echo "API Response Body:"
+            cat response_body.txt
+            if [ "$response" -eq 200 ]; then
+              echo "API call succeeded!"
+              break
+            else
+              echo "API call failed. Retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+
+          if [ "$response" -ne 200 ]; then
+            echo "API call failed after 3 attempts. Exiting with error."
+            exit 1
+          fi
