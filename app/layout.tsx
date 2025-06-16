@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Courtside: Book Sports Courts & Sessions Online",
-  description: "Seamlessly book courts, fields, and sessions for various sports and games. Quick, easy, and hassle-free sports booking with Courtside."
+  title: "Courtside: Modern Sports Facility Booking Platform",
+  description: "The easiest way to book sports facilities at your university. Check availability instantly, book your spot in seconds, get AI help when needed, and never miss out on game time. Made for university students and faculty."
 };
 
 export default function RootLayout({

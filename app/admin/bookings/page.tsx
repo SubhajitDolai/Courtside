@@ -24,9 +24,10 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check, ClipboardList, Search, Loader } from 'lucide-react'
+import { Copy, Check, ClipboardList, Search, Loader, Eye } from 'lucide-react'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import { getTodayDateInIST } from '@/lib/date'
+import BookingDetailsModal from './components/BookingDetailsDialog'
 
 // Define types
 interface Profile {
@@ -35,7 +36,6 @@ interface Profile {
   prn: string;
   gender: string;
   user_type: string;
-  phone_number: string;
 }
 
 interface Sport {
@@ -76,6 +76,7 @@ export default function AdminBookingsPage() {
   const [page, setPage] = useState(1)
   const [showConnectionStatus, setShowConnectionStatus] = useState(false)
   const [debouncedIsConnected, setDebouncedIsConnected] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const perPage = 50
 
   const fetchBookings = useCallback(async () => {
@@ -87,7 +88,7 @@ export default function AdminBookingsPage() {
       .from('bookings')
       .select(`
         id, status, created_at, seat_number, checked_in_at, checked_out_at,
-        profiles ( first_name, last_name, prn, gender, user_type, phone_number ),
+        profiles ( first_name, last_name, prn, gender, user_type ),
         sports ( name ),
         slots ( start_time, end_time )
       `)
@@ -266,7 +267,6 @@ export default function AdminBookingsPage() {
       (b.profiles?.first_name?.toLowerCase() || '').includes(query) ||
       (b.profiles?.last_name?.toLowerCase() || '').includes(query) ||
       (b.profiles?.prn?.toLowerCase() || '').includes(query) ||
-      (b.profiles?.phone_number?.toLowerCase() || '').includes(query) ||
       gender.includes(query) ||
       userType.includes(query) ||
       sport.includes(query) ||
@@ -433,10 +433,10 @@ export default function AdminBookingsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Details</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Booking #</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">PRN/ID</th>
-                      <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Phone</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Gender</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">User Type</th>
                       <th className="p-3 text-left font-semibold text-neutral-900 dark:text-white">Sport</th>
@@ -470,6 +470,16 @@ export default function AdminBookingsPage() {
                           `}
                         >
                           <td className="p-3 whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedBookingId(b.id)}
+                              className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-950/50 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
                             <button
                               onClick={() => setShowBookingId(b.id)}
                               className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 underline hover:no-underline transition-all duration-200 font-medium font-mono text-sm"
@@ -483,11 +493,6 @@ export default function AdminBookingsPage() {
                           <td className="p-3 whitespace-nowrap">
                             <span className="font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded">
                               {b.profiles?.prn || '-'}
-                            </span>
-                          </td>
-                          <td className="p-3 whitespace-nowrap">
-                            <span className="font-mono text-sm text-neutral-600 dark:text-neutral-400">
-                              {b.profiles?.phone_number || '-'}
                             </span>
                           </td>
                           <td className="p-3 whitespace-nowrap capitalize">{b.profiles?.gender || '-'}</td>
@@ -584,7 +589,7 @@ export default function AdminBookingsPage() {
                       </tr>
                     )}
                     <tr>
-                      <td colSpan={14} className='p8 text-center'>
+                      <td colSpan={14} className="text-center">
                         {/* Pagination */}
                         <div className="flex flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border-t border-neutral-200 dark:border-neutral-600">
                           <div className="text-sm text-muted-foreground">
@@ -659,6 +664,15 @@ export default function AdminBookingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Booking Details Modal */}
+      {selectedBookingId && (
+        <BookingDetailsModal
+          bookingId={selectedBookingId}
+          isOpen={!!selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
+        />
       )}
 
       {/* ...existing dialogs... */}

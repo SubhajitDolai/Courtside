@@ -71,14 +71,6 @@ export default function BookingDetailsModal({ booking, isOpen, onClose }: Bookin
       'checked-out': { 
         color: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800/30 dark:text-gray-300 dark:border-gray-700', 
         icon: XCircle 
-      },
-      'cancelled': { 
-        color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700', 
-        icon: XCircle 
-      },
-      'no-show': { 
-        color: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700', 
-        icon: XCircle 
       }
     }
     
