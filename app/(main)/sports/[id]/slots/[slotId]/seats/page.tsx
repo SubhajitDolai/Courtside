@@ -134,7 +134,7 @@ export default function SeatsPage() {
       const [profileResult, slotResult, sportResult] = await Promise.all([
         supabase
           .from('profiles')
-          .select('gender')
+          .select('gender, user_type')
           .eq('id', user.id)
           .single(),
         supabase
@@ -173,6 +173,12 @@ export default function SeatsPage() {
 
       if (slot.gender !== 'any' && profile.gender !== slot.gender) {
         toast.error(`This slot is only for ${slot.gender} users`)
+        return router.push(`/sports/${sportId}/slots`)
+      }
+
+      // ✅ Check user type eligibility 
+      if (slot.allowed_user_type !== 'any' && profile.user_type !== slot.allowed_user_type) {
+        toast.error(`This slot is reserved for ${slot.allowed_user_type} members only`)
         return router.push(`/sports/${sportId}/slots`)
       }
 
