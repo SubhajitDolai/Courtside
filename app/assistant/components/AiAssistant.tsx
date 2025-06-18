@@ -39,7 +39,7 @@ interface AiAssistantProps {
 }
 
 export function AiAssistant({ initialData }: AiAssistantProps) {
-  const { messages, input, handleInputChange, handleSubmit, status, setMessages, append } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setMessages, append, error } = useChat({
     api: '/api/chat',
     body: {
       sportsData: initialData
@@ -48,8 +48,11 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(true)
+  const [rateLimitError, setRateLimitError] = useState<{ show: boolean; message: string; retryAfter?: number; retryCountdown?: number }>({ show: false, message: '' })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -58,17 +61,82 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
 
   // Keep input focused at all times during conversation
   useEffect(() => {
-    if (status === 'ready' && inputRef.current) {
+    if (status === 'ready' && inputRef.current && !rateLimitError.show) {
       const timer = setTimeout(() => {
         inputRef.current?.focus()
       }, 100)
       return () => clearTimeout(timer)
     }
-  }, [status, messages])
+  }, [status, messages, rateLimitError.show])
 
   // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus()
+    if (!rateLimitError.show) {
+      inputRef.current?.focus()
+    }
+  }, [rateLimitError.show])
+
+  // Handle rate limit error detection
+  useEffect(() => {
+    if (error) {
+      // Check if it's a rate limit error (429)
+      const errorMessage = error.message || error.toString()
+      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('rate limit') || errorMessage.toLowerCase().includes('too many requests')) {
+        // Extract retry-after time if available (default to 60 seconds)
+        const retryAfterMatch = errorMessage.match(/retry.*?(\d+)/i)
+        const retryAfter = retryAfterMatch ? parseInt(retryAfterMatch[1]) : 60
+        
+        setRateLimitError({
+          show: true,
+          message: 'You\'ve reached the rate limit. Please wait before sending another message.',
+          retryAfter,
+          retryCountdown: retryAfter
+        })
+
+        // Start countdown
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current)
+        }
+
+        countdownIntervalRef.current = setInterval(() => {
+          setRateLimitError(prev => {
+            if (prev.retryCountdown && prev.retryCountdown > 1) {
+              return { ...prev, retryCountdown: prev.retryCountdown - 1 }
+            } else {
+              // Auto-hide when countdown reaches 0
+              if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current)
+              }
+              return { show: false, message: '' }
+            }
+          })
+        }, 1000)
+
+        // Auto-hide after retry period
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current)
+        }
+
+        retryTimeoutRef.current = setTimeout(() => {
+          setRateLimitError({ show: false, message: '' })
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current)
+          }
+        }, retryAfter * 1000)
+      }
+    }
+  }, [error])
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current)
+      }
+    }
   }, [])
 
   const copyToClipboard = async (text: string, messageId: string) => {
@@ -89,6 +157,11 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
   ]
 
   const handleSuggestionClick = async (suggestion: string) => {
+    // Don't allow suggestions during rate limit
+    if (rateLimitError.show) {
+      return
+    }
+    
     // Use append to add the user message and trigger AI response
     await append({
       role: 'user',
@@ -103,7 +176,44 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
     setMessages([])
     setShowSuggestions(true)
     setCopiedMessageId(null)
+    setRateLimitError({ show: false, message: '' })
+    
+    // Clear any existing timeouts
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current)
+    }
+    
     // Refocus input after reload
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }
+
+  const handleCustomSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    
+    // Don't submit if rate limited
+    if (rateLimitError.show) {
+      return
+    }
+    
+    // Use the default handleSubmit
+    handleSubmit(e)
+  }
+
+  const handleRetryAfterRateLimit = () => {
+    setRateLimitError({ show: false, message: '' })
+    
+    // Clear any existing timeouts
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current)
+    }
+    
+    // Refocus input
     setTimeout(() => inputRef.current?.focus(), 100)
   }
 
@@ -157,8 +267,12 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                       <Button
                         key={index}
                         variant="outline"
-                        className="text-left justify-start h-auto py-2 md:py-3 px-3 md:px-4 text-xs md:text-sm hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 min-h-[2.5rem] md:min-h-[3rem] whitespace-normal"
+                        className={cn(
+                          "text-left justify-start h-auto py-2 md:py-3 px-3 md:px-4 text-xs md:text-sm hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 min-h-[2.5rem] md:min-h-[3rem] whitespace-normal",
+                          rateLimitError.show && "opacity-50 cursor-not-allowed"
+                        )}
                         onClick={() => handleSuggestionClick(suggestion)}
+                        disabled={rateLimitError.show}
                       >
                         <MessageSquare className="w-3 h-3 md:w-4 md:h-4 mr-2 md:mr-3 text-primary flex-shrink-0 mt-0.5" />
                         <span className="leading-tight text-xs md:text-sm">{suggestion}</span>
@@ -373,20 +487,80 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
         </div>
       </div>
 
+      {/* Rate Limit Error Banner */}
+      {rateLimitError.show && (
+        <div className="fixed bottom-20 left-4 right-4 z-50 max-w-5xl mx-auto">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1">
+                <div className="w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
+                    Rate Limit Reached
+                  </h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400 mb-3">
+                    {rateLimitError.message}
+                    {rateLimitError.retryCountdown && rateLimitError.retryCountdown > 0 && (
+                      <span className="block mt-1 font-mono text-xs">
+                        Auto-retry in {rateLimitError.retryCountdown} second{rateLimitError.retryCountdown !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRetryAfterRateLimit}
+                      className="h-8 text-xs bg-white dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/70"
+                      disabled={rateLimitError.retryCountdown ? rateLimitError.retryCountdown > 0 : false}
+                    >
+                      {rateLimitError.retryCountdown && rateLimitError.retryCountdown > 0 ? (
+                        <>Wait {rateLimitError.retryCountdown}s</>
+                      ) : (
+                        <>Try Again</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setRateLimitError({ show: false, message: '' })}
+                      className="h-8 text-xs text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/50"
+                    >
+                      Dismiss
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-[#fbfbfa]/95 dark:bg-[#191919]/95 backdrop-blur-sm">
         <div className="p-4 max-w-5xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex gap-3">
+          <form onSubmit={handleCustomSubmit} className="flex gap-3">
             <div className="flex-1 relative">
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={handleInputChange}
-                placeholder={(status === 'submitted' || status === 'streaming') ? "AI is thinking..." : "Ask anything about Courtside..."}
-                disabled={status === 'submitted' || status === 'streaming'}
+                placeholder={
+                  rateLimitError.show 
+                    ? "Rate limited - please wait..."
+                    : (status === 'submitted' || status === 'streaming') 
+                      ? "AI is thinking..." 
+                      : "Ask anything about Courtside..."
+                }
+                disabled={status === 'submitted' || status === 'streaming' || rateLimitError.show}
                 className={cn(
                   "h-12 text-sm rounded-xl border-2 focus:border-primary/50 pr-12",
-                  (status === 'submitted' || status === 'streaming') && "pl-10"
+                  (status === 'submitted' || status === 'streaming') && "pl-10",
+                  rateLimitError.show && "border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20"
                 )}
                 autoComplete="off"
                 autoCorrect="off"
@@ -402,7 +576,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
                 aria-label="Chat message"
                 onBlur={() => {
                   // Prevent losing focus when not intended
-                  if (status === 'ready') {
+                  if (status === 'ready' && !rateLimitError.show) {
                     setTimeout(() => inputRef.current?.focus(), 50)
                   }
                 }}
@@ -420,7 +594,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
             </div>
             <Button
               type="submit"
-              disabled={status === 'submitted' || status === 'streaming' || !input.trim()}
+              disabled={status === 'submitted' || status === 'streaming' || !input.trim() || rateLimitError.show}
               size="lg"
               className="h-12 w-12 rounded-xl flex-shrink-0"
             >
