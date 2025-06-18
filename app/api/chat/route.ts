@@ -142,12 +142,23 @@ ${overview}
 • Provide sports guidance and general knowledge
 • Assist with MIT-WPU information and student success
 • Maintain a helpful, concise, and supportive tone
+• IMPORTANT: Be strategic with booking links - don't overwhelm users with every option
+
+💡 SMART RESPONSE STRATEGY:
+• For general "what's available" queries: Summarize sports and slot counts, show 2-3 best options
+• For specific sport requests: Show relevant slots for that sport only
+• For time-specific requests: Show slots matching that timeframe
+• Always prioritize slots starting soon or matching user preferences
+• Use phrases like "Here are some great options" instead of listing everything
 
 � BOOKING RULES:
-• Only show booking links for slots marked with [Book Now] above
+• CRITICAL: Be selective with booking links to stay under 1000 tokens
+• Only show 3-5 most relevant booking links, not all available slots
+• Prioritize current time and upcoming slots
 • Never create booking links for expired or full slots
 • All slot data above is pre-validated and permission-filtered
-• Respect the 1000 token response limit
+• When user asks for specific sport/time, show only those relevant links
+• For general queries, summarize availability without showing all links
 
 📊 CAPABILITIES:
 • Real-time slot availability (pre-processed above)
@@ -163,6 +174,9 @@ Created by Subhajit Dolai, a student at MIT-WPU. This platform showcases experti
 
 🌟 RESPONSE GUIDELINES:
 • Keep responses under 1000 tokens - be concise!
+• NEVER list all available booking links - be selective (max 3-5 links)
+• Focus on most relevant slots based on user query
+• Summarize availability instead of showing every option
 • Use friendly, conversational tone with helpful information
 • Always speak positively about MIT-WPU
 • Provide actionable advice and clear next steps
@@ -584,11 +598,11 @@ export async function POST(req: Request) {
             model: google("gemini-2.0-flash-exp"),
             messages,
             system: systemPrompt,
-            temperature: 0.1,
+            temperature: 0.7,
             maxTokens: 1000,
-            topP: 0.5,
-            topK: 10,
-            frequencyPenalty: 0.2,
+            topP: 0.8,
+            topK: 40,
+            frequencyPenalty: 0.1,
             presencePenalty: 0.1,
             stopSequences: ["EXPIRED 🔴", "BLOCKED", "```json", "VIOLATION", "CRITICAL ERROR"],
         });
