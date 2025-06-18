@@ -12,13 +12,13 @@ export default function ContentSection() {
                     alt="team image"
                     width={1489}
                     height={575}
-                    className="rounded-[var(--radius)] grayscale w-full h-auto"
+                    className="rounded-[var(--radius)] grayscale hover:grayscale-0 transition-all duration-500 w-full h-auto"
                 />
 
                 <div className="grid gap-6 md:grid-cols-2 md:gap-12">
-                    <h2 className="text-4xl font-medium">Dronacharya: Uniting sports, fitness, and community at MIT-WPU.</h2>
+                    <h2 className="text-4xl font-medium">Dronacharya: Where Sports and Community Thrive at MIT-WPU</h2>
                     <div className="space-y-6">
-                        <p>Dronacharya is evolving into more than just a sports complex. It powers an entire ecosystem — from world-class facilities to the platforms that help students and athletes grow and excel.</p>
+                        <p>Dronacharya is more than a sports complex, it&apos;s a hub for fostering growth, excellence, and camaraderie among students and athletes with world-class facilities and opportunities.</p>
 
                         <Button asChild variant="secondary" size="sm" className="gap-1 pr-1.5">
                             <Link href="https://mitwpu.edu.in/life-wpu/sports">

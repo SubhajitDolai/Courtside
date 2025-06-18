@@ -1,29 +1,22 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import BookNowButton from './bookNowBtn';
+import { GlowEffectButton } from './glowEffectButton';
 
 export default function CallToAction() {
     return (
         <section className="py-16">
             <div className="mx-auto max-w-5xl rounded-3xl border px-6 py-12 md:py-20 lg:py-32">
                 <div className="text-center">
-                    <h2 className="text-balance text-4xl font-semibold lg:text-5xl">Read Consent Forms</h2>
-                    <p className="mt-4">Access and download the required consent forms before your booking.</p>
+                    <h2 className="text-balance text-4xl font-semibold lg:text-5xl">Ready to Book Your Spot?</h2>
+                    <p className="mt-4">Experience seamless bookings and real-time updates for all your favorite sports facilities.</p>
 
-                    <div className="mt-12 flex flex-wrap justify-center gap-4">
-                        <Button asChild size="lg" variant='outline'>
-                            <Link href="https://drive.google.com/drive/folders/1m8fId0PFRvTT8ar9rIzccVE_b1W8eBkU?usp=sharing">
-                                <span>Swimming</span>
-                            </Link>
-                        </Button>
-
-                        <Button asChild size="lg" variant="outline">
-                            <Link href="https://drive.google.com/drive/folders/1m8fId0PFRvTT8ar9rIzccVE_b1W8eBkU?usp=sharing">
-                                <span>Badminton</span>
-                            </Link>
-                        </Button>
+                    <div className="mt-12 flex flex-col items-center gap-4 md:flex-row justify-center">
+                        <div className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
+                            <BookNowButton />
+                        </div>
+                        <GlowEffectButton />
                     </div>
                 </div>
             </div>
         </section>
-    )
+    );
 }

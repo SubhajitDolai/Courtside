@@ -4,6 +4,7 @@ import { TextEffect } from '@/components/ui/text-effect'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import BookNowButton from './bookNowBtn'
 import { GlowEffectButton } from './glowEffectButton'
+import Silk from './silkbg'
 
 const transitionVariants = {
     item: {
@@ -38,42 +39,15 @@ export default function HeroSection() {
                 </div>
                 <section>
                     <div className="relative pt-28 md:pt-36">
-                        <AnimatedGroup
-                            variants={{
-                                container: {
-                                    visible: {
-                                        transition: {
-                                            delayChildren: 1,
-                                        },
-                                    },
-                                },
-                                item: {
-                                    hidden: {
-                                        opacity: 0,
-                                        y: 20,
-                                    },
-                                    visible: {
-                                        opacity: 1,
-                                        y: 0,
-                                        transition: {
-                                            type: 'spring',
-                                            bounce: 0.3,
-                                            duration: 2,
-                                        },
-                                    },
-                                },
-                            }}
-                            className="absolute inset-0 -z-20">
-                            <Image
-                                src="/mit.webp"
-                                alt="background"
-                                className="absolute inset-x-0 top-56 -z-20 lg:top-32 dark:block w-full h-auto object-cover scale-[2] sm:scale-100
-                                [mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]
-                                [--webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_20%,black_80%,transparent_100%)]"
-                                width="3276"
-                                height="4095"
+                        <div className='absolute inset-0 -z-20'>
+                            <Silk
+                                speed={10}
+                                scale={1}
+                                color="#7B7481"
+                                noiseIntensity={1.5}
+                                rotation={5}
                             />
-                        </AnimatedGroup>
+                        </div>
                         <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
                         <div className="mx-auto max-w-7xl px-6">
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
@@ -106,7 +80,7 @@ export default function HeroSection() {
                                         },
                                         ...transitionVariants,
                                     }}
-                                    className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
+                                className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
                                     <div
                                         key={1}
                                         className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
@@ -129,21 +103,21 @@ export default function HeroSection() {
                                 },
                                 ...transitionVariants,
                             }}>
-                            <div className="relative mt-8 overflow-hidden px-2 sm:px-2 sm:mr-0 sm:mt-12 md:mt-20">
-                                <div
-                                    aria-hidden
-                                    className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
+                        <div className="relative mt-8 overflow-hidden px-2 sm:px-2 sm:mr-0 sm:mt-12 md:mt-20">
+                            <div
+                                aria-hidden
+                                className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
+                            />
+                            <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-full sm:max-w-6xl overflow-hidden rounded-xl sm:rounded-2xl border p-2 sm:p-4 shadow-lg shadow-zinc-950/15 ring-1">
+                                <Image
+                                    className="bg-background grayscale relative block rounded-lg sm:rounded-xl w-full h-auto"
+                                    src="/mit.webp"
+                                    alt="app screen"
+                                    width="2700"
+                                    height="1440"
                                 />
-                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-full sm:max-w-6xl overflow-hidden rounded-xl sm:rounded-2xl border p-2 sm:p-4 shadow-lg shadow-zinc-950/15 ring-1">
-                                    <Image
-                                        className="bg-background relative block rounded-lg sm:rounded-xl w-full h-auto"
-                                        src="/mit.webp"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                </div>
                             </div>
+                        </div>
                         </AnimatedGroup>
                     </div>
                 </section>
