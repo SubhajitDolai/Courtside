@@ -87,7 +87,7 @@ export default function CameraScannerPage() {
     memoryUsage: 0,
     cameraRestarts: 0
   })
-  const lastHeartbeatRef = useRef<NodeJS.Timeout>()
+  const lastHeartbeatRef = useRef<NodeJS.Timeout | null>(null)
   const performanceMetricsRef = useRef({
     sessionScans: 0,
     errorCount: 0,

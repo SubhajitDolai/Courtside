@@ -84,7 +84,7 @@ export default function IoTScannerPage() {
     memoryUsage: 0,
     deviceRestarts: 0
   })
-  const lastHeartbeatRef = useRef<NodeJS.Timeout>()
+  const lastHeartbeatRef = useRef<NodeJS.Timeout | null>(null)
   const performanceMetricsRef = useRef({
     sessionScans: 0,
     errorCount: 0,
