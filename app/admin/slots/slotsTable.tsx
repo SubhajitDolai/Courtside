@@ -21,11 +21,13 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
   const [sportFilter, setSportFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [userTypeFilter, setUserTypeFilter] = useState("all");
+  const [statusFilter, setstatusFilter] = useState("all");
 
   // ✅ Unique dropdown options
   const uniqueSports = Array.from(new Set(slots.map((s) => s.sports?.name).filter(Boolean)));
   const uniqueUserTypes = Array.from(new Set(slots.map((s) => s.allowed_user_type || 'any')));
   const genders = ['male', 'female', 'any'];
+  const status = ['Active', 'Inactive'];
 
   const filteredSlots = slots.filter((slot) => {
     const q = search.toLowerCase();
@@ -38,8 +40,11 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
     const matchSport = sportFilter === "all" ? true : slot.sports?.name === sportFilter;
     const matchGender = genderFilter === "all" ? true : slot.gender === genderFilter;
     const matchUserType = userTypeFilter === "all" ? true : slot.allowed_user_type === userTypeFilter;
+    const matchStatus = statusFilter === "all" ? true : 
+      (statusFilter === "Active" && slot.is_active) || 
+      (statusFilter === "Inactive" && !slot.is_active);
 
-    return matchSearch && matchSport && matchGender && matchUserType;
+    return matchSearch && matchSport && matchGender && matchUserType && matchStatus;
   });
 
   const formatTime12hr = (time24: string) => {
@@ -49,7 +54,7 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
     return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase();
   };
 
-  const hasActiveFilters = search || sportFilter !== 'all' || genderFilter !== 'all' || userTypeFilter !== 'all';
+  const hasActiveFilters = search || sportFilter !== 'all' || genderFilter !== 'all' || userTypeFilter !== 'all' || statusFilter !== 'all';
 
   return (
     <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
@@ -114,6 +119,19 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
                 </SelectContent>
               </Select>
 
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={setstatusFilter}>
+                <SelectTrigger className="w-full sm:w-[140px] border-neutral-200 dark:border-neutral-700">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  {status.map((s) => (
+                    <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               {/* Add Button */}
               <Button asChild className="w-full sm:w-auto">
                 <Link href="/admin/slots/add" className="flex items-center gap-2">
@@ -172,6 +190,16 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
                 </Badge>
               )}
               
+              {statusFilter !== 'all' && (
+                <Badge 
+                  variant="secondary" 
+                  className="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/70 cursor-pointer"
+                  onClick={() => setstatusFilter('all')}
+                >
+                  Status: {statusFilter}
+                </Badge>
+              )}
+              
               <Button
                 variant="ghost"
                 size="sm"
@@ -180,6 +208,7 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
                   setSportFilter('all');
                   setGenderFilter('all');
                   setUserTypeFilter('all');
+                  setstatusFilter('all');
                 }}
                 className="h-6 px-2 text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 hover:bg-green-100 dark:hover:bg-green-900/50"
               >
