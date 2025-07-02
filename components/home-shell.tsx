@@ -8,6 +8,7 @@ import HeroSection from "@/components/hero-section";
 import LogoCloud from "@/components/logo-cloud";
 import BannedRedirect from "@/components/banned-redirect";
 import Features from './features-4';
+import Pricing from './pricing';
 
 const ContentSection = dynamic(() => import('@/components/content-3'), { ssr: false });
 const AboutSports = dynamic(() => import('@/components/aboutSports'), { ssr: false });
@@ -39,6 +40,7 @@ export default function HomeShell() {
       <ContentSection />
       <AboutSports />
       <CallToAction />
+      <Pricing />
       <FAQsThree />
       <TeamSection />
       <MorphingPopoverTextarea />

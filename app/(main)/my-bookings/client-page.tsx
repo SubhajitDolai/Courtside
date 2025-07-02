@@ -279,9 +279,9 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                 <Skeleton className="h-8 w-full rounded-md" />
               </div>
 
-              {/* Grid of Skeleton Cards - 3 cards to match actual layout */}
+              {/* Grid of Skeleton Cards - 1 cards to match actual layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(3)].map((_, index) => (
+                {[...Array(1)].map((_, index) => (
                   <Card key={index} className="border-2 shadow-sm hover:shadow-lg transition-all duration-200 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">

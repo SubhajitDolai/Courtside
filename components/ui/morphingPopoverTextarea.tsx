@@ -33,7 +33,7 @@ export function MorphingPopoverTextarea() {
     >
       <MorphingPopoverTrigger className='flex h-9 items-center rounded-lg border border-neutral-950/10 bg-white px-3 text-neutral-950 dark:border-neutral-50/10 dark:bg-neutral-700 dark:text-neutral-50'>
         <motion.span layoutId={`popover-label-${uniqueId}`} className='text-sm'>
-          User Feedback Form
+          Report Bug or Feedback
         </motion.span>
       </MorphingPopoverTrigger>
       <MorphingPopoverContent className='rounded-xl border border-neutral-950/10 bg-white p-0 shadow-[0_9px_9px_0px_rgba(0,0,0,0.01),_0_2px_5px_0px_rgba(0,0,0,0.06)] dark:bg-neutral-700'>
@@ -52,7 +52,7 @@ export function MorphingPopoverTextarea() {
               }}
               className='absolute top-3 left-4 text-sm text-neutral-500 select-none dark:text-neutral-400'
             >
-              Add Note
+              Tell us about bugs, issues, or suggestions...
             </motion.span>
             <textarea
               className='h-full w-full resize-none rounded-md bg-transparent px-4 py-3 text-sm outline-hidden'
