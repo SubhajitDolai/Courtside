@@ -23,6 +23,14 @@ async function getAssistantData() {
       .eq('is_active', true)
       .order('start_time', { ascending: true })
 
+    // Get active notifications
+    const { data: notifications } = await supabase
+      .from('notifications')
+      .select('id, title, message, type, is_active, created_at, created_by')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(10) // Limit to 10 most recent notifications
+
     // Get today's date
     const today = new Date().toISOString().split('T')[0]
 
@@ -86,6 +94,7 @@ async function getAssistantData() {
       sportsWithSlots,
       facilityStats,
       currentUser: currentUserProfile,
+      notifications: notifications || [], // Include notifications
       lastUpdated: new Date().toISOString()
     }
   } catch (error) {
@@ -99,6 +108,7 @@ async function getAssistantData() {
         currentDate: new Date().toISOString().split('T')[0]
       },
       currentUser: null,
+      notifications: [], // Include empty notifications array
       lastUpdated: new Date().toISOString()
     }
   }

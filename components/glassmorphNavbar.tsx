@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, User, X, Calendar, Trophy, Mail, BarChart3, ScrollText, FileText, Info, Bot } from "lucide-react";
+import { ChevronDown, LogOut, Menu, User, X, Calendar, Trophy, Mail, BarChart3, ScrollText, FileText, Info, Bot, Bell } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { createClient } from "@/utils/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +79,7 @@ export default function GlassmorphNavbar() {
   const [, startTransition] = useTransition();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [hasNotifications, setHasNotifications] = useState(false);
 
   const [loadingBarVisible, setLoadingBarVisible] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -116,6 +118,26 @@ export default function GlassmorphNavbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Check for active notifications
+  useEffect(() => {
+    const checkNotifications = async () => {
+      if (!user) return;
+      
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('is_active', true)
+        .limit(1);
+      
+      if (!error && data) {
+        setHasNotifications(data.length > 0);
+      }
+    };
+
+    checkNotifications();
+  }, [user]);
 
   useEffect(() => {
     if (loadingBarVisible) {
@@ -286,6 +308,17 @@ export default function GlassmorphNavbar() {
           <div className="flex gap-3 flex-row items-center">
             <div className="hidden md:flex items-center gap-3">
               <ModeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigateWithLoading("/notifications")}
+                className="relative h-9 w-9"
+              >
+                <Bell className="h-4 w-4" />
+                {hasNotifications && (
+                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+                )}
+              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -333,6 +366,17 @@ export default function GlassmorphNavbar() {
 
             <div className="md:hidden flex items-center gap-3">
               <ModeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigateWithLoading("/notifications")}
+                className="relative h-9 w-9"
+              >
+                <Bell className="h-4 w-4" />
+                {hasNotifications && (
+                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+                )}
+              </Button>
               <Button
                 onClick={(e) => toggleMobileMenu(e)} // Pass the event to stop propagation
                 size="icon"

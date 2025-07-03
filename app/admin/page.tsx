@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare } from 'lucide-react'
+import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare, Bell } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function AdminPage() {
@@ -24,28 +24,34 @@ export default function AdminPage() {
       href: '/admin/slots',
     },
     {
-      title: 'Bookings History',
-      description: 'View all time booking records',
-      icon: <History className="w-full h-full text-teal-600 dark:text-teal-400" />,
-      href: '/admin/bookings-history',
-    },
-    {
       title: 'Manage Feedback',
       description: 'View and manage user feedback',
       icon: <MessageSquare className="w-full h-full text-emerald-600 dark:text-emerald-400" />,
       href: '/admin/feedback',
     },
     {
-      title: 'QR Scanner',
-      description: 'Scan QR codes for check-in/out',
-      icon: <QrCode className="w-full h-full text-purple-600 dark:text-purple-400" />,
-      href: '/admin/qr-scanner',
+      title: 'Manage Notifications',
+      description: 'Create and manage system notifications',
+      icon: <Bell className="w-full h-full text-cyan-600 dark:text-cyan-400" />,
+      href: '/admin/notifications',
+    },
+    {
+      title: 'Bookings History',
+      description: 'View all time booking records',
+      icon: <History className="w-full h-full text-teal-600 dark:text-teal-400" />,
+      href: '/admin/bookings-history',
     },
     {
       title: 'Manage Bookings',
       description: 'View and manage user bookings',
       icon: <ClipboardList className="w-full h-full text-emerald-600 dark:text-emerald-400" />,
       href: '/admin/bookings',
+    },
+    {
+      title: 'QR Scanner',
+      description: 'Scan QR codes for check-in/out',
+      icon: <QrCode className="w-full h-full text-purple-600 dark:text-purple-400" />,
+      href: '/admin/qr-scanner',
     },
   ], [])
 

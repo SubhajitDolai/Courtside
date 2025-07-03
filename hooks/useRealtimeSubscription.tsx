@@ -14,34 +14,34 @@ export function useRealtimeSubscription<T>(
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
-  
+
   // 🌍 Stable Supabase client - never recreated
   const supabase = useMemo(() => createClient(), [])
-  
+
   // 🌍 Refs for state management and cleanup
   const channelRef = useRef<RealtimeChannel | null>(null)
   const isMountedRef = useRef(true)
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastFetchRef = useRef<number>(0)
-  
+
   // 🌍 Intelligent debounced refresh (prevents spam)
   const debouncedRefresh = useMemo(() => {
     let timeoutId: NodeJS.Timeout
     return (force = false) => {
       clearTimeout(timeoutId)
-      
+
       const now = Date.now()
       const timeSinceLastFetch = now - lastFetchRef.current
-      
+
       // If forced or enough time has passed, execute immediately
       if (force || timeSinceLastFetch > 1000) {
         timeoutId = setTimeout(async () => {
           if (!isMountedRef.current) return
-          
+
           setLoading(true)
           setError(null)
           lastFetchRef.current = Date.now()
-          
+
           try {
             const freshData = await fetchFunction()
             if (isMountedRef.current) {
@@ -49,7 +49,6 @@ export function useRealtimeSubscription<T>(
             }
           } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-            console.error('🔴 Error refreshing data:', errorMessage)
             if (isMountedRef.current) {
               setError(errorMessage)
             }
@@ -63,11 +62,11 @@ export function useRealtimeSubscription<T>(
         // Debounce for 200ms if called too frequently
         timeoutId = setTimeout(async () => {
           if (!isMountedRef.current) return
-          
+
           setLoading(true)
           setError(null)
           lastFetchRef.current = Date.now()
-          
+
           try {
             const freshData = await fetchFunction()
             if (isMountedRef.current) {
@@ -75,7 +74,6 @@ export function useRealtimeSubscription<T>(
             }
           } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-            console.error('🔴 Error refreshing data:', errorMessage)
             if (isMountedRef.current) {
               setError(errorMessage)
             }
@@ -105,37 +103,34 @@ export function useRealtimeSubscription<T>(
     // Remove channel with error handling
     if (channelRef.current) {
       try {
-        const result = await supabase.removeChannel(channelRef.current)
-        console.log('🧹 Channel removed:', result)
+        await supabase.removeChannel(channelRef.current)
       } catch (err) {
-        console.warn('⚠️ Error removing channel:', err)
+        // Handle error silently
       }
       channelRef.current = null
     }
-    
+
     setIsConnected(false)
   }, [supabase])
 
   // 🌍 World-class subscription setup with exponential backoff
   const setupSubscription = useCallback(async () => {
     if (!isMountedRef.current) return
-    
+
     try {
       // Clean up any existing subscription
       await cleanup()
-      
+
       // Create filter if provided
       const filter = filterColumn && filterValue 
         ? `${filterColumn}=eq.${filterValue}`
         : undefined
-      
+
       // Create unique channel name with entropy
       const entropy = Math.random().toString(36).substring(2, 15)
       const timestamp = Date.now()
       const channelName = `${tableName}_${timestamp}_${entropy}`
-      
-      console.log(`🔄 Setting up subscription: ${channelName}`)
-      
+
       // Create channel with optimal config
       const channel = supabase.channel(channelName, {
         config: {
@@ -144,14 +139,11 @@ export function useRealtimeSubscription<T>(
           private: false
         }
       })
-      
-      // Event handler with logging
-      const handleRealtimeEvent = (payload: any) => {
-        console.log(`📡 ${payload.eventType} event on ${tableName}:`, payload)
+
+      const handleRealtimeEvent = () => {
         refreshData()
       }
-      
-      // Set up event listeners for all CRUD operations
+
       channel
         .on('postgres_changes', 
           { 
@@ -176,27 +168,20 @@ export function useRealtimeSubscription<T>(
             event: 'DELETE',
             schema: 'public',
             table: tableName
-            // No filter for DELETE - we want to catch all deletions
           },
           handleRealtimeEvent
         )
-      
-      // Subscribe with comprehensive status handling
-      const subscriptionStatus = await channel.subscribe((status, err) => {
-        console.log(`📡 Subscription status: ${status}`)
-        
+
+      await channel.subscribe((status, err) => {
         if (!isMountedRef.current) return
-        
+
         if (err) {
-          console.error('🔴 Subscription error:', err)
           setIsConnected(false)
           setError(err.message)
-          
+
           // Exponential backoff retry (max 5 attempts)
           if (retryCount < 5) {
             const delay = Math.min(1000 * Math.pow(2, retryCount), 10000)
-            console.log(`🔄 Retrying in ${delay}ms (attempt ${retryCount + 1}/5)`)
-            
             retryTimeoutRef.current = setTimeout(() => {
               if (isMountedRef.current) {
                 setRetryCount(prev => prev + 1)
@@ -206,45 +191,40 @@ export function useRealtimeSubscription<T>(
           }
           return
         }
-        
+
         switch (status) {
           case 'SUBSCRIBED':
-            console.log('✅ Successfully subscribed to realtime updates')
             setIsConnected(true)
             setError(null)
-            setRetryCount(0) // Reset retry count on success
+            setRetryCount(0)
             channelRef.current = channel
             break
-            
+
           case 'CHANNEL_ERROR':
           case 'TIMED_OUT':
-            console.log(`🔴 Subscription failed: ${status}`)
             setIsConnected(false)
             setError(`Connection ${status.toLowerCase()}`)
-            
-            // OPTIMIZED: Faster retry for better performance
+
             retryTimeoutRef.current = setTimeout(() => {
               if (isMountedRef.current) {
                 setupSubscription()
               }
             }, 1000)
             break
-            
+
           case 'CLOSED':
-            console.log('📡 Subscription closed')
             setIsConnected(false)
             break
-            
+
           default:
-            console.log(`📡 Unknown status: ${status}`)
+            // Handle unknown status silently
         }
       })
-      
+
     } catch (err) {
-      console.error('🔴 Error setting up subscription:', err)
       setIsConnected(false)
       setError(err instanceof Error ? err.message : 'Setup failed')
-      
+
       // Retry with exponential backoff
       if (retryCount < 5) {
         const delay = Math.min(1000 * Math.pow(2, retryCount), 10000)
@@ -261,13 +241,13 @@ export function useRealtimeSubscription<T>(
   // 🌍 Main effect - handles setup and cleanup
   useEffect(() => {
     isMountedRef.current = true
-    
+
     // Initial data fetch
     refreshData(true) // Force initial fetch
-    
+
     // Setup subscription
     setupSubscription()
-    
+
     // Cleanup on unmount
     return () => {
       isMountedRef.current = false
@@ -278,7 +258,6 @@ export function useRealtimeSubscription<T>(
   // 🌍 Handle parameter changes
   useEffect(() => {
     if (isMountedRef.current) {
-      console.log('🔄 Parameters changed, restarting subscription...')
       setRetryCount(0) // Reset retry count
       setupSubscription()
     }
@@ -288,7 +267,6 @@ export function useRealtimeSubscription<T>(
   useEffect(() => {
     const healthCheck = setInterval(() => {
       if (!isConnected && isMountedRef.current && retryCount < 5) {
-        console.log('🏥 Health check: Attempting reconnection...')
         setRetryCount(0)
         setupSubscription()
       }
@@ -299,7 +277,6 @@ export function useRealtimeSubscription<T>(
 
   // 🌍 Force reconnect function for manual recovery
   const forceReconnect = useCallback(() => {
-    console.log('🔄 Force reconnect initiated')
     setRetryCount(0)
     setError(null)
     setupSubscription()
@@ -307,8 +284,7 @@ export function useRealtimeSubscription<T>(
 
   // 🌍 Manual refresh function
   const manualRefresh = useCallback(() => {
-    console.log('🔄 Manual refresh triggered')
-    refreshData(true) // Force refresh
+    refreshData(true)
   }, [refreshData])
 
   return { 

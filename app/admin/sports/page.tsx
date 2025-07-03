@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Trophy, Plus, Activity, Users } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import SportsToggleButtons from './components/SportsToggleButtons'
 
@@ -25,11 +25,7 @@ export default function AdminSportsPage() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchSports()
-  }, [])
-
-  const fetchSports = async () => {
+  const fetchSports = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('sports')
@@ -44,7 +40,11 @@ export default function AdminSportsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchSports()
+  }, [fetchSports])
 
   // Calculate active/inactive sports for toggle buttons
   const hasActiveSports = sports?.some(sport => sport.is_active) || false

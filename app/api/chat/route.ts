@@ -40,10 +40,22 @@ interface Sport {
     slots: Slot[];
 }
 
+// Add notification interface
+interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    type: 'general' | 'maintenance' | 'urgent';
+    is_active: boolean;
+    created_at: string;
+    created_by: string | null;
+}
+
 interface SportsData {
     facilityStats: FacilityStats;
     currentUser?: User;
     sportsWithSlots: Sport[];
+    notifications?: Notification[]; // Add notifications
 }
 
 // New processed data types for server-side validation
@@ -72,6 +84,7 @@ interface ProcessedData {
     userInfo: string;
     currentTime: string;
     sports: ProcessedSport[];
+    notifications: Notification[];
     serverTimestamp: number;
 }
 
@@ -140,9 +153,17 @@ ${overview}
 🎯 YOUR ROLE:
 • Help users find and book available sports slots
 • Provide sports guidance and general knowledge
+• Share important facility notifications and announcements
 • Assist with MIT-WPU information and student success
 • Maintain a helpful, concise, and supportive tone
 • IMPORTANT: Be strategic with booking links - don't overwhelm users with every option
+
+📢 NOTIFICATION HANDLING:
+• When users ask about "news", "notices", "announcements", or "updates", show relevant notifications
+• Prioritize urgent notifications (🚨) over maintenance (🔧) and general (📋) ones
+• Always mention the notification type and when it was posted
+• For urgent notifications, emphasize their importance
+• Keep notification summaries concise but informative
 
 💡 SMART RESPONSE STRATEGY:
 • For general "what's available" queries: Summarize sports and slot counts, show 2-3 best options
@@ -235,6 +256,12 @@ const determineSlotStatus = (slot: Slot, currentMinutes: number): 'ACTIVE' | 'EX
 };
 
 const processAllSportsData = (sportsData: SportsData | null): ProcessedData | null => {
+    console.log('[DEBUG] Processing sports data:', {
+        hasData: !!sportsData,
+        hasNotifications: !!sportsData?.notifications,
+        notificationsCount: sportsData?.notifications?.length || 0
+    });
+    
     if (!sportsData) return null;
     
     try {
@@ -301,6 +328,7 @@ const processAllSportsData = (sportsData: SportsData | null): ProcessedData | nu
             userInfo,
             currentTime,
             sports: processedSports,
+            notifications: sportsData.notifications || [],
             serverTimestamp: getCurrentTimestamp()
         };
     } catch (error) {
@@ -310,6 +338,12 @@ const processAllSportsData = (sportsData: SportsData | null): ProcessedData | nu
 };
 
 const generateUserFriendlyOverview = (processedData: ProcessedData): string => {
+    console.log('[DEBUG] Generating overview with notifications:', {
+        hasNotifications: !!processedData.notifications,
+        notificationsCount: processedData.notifications?.length || 0,
+        activeNotifications: processedData.notifications?.filter(n => n.is_active)?.length || 0
+    });
+    
     const availableSportsCount = processedData.sports.filter(sport => sport.hasAvailableSlots).length;
     const totalSlotsCount = processedData.sports.reduce((sum, sport) => sum + sport.slots.length, 0);
     
@@ -319,6 +353,20 @@ const generateUserFriendlyOverview = (processedData: ProcessedData): string => {
     overview += `• ${processedData.facilityStats.todayBookings} bookings today\n`;
     overview += `• Current time: ${processedData.currentTime}\n`;
     overview += `• User: ${processedData.userInfo}\n\n`;
+    
+    // Add notifications section
+    if (processedData.notifications && processedData.notifications.length > 0) {
+        overview += `📢 ACTIVE NOTIFICATIONS:\n`;
+        processedData.notifications
+            .filter(notification => notification.is_active)
+            .slice(0, 3) // Show max 3 notifications to save tokens
+            .forEach(notification => {
+                const urgencyIcon = notification.type === 'urgent' ? '🚨' : 
+                                   notification.type === 'maintenance' ? '🔧' : '📋';
+                overview += `${urgencyIcon} ${notification.title}: ${notification.message}\n`;
+            });
+        overview += `\n`;
+    }
     
     if (processedData.sports.length === 0) {
         overview += `❌ No slots available for your user type and gender.\n`;
@@ -356,6 +404,16 @@ const generateUserFriendlyOverview = (processedData: ProcessedData): string => {
 // Enterprise-level validation and security functions
 const validateAndSanitizeInput = (data: any): { isValid: boolean; sanitized?: any; error?: string } => {
     try {
+        // Add debug logging
+        console.log('[DEBUG] Validating input data:', {
+            hasData: !!data,
+            hasFacilityStats: !!data?.facilityStats,
+            hasSportsWithSlots: !!data?.sportsWithSlots,
+            hasNotifications: !!data?.notifications,
+            notificationsLength: data?.notifications?.length || 0,
+            dataKeys: data ? Object.keys(data) : []
+        });
+
         // Basic structure validation
         if (!data || typeof data !== 'object') {
             return { isValid: false, error: "Invalid data structure" };
@@ -408,7 +466,8 @@ const validateAndSanitizeInput = (data: any): { isValid: boolean; sanitized?: an
             sanitized: {
                 facilityStats: data.facilityStats,
                 currentUser: data.currentUser,
-                sportsWithSlots: sanitizedSports
+                sportsWithSlots: sanitizedSports,
+                notifications: data.notifications || [] // Include notifications in sanitized data
             }
         };
     } catch (error) {

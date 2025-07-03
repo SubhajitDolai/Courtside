@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, MessageSquare, QrCode } from "lucide-react";
+import { Menu, LogOut, User, X, Mail, Home, Trophy, ClipboardList, Clock, ChevronDown, History, Settings, MessageSquare, QrCode, Bell } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useTransition, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -39,6 +39,7 @@ export const navigationItems = [
     items: [
       { title: "Sports", href: "/admin/sports", icon: Trophy },
       { title: "Slots", href: "/admin/slots", icon: Clock },
+      { title: "Notifications", href: "/admin/notifications", icon: Bell },
     ]
   },
   {
@@ -51,7 +52,7 @@ export const navigationItems = [
     ]
   },
   {
-    title: "Reports & History",
+    title: "Analytics",
     category: "reports",
     icon: History,
     items: [

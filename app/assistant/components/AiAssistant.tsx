@@ -31,6 +31,15 @@ interface AssistantData {
     user_type: string
     gender: string
   } | null
+  notifications: {
+    id: string
+    title: string
+    message: string
+    type: 'general' | 'maintenance' | 'urgent'
+    is_active: boolean
+    created_at: string
+    created_by: string | null
+  }[]
   lastUpdated: string
 }
 
@@ -151,7 +160,7 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
     "What slots are active right now?",
     "I want to book a badminton slot at 5pm",
     "Which sports can I book today?",
-    "What time does booking open?",
+    "Any news or announcements today?",
     "How do I check slot availability?",
     "What's popular today?"
   ]
