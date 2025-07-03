@@ -84,6 +84,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🚫 **User Access Control** - Ban/restrict user accounts with automatic logout
 - 🕒 **Schedule Automation** - Institutional calendar management via GitHub Actions
 - 📱 **Mobile-Optimized** - Full responsive design for all administrative tasks
+- 📬 **Notifications Management** - Comprehensive system for managing admin notifications
 
 ### 🤖 Automated Systems
 - ⏰ **Institutional Calendar Integration** - Sunday sports deactivation with Monday reactivation
@@ -186,6 +187,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /qr-scanner           # Professional QR code scanning system
       /camera             # Camera-based QR scanning with modern UI
       /iot                # Automated scanner with emerald-themed interface
+    /notifications        # Admin notifications management
   /assistant           # AI assistant for intelligent recommendations
   /banned              # Restricted access page for suspended users
   /api                 # API routes
@@ -404,6 +406,15 @@ Courtside features a sophisticated automation system that respects institutional
 - `status` (pending, reviewed, resolved)
 - `created_at` (timestamp)
 
+#### `notifications`
+- `id` (UUID, PK)
+- `type` (info, warning, error, success)
+- `message` (text)
+- `is_active` (boolean, default: true)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+- Strategic indexes for real-time subscription and filtering
+
 ### Database Optimizations
 - **Strategic Indexing**: 15+ optimized indexes for common query patterns
 - **Composite Indexes**: Multi-column indexes for complex filtering
@@ -549,13 +560,13 @@ Please follow the project coding conventions and use meaningful commit messages.
 This is a **production-ready** personal project developed by Subhajit Dolai, showcasing enterprise-level features and modern web development practices. The platform is actively used and continuously improved with new features.
 
 ### 🚀 Recent Major Updates
-- **Automated Scheduling System**: GitHub Actions for institutional calendar management
-- **Advanced User Type Validation**: Student/Faculty access control with "any" bypass option
-- **Enhanced AI Assistant**: Google Gemini 2.0 Flash integration with real-time data
-- **Professional QR Scanner**: Dual-mode scanning with IoT device support
-- **Comprehensive Analytics**: Advanced dashboard with Recharts visualizations
-- **User Access Control**: Complete ban/restriction system with appeal process
-- **Real-time Features**: Enhanced connection management and live updates
+- **Admin Notifications Management**: Added a dedicated page for managing notifications in the admin section, including active/inactive states, type categorization, and real-time subscription.
+- **Dashboard Integration**: Updated the admin dashboard to include a link to the notifications management page.
+- **Navbar Enhancements**: Modified the admin navbar and glassmorph navbar to include a notifications icon with a badge for active notifications.
+- **Chat API Update**: Enhanced the chat API to include notifications in the response.
+- **AI Assistant Notifications**: Updated the AI assistant to handle and display notifications.
+- **Sports Page Optimization**: Refactored sports page to use useCallback for fetching sports data.
+- **Dependency Updates**: Updated package dependencies for Supabase functions and real-time libraries.
 
 ### 🔮 Future Roadmap
 - **Mobile App**: React Native companion app
