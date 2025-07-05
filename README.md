@@ -58,10 +58,11 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - ❌ **Easy Cancellation** - Cancel bookings with time-based restrictions
 - 📱 **Modern UI/UX** - Responsive design with dark/light mode support
 - 🧠 **AI Assistant** - Chat with Courtside AI for smart recommendations and instant help
-- 🔔 **Live Notifications** - Connection status and booking confirmations
+- 🔔 **Live Notifications** - Real-time system announcements and booking confirmations
 - 🎯 **Visual Spot Selection** - Interactive seat selection with live availability
 - 📊 **Personal Dashboard** - Comprehensive analytics and booking insights
 - 🚫 **Access Control** - Automatic handling of restricted accounts
+- 📢 **System Announcements** - Instant access to important notifications and updates
 
 ### For Administrators
 - 🔑 **Role-based Access** - Admin panel access via profile role setting
@@ -84,7 +85,8 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🚫 **User Access Control** - Ban/restrict user accounts with automatic logout
 - 🕒 **Schedule Automation** - Institutional calendar management via GitHub Actions
 - 📱 **Mobile-Optimized** - Full responsive design for all administrative tasks
-- 📬 **Notifications Management** - Comprehensive system for managing admin notifications
+- 📢 **Notifications Management** - Create, manage, and broadcast system-wide announcements
+- 🔔 **Real-time Alerts** - Instant notification delivery with live status updates
 
 ### 🤖 Automated Systems
 - ⏰ **Institutional Calendar Integration** - Sunday sports deactivation with Monday reactivation
@@ -176,6 +178,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /my-bookings          # Booking history and current bookings
     /profile              # User profile management
     /dashboard            # Analytics dashboard with comprehensive insights
+    /notifications        # Real-time system announcements and important updates
     /rules                # Sports facility rules
     /terms                # Terms and conditions
   /admin               # Admin dashboard
@@ -184,10 +187,10 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /slots                # Manage sports slots
     /sports               # Manage sports facilities
     /feedback             # User feedback management system
+    /notifications        # System-wide announcements and notifications management
     /qr-scanner           # Professional QR code scanning system
       /camera             # Camera-based QR scanning with modern UI
       /iot                # Automated scanner with emerald-themed interface
-    /notifications        # Admin notifications management
   /assistant           # AI assistant for intelligent recommendations
   /banned              # Restricted access page for suspended users
   /api                 # API routes
@@ -331,6 +334,26 @@ Courtside features a sophisticated automation system that respects institutional
 - **User Details**: Access to feedback author information
 - **Export Capabilities**: Download feedback data for analysis
 
+## 📢 Notifications Management System
+
+### Admin Notification Control
+- **Create Announcements**: Compose system-wide notifications with rich formatting
+- **Notification Types**: Categorize announcements (urgent, maintenance, general, etc.)
+- **Status Management**: Activate/deactivate notifications with real-time updates
+- **Audience Targeting**: Control visibility and reach of announcements
+
+### User Notification Experience
+- **Real-time Delivery**: Instant notification updates using Supabase Realtime
+- **Notification Center**: Dedicated page for viewing all system announcements
+- **Connection Status**: Live indicators showing notification sync status
+- **Type-based Styling**: Visual differentiation for urgent, maintenance, and general notifications
+- **Auto-refresh**: Smart refresh capabilities with manual override options
+
+### AI Assistant Integration
+- **Contextual Responses**: AI assistant aware of current notifications and announcements
+- **Smart Recommendations**: Notification-based guidance and support
+- **Real-time Data**: Assistant responses include latest notification status
+
 ## 🚫 User Access Control & Security
 
 ### Banned User Management
@@ -408,12 +431,12 @@ Courtside features a sophisticated automation system that respects institutional
 
 #### `notifications`
 - `id` (UUID, PK)
-- `type` (info, warning, error, success)
-- `message` (text)
-- `is_active` (boolean, default: true)
+- `title`, `message` (notification content)
+- `type` ('urgent', 'maintenance', 'general') - Notification category
+- `is_active` (boolean, default: true) - Visibility control
+- `created_by` (FK to profiles) - Admin who created the notification
 - `created_at` (timestamp)
-- `updated_at` (timestamp)
-- Strategic indexes for real-time subscription and filtering
+- Optimized for real-time delivery and admin management
 
 ### Database Optimizations
 - **Strategic Indexing**: 15+ optimized indexes for common query patterns
@@ -440,6 +463,7 @@ Courtside features a sophisticated automation system that respects institutional
 - **Streaming Responses**: Real-time message streaming with professional UI/UX and loading states
 - **Intelligent Recommendations**: Smart booking suggestions based on user profile, availability patterns, and slot constraints
 - **Multi-topic Support**: Handles sports bookings, general knowledge, academic guidance, and institutional queries
+- **Notification Integration**: AI assistant aware of current system announcements and notifications for contextual support
 
 ### Professional QR Scanner System
 - **Multi-mode Scanning**: Camera-based and IoT device integration with audio feedback
@@ -560,13 +584,15 @@ Please follow the project coding conventions and use meaningful commit messages.
 This is a **production-ready** personal project developed by Subhajit Dolai, showcasing enterprise-level features and modern web development practices. The platform is actively used and continuously improved with new features.
 
 ### 🚀 Recent Major Updates
-- **Admin Notifications Management**: Added a dedicated page for managing notifications in the admin section, including active/inactive states, type categorization, and real-time subscription.
-- **Dashboard Integration**: Updated the admin dashboard to include a link to the notifications management page.
-- **Navbar Enhancements**: Modified the admin navbar and glassmorph navbar to include a notifications icon with a badge for active notifications.
-- **Chat API Update**: Enhanced the chat API to include notifications in the response.
-- **AI Assistant Notifications**: Updated the AI assistant to handle and display notifications.
-- **Sports Page Optimization**: Refactored sports page to use useCallback for fetching sports data.
-- **Dependency Updates**: Updated package dependencies for Supabase functions and real-time libraries.
+- **Automated Scheduling System**: GitHub Actions for institutional calendar management
+- **Advanced User Type Validation**: Student/Faculty access control with "any" bypass option
+- **Enhanced AI Assistant**: Google Gemini 2.0 Flash integration with real-time data
+- **Professional QR Scanner**: Dual-mode scanning with IoT device support
+- **Comprehensive Analytics**: Advanced dashboard with Recharts visualizations
+- **User Access Control**: Complete ban/restriction system with appeal process
+- **Real-time Features**: Enhanced connection management and live updates
+- **Notifications Management**: Complete admin notification system with real-time delivery
+- **AI Notification Integration**: Assistant awareness of system announcements for contextual support
 
 ### 🔮 Future Roadmap
 - **Mobile App**: React Native companion app
