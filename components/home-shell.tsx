@@ -8,10 +8,10 @@ import HeroSection from "@/components/hero-section";
 import LogoCloud from "@/components/logo-cloud";
 import BannedRedirect from "@/components/banned-redirect";
 import Features from './features-4';
-import Pricing from './pricing';
 
 const ContentSection = dynamic(() => import('@/components/content-3'), { ssr: false });
 const AboutSports = dynamic(() => import('@/components/aboutSports'), { ssr: false });
+const Pricing = dynamic(() => import('@/components/pricing'), { ssr: false });
 const CallToAction = dynamic(() => import('@/components/call-to-action'), { ssr: false });
 const FAQsThree = dynamic(() => import('@/components/faqs-3'), { ssr: false });
 const TeamSection = dynamic(() => import('@/components/team'), { ssr: false });

@@ -552,6 +552,9 @@ Courtside features a sophisticated automation system that respects institutional
    
    # Test sports activation
    curl -X POST "http://localhost:3000/api/sports/activate?secret=YOUR_SECRET"
+
+   # Test bookings reset and archival
+   curl -X POST "http://localhost:3000/api/reset-bookings?secret=YOUR_SECRET"
    ```
 
 2. **Test GitHub Actions**:
