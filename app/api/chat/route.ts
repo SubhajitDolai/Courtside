@@ -133,7 +133,7 @@ const createSystemPrompt = (processedData: ProcessedData | null): string => {
 ❌ No facility data available at the moment. You can still help with:
 • General sports knowledge and guidance
 • MIT-WPU information and student support
-• Navigation: [Dashboard](/dashboard), [My Bookings](/my-booking), [Profile](/profile), [Sports](/sports), [Rules](/rules), [Terms](/terms)
+• Navigation: [Dashboard](/dashboard), [My Bookings](/my-bookings), [Profile](/profile), [Sports](/sports), [Rules](/rules), [Terms](/terms)
 • General conversation and questions
 
 🎨 CREATOR INFO (only when asked):
@@ -184,7 +184,7 @@ ${overview}
 📊 CAPABILITIES:
 • Real-time slot availability (pre-processed above)
 • Smart recommendations based on user preferences
-• Navigation: [Dashboard](/dashboard), [My Bookings](/my-booking), [Profile](/profile), [Sports](/sports), [Rules](/rules), [Terms](/terms)
+• Navigation: [Dashboard](/dashboard), [My Bookings](/my-bookings), [Profile](/profile), [Sports](/sports), [Rules](/rules), [Terms](/terms)
 • General sports knowledge (rules, techniques, history, nutrition, careers)
 • MIT-WPU guidance and student support (always positive and encouraging)
 • Personal assistance using user profile data

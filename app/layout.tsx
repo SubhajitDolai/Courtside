@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { LoadingBarProvider } from "@/components/providers/LoadingBarProvider";
+import { NotificationProvider } from "@/components/providers/NotificationProvider";
 import { GlobalRouteChangeHandler } from "@/components/GlobalRouteChangeHandler";
 
 const geistSans = Geist({
@@ -39,8 +40,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LoadingBarProvider>
-            <GlobalRouteChangeHandler />
-            {children}
+            <NotificationProvider>
+              <GlobalRouteChangeHandler />
+              {children}
+            </NotificationProvider>
           </LoadingBarProvider>
           <Analytics />
           <SpeedInsights />

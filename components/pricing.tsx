@@ -5,10 +5,10 @@ import BookNowButton from '@/components/bookNowBtn'
 
 export default function Pricing() {
     return (
-        <div className="relative py-16 md:py-32">
+        <div id="pricing" className="relative py-16 md:py-32">
             <div className="mx-auto max-w-5xl px-6">
                 <div className="mx-auto max-w-2xl text-center">
-                    <h2 className="text-balance text-3xl font-bold md:text-4xl lg:text-5xl">Book Your Game, Own Your Moment</h2>
+                    <h2 className="text-balance text-3xl font-bold md:text-4xl lg:text-5xl">Fair & Affordable Pricing</h2>
                 </div>
                 <div className="mt-8 md:mt-20">
                     <div className="bg-card relative rounded-3xl border shadow-2xl shadow-zinc-950/5">

@@ -65,7 +65,7 @@ export default function SportsToggleButtons({
             <Button
               disabled={toggling}
               size="sm"
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white"
             >
               {toggling ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -87,7 +87,7 @@ export default function SportsToggleButtons({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction 
                 onClick={() => toggleAllSports(true)}
-                className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white"
               >
                 Activate All
               </AlertDialogAction>
@@ -103,6 +103,7 @@ export default function SportsToggleButtons({
               disabled={toggling}
               size="sm"
               variant="destructive"
+              className="text-white"
             >
               {toggling ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -124,7 +125,7 @@ export default function SportsToggleButtons({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction 
                 onClick={() => toggleAllSports(false)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
               >
                 Deactivate All
               </AlertDialogAction>

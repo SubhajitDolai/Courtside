@@ -7,28 +7,28 @@ import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 const links = [
     {
-        title: 'Developer',
-        href: 'https://www.linkedin.com/in/subhajit-dolai',
+        title: 'Features',
+        href: '#features',
     },
     {
         title: 'Facilities',
-        href: 'https://mitwpu.edu.in/life-wpu/sports',
+        href: '#facilities',
     },
     {
-        title: 'Achievements',
-        href: 'https://mitwpu.edu.in/about-us/student-achievements',
+        title: 'Team',
+        href: '#team',
     },
     {
         title: 'Pricing',
-        href: '#',
+        href: '#pricing',
     },
     {
         title: 'Help',
-        href: '#',
+        href: '#faq',
     },
     {
         title: 'About',
-        href: 'https://mitwpu.edu.in/about-us/about-mit',
+        href: '#',
     },
 ]
 
@@ -38,9 +38,9 @@ export default function FooterSection() {
 
     const handleClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
         const isExternal = href.startsWith('http');
-        const isNoOp = href === '#';
+        const isAnchorLink = href.startsWith('#');
 
-        if (isExternal || isNoOp) {
+        if (isExternal || isAnchorLink) {
             return; // Let the browser handle it
         }
 

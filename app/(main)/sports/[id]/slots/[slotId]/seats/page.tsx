@@ -23,6 +23,7 @@ import { getTodayDateInIST } from '@/lib/date'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import BannedRedirect from '@/components/banned-redirect'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
+import QRCodeComponent from 'react-qr-code'
 
 // Define types for real-time subscription
 interface Booking {
@@ -54,9 +55,8 @@ export default function SeatsPage() {
   const sportId = params.id as string
   const slotId = params.slotId as string
 
-  // Invite state & qrLoading state
+  // Invite state
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [qrLoading, setQrLoading] = useState(true);
 
   // ✅ Seat limit from sports table
   const [seatLimit, setSeatLimit] = useState<number | null>(null)
@@ -1047,24 +1047,12 @@ export default function SeatsPage() {
                   <div className="text-center text-neutral-700 dark:text-neutral-300 mt-4">
                     {/* QR Code with Loading State */}
                     <div className="flex justify-center my-4 relative min-h-[170px]">
-                      {qrLoading ? (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader className="h-8 w-8 animate-spin text-primary" />
-                          <span className="sr-only">Loading QR code</span>
-                        </div>
-                      ) : null}
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-                          window.location.href
-                        )}&size=150x150`}
-                        alt="QR Code"
-                        className={`rounded-lg border border-gray-300 shadow-md bg-white p-2 ${qrLoading ? 'opacity-0' : 'opacity-100'}`}
-                        onLoad={() => setQrLoading(false)}
-                        onError={() => {
-                          setQrLoading(false);
-                          toast.error("Failed to load QR code");
-                        }}
-                        style={{ transition: 'opacity 0.3s ease' }}
+                      <QRCodeComponent
+                        value={typeof window !== 'undefined' ? window.location.href : ''}
+                        size={150}
+                        className="rounded-lg border border-gray-300 shadow-md bg-white p-2"
+                        style={{ height: "150px", maxWidth: "150px", width: "150px" }}
+                        viewBox="0 0 150 150"
                       />
                     </div>
                     <p className="text-sm text-muted-foreground mb-6">

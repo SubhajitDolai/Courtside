@@ -39,9 +39,9 @@ export default function HomeShell() {
       <Features />
       <ContentSection />
       <AboutSports />
-      <CallToAction />
       <Pricing />
       <FAQsThree />
+      <CallToAction />
       <TeamSection />
       <MorphingPopoverTextarea />
       <FooterSection />

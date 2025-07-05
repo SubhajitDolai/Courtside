@@ -30,6 +30,9 @@ const SportCard = React.memo(function SportCard({
   isLoading: boolean
   onViewSlots: (sportId: string) => void
 }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
   return (
     <Card 
       className="group border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] overflow-hidden"
@@ -44,15 +47,40 @@ const SportCard = React.memo(function SportCard({
       <CardContent className="space-y-4">
         {/* Sport Image */}
         <div className="relative w-full h-48 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+          {/* Loading Skeleton Overlay - Shows until image loads */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <Skeleton className="w-full h-full rounded-lg" />
+            </div>
+          )}
+          
+          {/* Error State - Shows if image fails to load */}
+          {imageError && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">
+              <Trophy className="h-8 w-8 mb-2 opacity-50" />
+              <span className="text-sm">Image unavailable</span>
+            </div>
+          )}
+          
           <Image
             src={sport.image_url || '/mit.webp'}
             alt={sport.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={index < 4} // ✅ Priority load first 4 images
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+            onLoad={() => {
+              setImageLoaded(true)
+              setImageError(false)
+            }}
+            onError={() => {
+              setImageLoaded(false)
+              setImageError(true)
+            }}
           />
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

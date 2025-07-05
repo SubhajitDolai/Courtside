@@ -184,7 +184,7 @@ export default function SportSlotsPage() {
             
             {/* Cards Skeleton - EXACTLY MATCHING */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 9 }).map((_, i) => (
                 <div key={i} className="group border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm rounded-xl overflow-hidden">
                   {/* CardHeader equivalent - pb-4 p-6 */}
                   <div className="pb-4 p-6">

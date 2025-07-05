@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { createClient } from "@/utils/supabase/client";
+import { useNotifications } from "@/components/providers/NotificationProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,6 +72,7 @@ export const navigationItems = [
 
 export default function GlassmorphNavbar() {
   const { user, loading } = useCurrentUser();
+  const { hasNotifications } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -79,7 +80,6 @@ export default function GlassmorphNavbar() {
   const [, startTransition] = useTransition();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [hasNotifications, setHasNotifications] = useState(false);
 
   const [loadingBarVisible, setLoadingBarVisible] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -118,26 +118,6 @@ export default function GlassmorphNavbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Check for active notifications
-  useEffect(() => {
-    const checkNotifications = async () => {
-      if (!user) return;
-      
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('id')
-        .eq('is_active', true)
-        .limit(1);
-      
-      if (!error && data) {
-        setHasNotifications(data.length > 0);
-      }
-    };
-
-    checkNotifications();
-  }, [user]);
 
   useEffect(() => {
     if (loadingBarVisible) {

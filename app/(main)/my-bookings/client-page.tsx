@@ -126,11 +126,13 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
     })
   }, [supabase, userId, initialBookings])
 
-  // ✅ Use Realtime subscription with initial data
+  // ✅ Use Realtime subscription with initial data - filter by user_id
   const { data: bookings, loading: loadingBookings } = useRealtimeSubscription<Booking>(
     'bookings',
     initialBookings as Booking[],
-    fetchBookings
+    fetchBookings,
+    'user_id',
+    userId
   )
 
   // Generate QR code when dialog opens
