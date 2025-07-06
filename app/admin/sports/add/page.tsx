@@ -24,7 +24,7 @@ import {
 import Image from 'next/image'
 import {
   ImageIcon,
-  Loader2,
+  Loader,
   AlertCircle,
   CheckCircle2,
   Upload,
@@ -459,7 +459,7 @@ export default function AddSportPage() {
                       {imageState.loading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Loading image...</span>
                           </div>
                         </div>
@@ -596,7 +596,7 @@ export default function AddSportPage() {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Adding...
                     </>
                   ) : (
@@ -636,7 +636,7 @@ export default function AddSportPage() {
             <AlertDialogAction onClick={handleConfirmedSubmit} disabled={submitting}>
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
                 </>
               ) : (

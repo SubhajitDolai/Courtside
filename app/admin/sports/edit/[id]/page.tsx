@@ -24,7 +24,7 @@ import {
 import Image from 'next/image'
 import {
   ImageIcon,
-  Loader2,
+  Loader,
   AlertCircle,
   CheckCircle2,
   Save,
@@ -563,7 +563,7 @@ export default function EditSportPage() {
                       {imageState.loading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                           <div className="flex flex-col items-center gap-2">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Loading image...</span>
                           </div>
                         </div>
@@ -701,7 +701,7 @@ export default function EditSportPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       <span className="hidden sm:inline">Saving...</span>
                       <span className="sm:hidden">Saving...</span>
                     </>
@@ -753,7 +753,7 @@ export default function EditSportPage() {
             <AlertDialogAction onClick={handleSave} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -799,7 +799,7 @@ export default function EditSportPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

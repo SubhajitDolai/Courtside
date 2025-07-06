@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader2, Trash2 } from 'lucide-react'
+import { CalendarIcon, Search, MessageSquare, User, Mail, Hash, Clock, ChevronDown, ChevronUp, Loader, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
@@ -427,7 +427,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                       disabled={isDeleting}
                     >
                       {isDeleting ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
+                        <Loader className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
                       ) : (
                         <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       )}
@@ -543,7 +543,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                             disabled={deletingIds.has(item.id)}
                           >
                             {deletingIds.has(item.id) ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
+                              <Loader className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
                             ) : (
                               <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             )}
@@ -634,7 +634,7 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
               <div ref={loadMoreRef} className="flex justify-center py-6 sm:py-8">
                 {isLoading ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
+                    <Loader className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
                     <span className="text-xs font-medium sm:text-sm">
                       <span className="hidden sm:inline">Loading more feedback...</span>
                       <span className="sm:hidden">Loading...</span>

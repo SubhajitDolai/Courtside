@@ -30,7 +30,7 @@ import {
   Clock,
   Users,
   Calendar,
-  Loader2,
+  Loader,
   AlertCircle,
   Plus
 } from 'lucide-react'
@@ -548,7 +548,7 @@ export default function AddSlotPage() {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Adding...
                     </>
                   ) : (
@@ -591,7 +591,7 @@ export default function AddSlotPage() {
             <AlertDialogAction onClick={handleConfirmedSubmit} disabled={submitting}>
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Adding...
                 </>
               ) : (

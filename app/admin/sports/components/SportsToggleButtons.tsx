@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Power, PowerOff, Loader2 } from 'lucide-react'
+import { Power, PowerOff, Loader } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/utils/supabase/client'
@@ -68,7 +68,7 @@ export default function SportsToggleButtons({
               className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white"
             >
               {toggling ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" />
               ) : (
                 <Power className="h-4 w-4" />
               )}
@@ -106,7 +106,7 @@ export default function SportsToggleButtons({
               className="text-white"
             >
               {toggling ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" />
               ) : (
                 <PowerOff className="h-4 w-4" />
               )}

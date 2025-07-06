@@ -86,8 +86,8 @@ export default function AdminNotificationsPage() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="bg-white/70 dark:bg-neutral-800/70 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-700/50">
+                {[...Array(1)].map((_, i) => (
+                  <Card key={i} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
                     <CardHeader>
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 space-y-2">

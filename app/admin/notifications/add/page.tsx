@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Loader2, Bell } from 'lucide-react'
+import { Loader, Bell } from 'lucide-react'
 import Link from 'next/link'
 
 interface FormData {
@@ -160,7 +160,7 @@ export default function AddNotificationPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
                     Creating...
                   </>
                 ) : (

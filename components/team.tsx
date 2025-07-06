@@ -9,7 +9,7 @@ const members = [
     },
     {
         name: 'Om Jawanjal',
-        role: 'Manager',
+        role: 'Support & Coordination',
         avatar: 'https://media.licdn.com/dms/image/v2/D5603AQGLmDWHGeIbFw/profile-displayphoto-shrink_800_800/B56Za5oi07GgAc-/0/1746871137057?e=1752105600&v=beta&t=PVXytCsiCRnJVWzol151xziwoeM8NHpfq0xFtjozYsc',
         linkedin: 'https://www.linkedin.com/in/om-jawanjal-5606162a4/',
     },

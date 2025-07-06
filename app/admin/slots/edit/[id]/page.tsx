@@ -31,7 +31,7 @@ import {
   Clock,
   Users,
   Calendar,
-  Loader2,
+  Loader,
   AlertCircle,
   Save,
   Trash2
@@ -414,7 +414,7 @@ export default function EditSlotPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-start justify-center p-4 pt-30 sm:pt-4 sm:items-center">
         <div className="flex flex-col items-center space-y-2">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <Loader className="w-6 h-6 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Loading slot...</p>
         </div>
       </div>
@@ -646,7 +646,7 @@ export default function EditSlotPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
                       <span className="sm:hidden">Saving...</span>
                       <span className="hidden sm:inline">Saving...</span>
                     </>
@@ -702,7 +702,7 @@ export default function EditSlotPage() {
             <AlertDialogAction onClick={handleSave} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -748,7 +748,7 @@ export default function EditSlotPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

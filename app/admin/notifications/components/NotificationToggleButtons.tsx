@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Power, PowerOff, Loader2 } from 'lucide-react'
+import { Power, PowerOff, Loader } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/utils/supabase/client'
@@ -79,7 +79,7 @@ export default function NotificationToggleButtons({
           <AlertDialogTrigger asChild>
             <Button variant="outline" size="sm" disabled={isActivating} className="w-full sm:w-auto h-9">
               {isActivating ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Power className="w-4 h-4 mr-2" />
               )}
@@ -108,7 +108,7 @@ export default function NotificationToggleButtons({
           <AlertDialogTrigger asChild>
             <Button variant="outline" size="sm" disabled={isDeactivating} className="w-full sm:w-auto h-9">
               {isDeactivating ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <PowerOff className="w-4 h-4 mr-2" />
               )}

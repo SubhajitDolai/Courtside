@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DatePickerWithRange } from '@/components/ui/date-range-picker'
-import { Search, RefreshCw, Filter, Target, Activity, X } from 'lucide-react'
+import { Search, RefreshCw, Filter, ListChecks, Trophy, X } from 'lucide-react'
 import { DateRange } from "react-day-picker"
 
 interface Sport {
@@ -151,7 +151,7 @@ function BookingHistoryFilters({
               >
                 <SelectTrigger className="border-neutral-200 dark:border-neutral-700 w-full">
                   <div className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-neutral-500" />
+                    <ListChecks className="h-4 w-4 text-neutral-500" />
                     <SelectValue placeholder="Status" />
                   </div>
                 </SelectTrigger>
@@ -178,7 +178,7 @@ function BookingHistoryFilters({
               >
                 <SelectTrigger className="border-neutral-200 dark:border-neutral-700 w-full">
                   <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-neutral-500" />
+                    <Trophy className="h-4 w-4 text-neutral-500" />
                     <SelectValue placeholder="Sport" />
                   </div>
                 </SelectTrigger>

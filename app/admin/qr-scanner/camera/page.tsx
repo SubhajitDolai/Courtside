@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import {
   Camera,
   QrCode,
-  Loader2,
+  Loader,
   Clock,
   Zap,
   AlertCircle,
@@ -1185,7 +1185,7 @@ export default function CameraScannerPage() {
                     <QrCode className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">QR Scanner</h3>
                     <div className="ml-auto flex items-center gap-2">
-                      {processing && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
+                      {processing && <Loader className="h-3 w-3 animate-spin text-blue-500" />}
                       <div className={`w-2 h-2 rounded-full ${scanning ? 'bg-green-500 animate-pulse' : 'bg-neutral-400'}`} />
                       <span className="text-xs text-neutral-600 dark:text-neutral-400">
                         {processing ? 'Processing...' : scanning ? 'Ready' : 'Initializing'}
@@ -1247,7 +1247,7 @@ export default function CameraScannerPage() {
                             className="h-7 px-2 text-xs sm:h-8 sm:px-3 min-w-0 flex-shrink-0"
                           >
                             {switchingCamera ? (
-                              <Loader2 className="h-3 w-3 animate-spin sm:mr-1" />
+                              <Loader className="h-3 w-3 animate-spin sm:mr-1" />
                             ) : (
                               <SwitchCamera className="h-3 w-3 sm:mr-1" />
                             )}

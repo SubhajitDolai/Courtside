@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
-import { Loader2, Bell, Trash2 } from 'lucide-react'
+import { Loader, Bell, Trash2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -219,7 +219,7 @@ export default function EditNotificationPage() {
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm" disabled={isDeleting}>
                     {isDeleting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
                       <Trash2 className="w-4 h-4 mr-2" />
                     )}
@@ -313,7 +313,7 @@ export default function EditNotificationPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
                     Updating...
                   </>
                 ) : (
