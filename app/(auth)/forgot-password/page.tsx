@@ -20,30 +20,28 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     start(); // Start the global loading bar
 
-    const supabase = createClient();
-
-    // // ✅ Restrict to mitwpu.edu.in emails
-    // if (!email.endsWith('@mitwpu.edu.in')) {
-    //   toast.error('Only mitwpu.edu.in emails are allowed');
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // ✅ Check if email exists in 'profiles' table
-    const { data: user, error: fetchError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('email', email)
-      .single();
-
-    if (fetchError || !user) {
+    // Check if user exists in Supabase Auth users table via API route
+    const res = await fetch('/api/check-user-exists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const result = await res.json();
+    if (res.status !== 200) {
+      toast.error(result.error || 'Could not check user. Try again later.');
+      setLoading(false);
+      finish();
+      return;
+    }
+    if (!result.exists) {
       toast.error('This email is not registered');
       setLoading(false);
-      finish(); // Finish the loading bar on error
+      finish();
       return;
     }
 
-    // ✅ Trigger password reset
+    const supabase = createClient();
+    // ✅ Trigger password reset directly from Supabase Auth
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });

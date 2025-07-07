@@ -30,20 +30,33 @@ import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [userEmail, setUserEmail] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const { start, finish } = useGlobalLoadingBar()
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setPasswordError("");
     setIsLoading(true)
     start()
 
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const confirm = formData.get('confirmPassword') as string
     setUserEmail(email) // Store email for display in dialog
-    
+
+    if (password !== confirm) {
+      setIsLoading(false)
+      finish()
+      setPasswordError("Passwords do not match")
+      return
+    }
+
     const res = await signup(formData)
 
     setIsLoading(false)
@@ -88,7 +101,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Password"
+                      placeholder="Create Password"
                       required
                       className="pr-10"
                     />
@@ -101,6 +114,34 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      required
+                      className="pr-10"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-2 top-2/4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {passwordError && (
+                    <p className="text-xs text-red-600 mt-1">{passwordError}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
