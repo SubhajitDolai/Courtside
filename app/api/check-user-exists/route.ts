@@ -20,6 +20,7 @@ export async function POST(req: Request) {
 
     const data = await response.json()
     const exactMatch = (data.users || []).find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (user: any) => user.email && user.email.toLowerCase() === email.toLowerCase()
     )
 
