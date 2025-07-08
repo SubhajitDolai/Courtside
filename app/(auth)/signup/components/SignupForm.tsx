@@ -72,6 +72,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
         return
       }
     } catch (err) {
+      console.log("Error:", err)
       setIsLoading(false)
       finish()
       toast.error('Could not check if user exists. Please try again.')
