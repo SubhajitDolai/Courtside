@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import React, { useState } from 'react'
 
 const members = [
     {
@@ -74,6 +75,33 @@ const members = [
 // ]
 
 export default function TeamSection() {
+    // Track loading state for each image
+    const [loadedImages, setLoadedImages] = useState(Array(members.length).fill(false))
+    // const [loadedLeaders, setLoadedLeaders] = useState(Array(leaders.length).fill(false))
+    // const [loadedWorkers, setLoadedWorkers] = useState(Array(workers.length).fill(false))
+
+    const handleImageLoad = (index: number) => {
+        setLoadedImages((prev) => {
+            const updated = [...prev]
+            updated[index] = true
+            return updated
+        })
+    }
+    // const handleLeaderImageLoad = (index: number) => {
+    //     setLoadedLeaders((prev) => {
+    //         const updated = [...prev]
+    //         updated[index] = true
+    //         return updated
+    //     })
+    // }
+    // const handleWorkerImageLoad = (index: number) => {
+    //     setLoadedWorkers((prev) => {
+    //         const updated = [...prev]
+    //         updated[index] = true
+    //         return updated
+    //     })
+    // }
+
     return (
         <section id='team' className="py-12 md:py-32">
             <div className="mx-auto max-w-3xl px-8 lg:px-0">
@@ -91,12 +119,17 @@ export default function TeamSection() {
                                 className="hover:opacity-90 transition-opacity"
                             >
                                 <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+                                    {/* Skeleton loader */}
+                                    {!loadedImages[index] && (
+                                        <div className="absolute top-0 left-0 w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-full z-10" />
+                                    )}
                                     <Image
                                         src={member.avatar}
                                         alt={member.name}
                                         fill
                                         sizes="80px"
-                                        className="aspect-square rounded-full object-cover"
+                                        className={`aspect-square rounded-full object-cover ${!loadedImages[index] ? 'invisible' : ''}`}
+                                        onLoad={() => handleImageLoad(index)}
                                     />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
@@ -112,11 +145,16 @@ export default function TeamSection() {
                         {leaders.map((member, index) => (
                             <div key={index}>
                                 <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+
+                                    {!loadedLeaders[index] && (
+                                        <div className="absolute top-0 left-0 w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-full z-10" />
+                                    )}
                                     <Image
                                         src={member.avatar}
                                         alt={member.name}
                                         fill
-                                        className="aspect-square rounded-full object-cover"
+                                        className={`aspect-square rounded-full object-cover ${!loadedLeaders[index] ? 'invisible' : ''}`}
+                                        onLoad={() => handleLeaderImageLoad(index)}
                                     />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>
@@ -132,11 +170,16 @@ export default function TeamSection() {
                         {workers.map((member, index) => (
                             <div key={index}>
                                 <div className="bg-background size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5 relative">
+
+                                    {!loadedWorkers[index] && (
+                                        <div className="absolute top-0 left-0 w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-full z-10" />
+                                    )}
                                     <Image
                                         src={member.avatar}
                                         alt={member.name}
                                         fill
-                                        className="aspect-square rounded-full object-cover"
+                                        className={`aspect-square rounded-full object-cover ${!loadedWorkers[index] ? 'invisible' : ''}`}
+                                        onLoad={() => handleWorkerImageLoad(index)}
                                     />
                                 </div>
                                 <span className="mt-2 block text-sm">{member.name}</span>

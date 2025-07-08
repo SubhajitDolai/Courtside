@@ -57,6 +57,27 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       return
     }
 
+    // Check if user already exists
+    try {
+      const checkRes = await fetch('/api/check-user-exists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const checkData = await checkRes.json()
+      if (checkData.exists) {
+        setIsLoading(false)
+        finish()
+        toast.error('User with this email already exists')
+        return
+      }
+    } catch (err) {
+      setIsLoading(false)
+      finish()
+      toast.error('Could not check if user exists. Please try again.')
+      return
+    }
+
     const res = await signup(formData)
 
     setIsLoading(false)
