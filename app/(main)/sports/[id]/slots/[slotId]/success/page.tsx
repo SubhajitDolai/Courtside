@@ -47,6 +47,11 @@ export default function BookingSuccessPage() {
   const { start } = useGlobalLoadingBar()
   const supabase = createClient()
 
+  // Prefetch /my-bookings on mount
+  useEffect(() => {
+    router.prefetch('/my-bookings')
+  }, [router])
+
   useEffect(() => {
     setMounted(true)
 

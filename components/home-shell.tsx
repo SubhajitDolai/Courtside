@@ -30,6 +30,8 @@ export default function HomeShell() {
     router.prefetch('/my-bookings');
     router.prefetch('/assistant');
     router.prefetch('/dashboard');
+    router.prefetch('/notifications');
+    router.prefetch('/profile');
   }, [router]);
 
   return (

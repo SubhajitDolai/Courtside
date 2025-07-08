@@ -271,6 +271,15 @@ export default function SportsPageClient({ sports: initialSports }: { sports: Sp
     return () => clearTimeout(timer)
   }, [])
 
+  // Prefetch /sports/[id]/slots for each sport after loading
+  useEffect(() => {
+    if (!isLoading && sports && sports.length) {
+      sports.forEach((sport) => {
+        router.prefetch(`/sports/${sport.id}/slots`)
+      })
+    }
+  }, [isLoading, sports, router])
+
   // ✅ Memoize handleViewSlots to prevent SportsList re-renders
   const handleViewSlots = useCallback((sportId: string) => {
     setLoadingId(sportId)
