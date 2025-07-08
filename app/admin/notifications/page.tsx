@@ -148,8 +148,8 @@ export default function AdminNotificationsPage() {
               </CardTitle>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <Link href="/admin/notifications/add" className="w-full sm:w-auto">
-                  <Button className="w-full h-9 bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button className="w-full">
+                    <Plus className="w-4 h-4" />
                     Add Notification
                   </Button>
                 </Link>
@@ -200,7 +200,7 @@ export default function AdminNotificationsPage() {
                   <div className="flex-shrink-0">
                     <Link href={`/admin/notifications/edit/${notification.id}`}>
                       <Button variant="outline" size="sm" className="bg-white/50 dark:bg-neutral-800/50">
-                        <Edit className="w-4 h-4 sm:mr-2" />
+                        <Edit className="w-4 h-4" />
                         <span className="hidden sm:inline">Edit</span>
                       </Button>
                     </Link>

@@ -548,12 +548,12 @@ export default function AddSlotPage() {
                 >
                   {submitting ? (
                     <>
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Adding...
                     </>
                   ) : (
                     <>
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="h-4 w-4" />
                       Add Slot
                     </>
                   )}
@@ -591,7 +591,7 @@ export default function AddSlotPage() {
             <AlertDialogAction onClick={handleConfirmedSubmit} disabled={submitting}>
               {submitting ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Adding...
                 </>
               ) : (

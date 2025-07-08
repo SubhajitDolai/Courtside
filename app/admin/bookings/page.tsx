@@ -696,7 +696,7 @@ export default function AdminBookingsPage() {
             >
               {deleting ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader className="w-4 h-4 animate-spin" />
                   Deleting...
                 </>
               ) : (
@@ -731,7 +731,7 @@ export default function AdminBookingsPage() {
             >
               {loading ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader className="w-4 h-4 animate-spin" />
                   Please wait...
                 </>
               ) : (

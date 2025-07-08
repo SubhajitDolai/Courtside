@@ -171,7 +171,7 @@ export function OnboardingForm() {
               >
                 {pending ? (
                   <>
-                    <Loader className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader className="w-5 h-5 animate-spin" />
                     Setting up your profile...
                   </>
                 ) : (

@@ -701,13 +701,13 @@ export default function EditSportPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       <span className="hidden sm:inline">Saving...</span>
                       <span className="sm:hidden">Saving...</span>
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <Save className="h-4 w-4" />
                       <span className="hidden sm:inline">Save Changes</span>
                       <span className="sm:hidden">Save</span>
                     </>
@@ -720,7 +720,7 @@ export default function EditSportPage() {
                   disabled={loading}
                   className="flex-1"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                   Delete
                 </Button>
               </div>
@@ -753,7 +753,7 @@ export default function EditSportPage() {
             <AlertDialogAction onClick={handleSave} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -799,7 +799,7 @@ export default function EditSportPage() {
             >
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

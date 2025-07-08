@@ -219,9 +219,9 @@ export default function EditNotificationPage() {
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm" disabled={isDeleting}>
                     {isDeleting ? (
-                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader className="w-4 h-4 animate-spin" />
                     ) : (
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4" />
                     )}
                     Delete
                   </Button>
@@ -313,7 +313,7 @@ export default function EditNotificationPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader className="w-4 h-4 animate-spin" />
                     Updating...
                   </>
                 ) : (

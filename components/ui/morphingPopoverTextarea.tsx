@@ -31,7 +31,7 @@ export function MorphingPopoverTextarea() {
       open={isOpen}
       onOpenChange={setIsOpen}
     >
-      <MorphingPopoverTrigger className='flex h-9 items-center rounded-lg border border-neutral-950/10 bg-white px-3 text-neutral-950 dark:border-neutral-50/10 dark:bg-neutral-700 dark:text-neutral-50'>
+      <MorphingPopoverTrigger className='flex h-9 cursor-pointer items-center rounded-lg border border-neutral-950/10 bg-white px-3 text-neutral-950 dark:border-neutral-50/10 dark:bg-neutral-700 dark:text-neutral-50'>
         <motion.span layoutId={`popover-label-${uniqueId}`} className='text-sm'>
           Share Feedback
         </motion.span>
@@ -62,7 +62,7 @@ export function MorphingPopoverTextarea() {
             <div key='close' className='flex justify-between py-3 pr-4 pl-2'>
               <button
                 type='button'
-                className='flex items-center rounded-lg bg-white px-2 py-1 text-sm text-neutral-950 hover:bg-neutral-100 dark:bg-neutral-700 dark:text-neutral-50 dark:hover:bg-neutral-600'
+                className='flex items-center cursor-pointer rounded-lg bg-white px-2 py-1 text-sm text-neutral-950 hover:bg-neutral-100 dark:bg-neutral-700 dark:text-neutral-50 dark:hover:bg-neutral-600'
                 onClick={closeMenu}
                 aria-label='Close popover'
               >
@@ -72,7 +72,7 @@ export function MorphingPopoverTextarea() {
                 />
               </button>
               <button
-                className='relative ml-1 flex h-8 shrink-0 scale-100 appearance-none items-center justify-center rounded-lg border border-neutral-950/10 bg-transparent px-2 text-sm text-neutral-500 transition-colors select-none hover:bg-neutral-100 hover:text-neutral-800 focus-visible:ring-2 active:scale-[0.98] dark:border-neutral-50/10 dark:text-neutral-50 dark:hover:bg-neutral-800'
+                className='relative cursor-pointer ml-1 flex h-8 shrink-0 scale-100 appearance-none items-center justify-center rounded-lg border border-neutral-950/10 bg-transparent px-2 text-sm text-neutral-500 transition-colors select-none hover:bg-neutral-100 hover:text-neutral-800 focus-visible:ring-2 active:scale-[0.98] dark:border-neutral-50/10 dark:text-neutral-50 dark:hover:bg-neutral-800'
                 type='submit'
                 aria-label='Submit note'
                 onClick={async () => {

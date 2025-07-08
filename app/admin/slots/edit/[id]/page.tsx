@@ -646,13 +646,13 @@ export default function EditSlotPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       <span className="sm:hidden">Saving...</span>
                       <span className="hidden sm:inline">Saving...</span>
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <Save className="h-4 w-4" />
                       <span className="sm:hidden">Save</span>
                       <span className="hidden sm:inline">Save Changes</span>
                     </>
@@ -665,7 +665,7 @@ export default function EditSlotPage() {
                   disabled={loading}
                   className="w-full sm:flex-1"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                   Delete
                 </Button>
               </div>
@@ -702,7 +702,7 @@ export default function EditSlotPage() {
             <AlertDialogAction onClick={handleSave} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -748,7 +748,7 @@ export default function EditSlotPage() {
             >
               {loading ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

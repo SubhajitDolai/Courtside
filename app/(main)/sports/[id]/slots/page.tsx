@@ -201,7 +201,7 @@ export default function SportSlotsPage() {
                   </div>
                   
                   <div className="p-6">
-                    <Skeleton className="h-11 w-full rounded-md" /> {/* Button skeleton */}
+                    <Skeleton className="h-10 w-full rounded-md" /> {/* Button skeleton */}
                   </div>
                 </div>
               ))}
@@ -312,7 +312,7 @@ export default function SportSlotsPage() {
                     <CardContent>
                       <Button 
                         onClick={() => handleViewSeats(slot.id)} 
-                        className="w-full h-11 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                        className="w-full h-10 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                         disabled={past || loadingSlotId === slot.id}
                       >
                         {loadingSlotId === slot.id ? (

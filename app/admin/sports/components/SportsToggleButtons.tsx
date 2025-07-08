@@ -101,7 +101,7 @@ export default function SportsToggleButtons({
           <AlertDialogTrigger asChild>
             <Button
               disabled={toggling}
-              size="sm"
+              size='default'
               variant="destructive"
               className="text-white"
             >

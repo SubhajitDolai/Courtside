@@ -93,12 +93,12 @@ export default function ErrorPage() {
                 >
                   {loadingStates.login ? (
                     <>
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Loading...
                     </>
                   ) : (
                     <>
-                      <LogIn className="h-4 w-4 mr-2" />
+                      <LogIn className="h-4 w-4" />
                       Login
                     </>
                   )}
@@ -112,12 +112,12 @@ export default function ErrorPage() {
                 >
                   {loadingStates.signup ? (
                     <>
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Loading...
                     </>
                   ) : (
                     <>
-                      <UserPlus className="h-4 w-4 mr-2" />
+                      <UserPlus className="h-4 w-4" />
                       Sign Up
                     </>
                   )}
@@ -132,7 +132,7 @@ export default function ErrorPage() {
                   size="default"
                   className="h-11 shadow-sm hover:shadow-md transition-all duration-300"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-4 w-4" />
                   Refresh
                 </Button>
                 <Button 
@@ -144,12 +144,12 @@ export default function ErrorPage() {
                 >
                   {loadingStates.home ? (
                     <>
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Loading...
                     </>
                   ) : (
                     <>
-                      <Home className="h-4 w-4 mr-2" />
+                      <Home className="h-4 w-4" />
                       Home
                     </>
                   )}
@@ -183,12 +183,12 @@ export default function ErrorPage() {
           >
             {loadingStates.back ? (
               <>
-                <Loader className="h-3 w-3 mr-2 animate-spin" />
+                <Loader className="h-3 w-3 animate-spin" />
                 Loading...
               </>
             ) : (
               <>
-                <ArrowLeft className="h-3 w-3 mr-2" />
+                <ArrowLeft className="h-3 w-3" />
                 Go back
               </>
             )}

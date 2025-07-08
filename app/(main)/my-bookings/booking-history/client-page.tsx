@@ -15,7 +15,6 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import BannedRedirect from '@/components/banned-redirect'
 import BookingHistoryFilters, { FilterState, Sport } from './components/BookingHistoryFilters'
 import BookingHistoryTable from './components/BookingHistoryTable'
 
@@ -235,7 +234,6 @@ export default function MyBookingHistoryClient({ userId }: MyBookingHistoryClien
 
   return (
     <>
-      <BannedRedirect />
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Advanced Filters Section */}
         <BookingHistoryFilters

@@ -247,7 +247,7 @@ export function ProfileForm({ profile }: { profile: any }) {
             <div className="flex justify-center pt-6">
               <Button 
                 type="submit" 
-                className="gap-2" 
+                className="gap-2 cursor-pointer" 
                 disabled={loading}
               >
                 {loading ? (

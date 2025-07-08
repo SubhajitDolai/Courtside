@@ -9,7 +9,6 @@ import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 import { createClient } from '@/utils/supabase/client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import BannedRedirect from '@/components/banned-redirect'
 import { format } from 'date-fns'
 
 // ✅ Convert 24hr time to 12hr format
@@ -108,7 +107,6 @@ export default function BookingSuccessPage() {
   if (loading) {
     return (
       <>
-        <BannedRedirect />
         <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
             {/* Header Skeleton */}
@@ -213,7 +211,6 @@ export default function BookingSuccessPage() {
 
   return (
     <>
-      <BannedRedirect />
       <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
 
@@ -325,8 +322,8 @@ export default function BookingSuccessPage() {
                         <Button
                           onClick={handleCopy}
                           variant="outline"
-                          size="sm"
-                          className="shrink-0"
+                          size="lg"
+                          className="shrink-0 cursor-pointer"
                         >
                           {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                         </Button>
@@ -378,7 +375,7 @@ export default function BookingSuccessPage() {
                   start()
                   router.push('/my-bookings')
                 }}
-                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 dark:from-emerald-600 dark:to-emerald-700 dark:hover:from-emerald-700 dark:hover:to-emerald-800 text-white order-1 sm:order-2"
+                className="flex-1 cursor-pointer bg-gradient-to-r from-emerald-600 to-emerald-700 hover:grayscale-25 dark:from-emerald-600 dark:to-emerald-700 text-white order-1 sm:order-2"
               >
                 View My Bookings
               </Button>
@@ -386,7 +383,7 @@ export default function BookingSuccessPage() {
               <Button
                 onClick={handleGoBack}
                 variant="outline"
-                className="flex-1 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 order-2 sm:order-1"
+                className="flex-1 cursor-pointer border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 order-2 sm:order-1"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Spots

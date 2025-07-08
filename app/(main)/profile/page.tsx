@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
 import { PencilIcon, User, Loader } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
-import BannedRedirect from '@/components/banned-redirect'
 
 // Simple Skeleton component
 function Skeleton({ className }: { className: string }) {
@@ -172,7 +171,6 @@ export default function ProfilePage() {
 
   return (
     <>
-      <BannedRedirect />
       <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-28 sm:pt-32">
           {/* Header Section - Matching Sports Page */}
@@ -211,7 +209,7 @@ export default function ProfilePage() {
                 </div>
                 
                 <Button 
-                  className="gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm h-8 sm:h-10 flex-shrink-0" 
+                  className="gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm h-8 sm:h-10 flex-shrink-0 cursor-pointer" 
                   onClick={handleEdit} 
                   disabled={loading}
                 >

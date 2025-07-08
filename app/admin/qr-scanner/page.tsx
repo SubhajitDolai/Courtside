@@ -76,7 +76,7 @@ export default function QRScannerPage() {
               </div>
               
               <Button asChild 
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:grayscale-25 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={start}
               >
                 <Link href="/admin/qr-scanner/camera" className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function QRScannerPage() {
               </div>
               
               <Button asChild 
-                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:grayscale-25 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={start}
               >
                 <Link href="/admin/qr-scanner/iot" className="flex items-center gap-2">

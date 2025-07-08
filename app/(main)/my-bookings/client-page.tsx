@@ -56,6 +56,11 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
   const [activeTab, setActiveTab] = useState("all")
   const [showCancelDialog, setShowCancelDialog] = useState<string | null>(null)
 
+  // Prefetch booking-history page on mount
+  useEffect(() => {
+    router.prefetch('/my-bookings/booking-history')
+  }, [router])
+
   // QR Code states
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
   const [generatingQR, setGeneratingQR] = useState(false)
@@ -353,7 +358,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                   start()
                   router.push('/my-bookings/booking-history')
                 }}
-                className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
+                className="flex items-center justify-center gap-2 px-4 py-2 cursor-pointer text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200"
               >
                 <History className="h-4 w-4 animate-pulse" />
                 <span className="hidden sm:inline">View History</span>
@@ -364,10 +369,10 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
           <div className="p-6">
             <Tabs defaultValue="all" className="space-y-6" onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="all" className="text-xs sm:text-sm px-1 sm:px-4">All</TabsTrigger>
-                <TabsTrigger value="booked" className="text-xs sm:text-sm px-1 sm:px-4">Upcoming</TabsTrigger>
-                <TabsTrigger value="checked-in" className="text-xs sm:text-sm px-1 sm:px-4">Live</TabsTrigger>
-                <TabsTrigger value="checked-out" className="text-xs sm:text-sm px-1 sm:px-4">Past</TabsTrigger>
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-1 sm:px-4 cursor-pointer">All</TabsTrigger>
+                <TabsTrigger value="booked" className="text-xs sm:text-sm px-1 sm:px-4 cursor-pointer">Upcoming</TabsTrigger>
+                <TabsTrigger value="checked-in" className="text-xs sm:text-sm px-1 sm:px-4 cursor-pointer">Live</TabsTrigger>
+                <TabsTrigger value="checked-out" className="text-xs sm:text-sm px-1 sm:px-4 cursor-pointer">Past</TabsTrigger>
               </TabsList>
 
               <TabsContent value={activeTab} className="space-y-4">
@@ -449,9 +454,9 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                               size="sm"
                               variant="outline"
                               onClick={() => setShowBookingId(booking.id)}
-                              className="w-full text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-950/20 transition-colors"
+                              className="w-full cursor-pointer text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-950/20 transition-colors"
                             >
-                              <QrCode className="mr-2 h-4 w-4" />
+                              <QrCode className="h-4 w-4" />
                               View QR Code & Booking ID
                             </Button>
 
@@ -462,11 +467,11 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                                 variant="outline"
                                 disabled={canceling === booking.id || slotStarted}
                                 onClick={() => setShowCancelDialog(booking.id)}
-                                className="w-full text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800 dark:hover:bg-rose-950/20"
+                                className="w-full cursor-pointer text-rose-600 border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:border-rose-800 dark:hover:bg-rose-950/20"
                               >
                                 {canceling === booking.id ? (
                                   <>
-                                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader className="h-4 w-4 animate-spin" />
                                     Cancelling...
                                   </>
                                 ) : (
@@ -530,7 +535,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                     variant="outline"
                     size="icon"
                     onClick={() => handleCopy(showBookingId!)}
-                    className="ml-2 flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9"
+                    className="ml-2 flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9 cursor-pointer"
                   >
                     {copied ? <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-500" /> : <Copy className="w-3 h-3 sm:w-4 sm:h-4" />}
                   </Button>
@@ -579,7 +584,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                         size="sm"
                         onClick={downloadQRCode}
                         disabled={!qrCodeUrl}
-                        className="flex items-center gap-1 sm:gap-2 bg-white dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700 text-emerald-700 dark:text-emerald-300 transition-all duration-200 text-xs sm:text-sm px-3 sm:px-4 py-2"
+                        className="flex items-center cursor-pointer gap-1 sm:gap-2 bg-white dark:bg-neutral-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700 text-emerald-700 dark:text-emerald-300 transition-all duration-200 text-xs sm:text-sm px-3 sm:px-4 py-2"
                       >
                         <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                         Download QR
@@ -616,7 +621,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setShowBookingId(null)} className="w-full">
+              <Button onClick={() => setShowBookingId(null)} className="w-full cursor-pointer">
                 Close
               </Button>
             </DialogFooter>
@@ -670,7 +675,7 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                 variant="outline"
                 onClick={() => setShowCancelDialog(null)}
                 disabled={canceling === showCancelDialog}
-                className="w-full sm:w-auto order-2 sm:order-1"
+                className="w-full cursor-pointer sm:w-1/2 order-2 sm:order-1"
               >
                 Keep Booking
               </Button>
@@ -678,11 +683,11 @@ export default function MyBookingsClient({ initialBookings, userId }: MyBookings
                 variant="destructive"
                 onClick={() => showCancelDialog && handleCancel(showCancelDialog)}
                 disabled={canceling === showCancelDialog}
-                className="bg-rose-600 hover:bg-rose-700 text-white w-full sm:w-auto order-1 sm:order-2"
+                className="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white w-full sm:w-1/2 order-1 sm:order-2"
               >
                 {canceling === showCancelDialog ? (
                   <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin" />
                     Cancelling...
                   </>
                 ) : (

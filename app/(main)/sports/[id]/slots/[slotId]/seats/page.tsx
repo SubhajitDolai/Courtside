@@ -843,7 +843,7 @@ export default function SeatsPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => setIsInviteOpen(true)}
-                className="flex-1 h-14 sm:h-12 rounded-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-base order-1 sm:order-2"
+                className="flex-1 h-14 sm:h-12 cursor-pointer rounded-lg bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-base order-1 sm:order-2"
               >
                 <Users className="w-4 h-4 mr-2 animate-pulse" />
                 Invite Friends
@@ -852,7 +852,7 @@ export default function SeatsPage() {
               <Button
                 onClick={handleGoBack}
                 variant="outline"
-                className="flex-1 h-14 sm:h-12 rounded-lg border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 font-medium text-base order-2 sm:order-1"
+                className="flex-1 h-14 sm:h-12 cursor-pointer rounded-lg border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 font-medium text-base order-2 sm:order-1"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Slots
@@ -1004,7 +1004,7 @@ export default function SeatsPage() {
                     <p className="text-sm text-muted-foreground">Cancellation allowed up to 30 minutes prior.</p>
 
                     <div className="flex items-start sm:items-center space-x-2 pt-4 justify-center text-left">
-                      <Checkbox id="terms" checked={agreed} onCheckedChange={(checked) => setAgreed(!!checked)} />
+                      <Checkbox className='cursor-pointer' id="terms" checked={agreed} onCheckedChange={(checked) => setAgreed(!!checked)} />
                       <label htmlFor="terms" className="text-sm leading-snug">
                         I agree to the{' '}
                         <Link href="/terms" target="_blank" className="text-blue-600 dark:text-blue-400 underline underline-offset-4">
@@ -1017,13 +1017,13 @@ export default function SeatsPage() {
               </AlertDialogHeader>
 
               <AlertDialogFooter className="sm:justify-center gap-3 pt-4">
-                <AlertDialogCancel disabled={isBooking} className="sm:w-32 border text-neutral-700 dark:text-neutral-300">
+                <AlertDialogCancel disabled={isBooking} className="sm:w-32 cursor-pointer border text-neutral-700 dark:text-neutral-300">
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleConfirmBooking}
                   disabled={isBooking || !agreed}
-                  className={`sm:w-32 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 ${!agreed || isBooking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`sm:w-32 cursor-pointer ${!agreed || isBooking ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {isBooking ? (
                     <div className="flex items-center gap-2">
@@ -1062,7 +1062,7 @@ export default function SeatsPage() {
                     {/* Social Media Buttons - WhatsApp and Device only */}
                     <div className="flex flex-col gap-4">
                       <Button
-                        className="bg-[#25D366] text-white hover:bg-[#22c15e] py-3 rounded-lg shadow-md flex items-center justify-center gap-2"
+                        className="bg-[#25D366] text-white hover:bg-[#22c15e] py-3 rounded-lg shadow-md flex items-center justify-center gap-2 cursor-pointer"
                         onClick={() =>
                           window.open(
                             `https://wa.me/?text=${encodeURIComponent(
@@ -1080,7 +1080,7 @@ export default function SeatsPage() {
                         Share via WhatsApp
                       </Button>
                       <Button
-                        className="bg-neutral-800 text-white hover:bg-neutral-900 py-3 rounded-lg shadow-md flex items-center justify-center gap-2"
+                        className="bg-neutral-800 text-white hover:bg-neutral-900 py-3 rounded-lg cursor-pointer shadow-md flex items-center justify-center gap-2"
                         onClick={async () => {
                           if (!navigator.share) {
                             toast.error('Sharing not supported on this device');
@@ -1117,7 +1117,7 @@ export default function SeatsPage() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="sm:justify-center pt-6">
-                <AlertDialogCancel className="sm:w-32 border text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+                <AlertDialogCancel className="sm:w-32 cursor-pointer border text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
                   Close
                 </AlertDialogCancel>
               </AlertDialogFooter>

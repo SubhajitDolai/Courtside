@@ -19,7 +19,7 @@ export default function BookNowButton() {
 
   return (
     <Button
-      className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm min-w-[110px] h-[36px]"
+      className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm min-w-[110px] h-[36px] cursor-pointer"
       onClick={handleClick}
       disabled={isLoading}
     >

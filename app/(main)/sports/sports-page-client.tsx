@@ -101,7 +101,7 @@ const SportCard = React.memo(function SportCard({
 
           {/* Action Button */}
           <Button
-            className="w-full h-11 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-900 hover:to-black dark:from-white dark:to-neutral-100 dark:hover:from-neutral-100 dark:hover:to-neutral-200 text-white dark:text-neutral-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="w-full h-10 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             disabled={isLoading}
             onClick={() => onViewSlots(sport.id)}
           >
@@ -187,10 +187,10 @@ const LoadingSkeleton = React.memo(function LoadingSkeleton() {
           
           <CardContent className="space-y-4">
             {/* Sport Image Skeleton */}
-            <Skeleton className="w-full h-48 rounded-lg" />
+            <Skeleton className="w-full h-49 rounded-lg" />
 
             {/* Sport Info Skeleton */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
                   <Skeleton className="h-4 w-4 rounded" />
@@ -203,7 +203,7 @@ const LoadingSkeleton = React.memo(function LoadingSkeleton() {
               </div>
 
               {/* Action Button Skeleton */}
-              <Skeleton className="h-11 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
             </div>
           </CardContent>
         </Card>

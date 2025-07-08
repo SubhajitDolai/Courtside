@@ -596,12 +596,12 @@ export default function AddSportPage() {
                 >
                   {submitting ? (
                     <>
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader className="h-4 w-4 animate-spin" />
                       Adding...
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2 h-4 w-4" />
+                      <Upload className="h-4 w-4" />
                       Add Sport
                     </>
                   )}
@@ -636,7 +636,7 @@ export default function AddSportPage() {
             <AlertDialogAction onClick={handleConfirmedSubmit} disabled={submitting}>
               {submitting ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="h-4 w-4 animate-spin" />
                   Creating...
                 </>
               ) : (

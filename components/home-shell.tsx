@@ -28,7 +28,8 @@ export default function HomeShell() {
     // Prefetch multiple routes
     router.prefetch('/sports');
     router.prefetch('/my-bookings');
-    router.prefetch('/profile');
+    router.prefetch('/assistant');
+    router.prefetch('/dashboard');
   }, [router]);
 
   return (
