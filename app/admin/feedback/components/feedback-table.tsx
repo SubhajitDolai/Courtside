@@ -550,24 +550,26 @@ export default function FeedbackTable({ initialFeedback, onFeedbackDeleted }: Fe
                             <span className="sr-only sm:not-sr-only">Delete</span>
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="mx-4 max-w-lg">
+                        <AlertDialogContent className="mx-2 sm:mx-4 w-full max-w-xs sm:max-w-lg p-3 sm:p-6">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Feedback</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this feedback? This action cannot be undone.
-                              <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
-                                <p className="text-sm font-medium mb-1">From: {item.user_name || 'Anonymous'}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {truncateText(item.note, 100)}
-                                </p>
+                            <AlertDialogTitle className="text-base sm:text-lg">Delete Feedback</AlertDialogTitle>
+                            <AlertDialogDescription asChild>
+                              <div>
+                                Are you sure you want to delete this feedback? This action cannot be undone.
+                                <div className="mt-3 p-2 sm:p-3 bg-muted/50 rounded-lg border">
+                                  <p className="text-xs sm:text-sm font-medium mb-1">From: {item.user_name || 'Anonymous'}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {truncateText(item.note, 100)}
+                                  </p>
+                                </div>
                               </div>
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-                            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:gap-3 w-full">
+                            <AlertDialogCancel className="w-full sm:w-auto text-sm">Cancel</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => deleteFeedback(item.id)}
-                              className={cn(buttonVariants({ variant: "destructive" }), "w-full sm:w-auto")}
+                              className={cn(buttonVariants({ variant: "destructive" }), "w-full sm:w-auto text-sm")}
                             >
                               Delete Feedback
                             </AlertDialogAction>
