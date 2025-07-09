@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useRef } from 'react';
 
 interface NotificationContextType {
   hasNotifications: boolean;
@@ -18,14 +19,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notificationCount, setNotificationCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const lastFetchTimeRef = useRef(0);
 
   const supabase = useMemo(() => createClient(), []);
 
   // Memoized fetch function with caching
   const fetchNotifications = useCallback(async (force = false) => {
     const now = Date.now();
-    const timeSinceLastFetch = now - lastFetchTime;
+    const timeSinceLastFetch = now - lastFetchTimeRef.current;
     
     // Skip if fetched recently (within 30 seconds) unless forced
     if (!force && timeSinceLastFetch < 30000) {
@@ -46,7 +47,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const count = data?.length || 0;
       setNotificationCount(count);
       setHasNotifications(count > 0);
-      setLastFetchTime(now);
+      lastFetchTimeRef.current = now;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch notifications';
       setError(errorMessage);
@@ -54,7 +55,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, lastFetchTime]);
+  }, [supabase]);
 
   // Debounced refresh function
   const refreshNotifications = useCallback(async () => {
