@@ -893,6 +893,7 @@ export default function SeatsPage() {
                         <div>
                           <h5 className="font-medium text-neutral-800 dark:text-neutral-100">Swimming Pool Rules</h5>
                           <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                            <li>I know swimming and am capable of safely using the pool.</li>
                             <li>Swimming is allowed only during designated hours under supervision.</li>
                             <li>Proper swimwear must be worn at all times.</li>
                             <li>Users must shower before entering the pool.</li>

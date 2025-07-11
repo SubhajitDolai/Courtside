@@ -42,6 +42,7 @@ export default function TermsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200 mb-3">General Rules</h3>
                   <ul className="list-disc pl-5 space-y-2 text-neutral-600 dark:text-neutral-400">
+                    <li>I know swimming and am capable of safely using the pool.</li>
                     <li>Swimming is allowed only during designated hours under supervision (if applicable).</li>
                     <li>Proper swimwear must be worn at all times.</li>
                     <li>Users must shower before entering the pool.</li>

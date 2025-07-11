@@ -158,8 +158,8 @@ export function AiAssistant({ initialData }: AiAssistantProps) {
 
   const quickSuggestions = [
     "What slots are active right now?",
-    "I want to book a badminton slot at 5pm",
-    "Which sports can I book today?",
+    "I want to book a badminton slot at 2pm",
+    "Show me my bookings",
     "Any news or announcements today?",
     "How do I check slot availability?",
     "What's popular today?"

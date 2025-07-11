@@ -24,13 +24,13 @@ const sports = [
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
-        name: 'Foosball',
-        avatar: '/sports_img/foosball.webp',
+        name: 'Chess',
+        avatar: '/sports_img/chess.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
-        name: 'Chess',
-        avatar: '/sports_img/chess.webp',
+        name: 'Carrom',
+        avatar: '/sports_img/carrom.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
 ]
