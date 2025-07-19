@@ -454,7 +454,7 @@ Courtside features a sophisticated automation system that respects institutional
 
 ### AI Assistant (Courtside AI)
 - **Advanced AI SDK Integration**: Vercel AI SDK v4.3.16 with React hooks for seamless streaming responses
-- **Google Gemini 2.0 Flash**: Latest `google-2.0-flash-exp` model via @ai-sdk/google v1.2.18 for advanced NLP and intelligent responses
+- **Google Gemini 2.0 Flash**: Latest `google-2.0-flash` model via @ai-sdk/google v1.2.18 for advanced NLP and intelligent responses
 - **Real-time Data Integration**: Live sports and slot availability with bulletproof server-side validation
 - **Contextual Understanding**: Maintains conversation context with institutional knowledge and user session awareness
 - **Advanced Filtering**: User permission-aware responses (student/faculty, gender restrictions) with "any" bypass logic
