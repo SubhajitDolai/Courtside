@@ -51,34 +51,34 @@ const members = [
 //     },
 // ]
 
-// const workers = [
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Frontend Dev',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Backend Dev',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Frontend Dev',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-//     {
-//         name: 'Subhajit Dolai',
-//         role: 'Frontend Dev',
-//         avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
-//     },
-// ]
+const workers = [
+    {
+        name: 'Vilas Kathure',
+        role: 'Asst. Director of Sports',
+        avatar: '/team/vilas.webp',
+    },
+    {
+        name: 'Rahul Birajdar',
+        role: 'Sports Coach',
+        avatar: '/team/rahul.webp',
+    },
+    {
+        name: 'Rohit Bagawade',
+        role: 'Sports Coach',
+        avatar: '/team/rohit.webp',
+    },
+    {
+        name: 'Nikhil Wanve',
+        role: 'Sports Facility Manager',
+        avatar: '/team/nikhil.webp',
+    },
+]
 
 export default function TeamSection() {
     // Track loading state for each image
     const [loadedImages, setLoadedImages] = useState(Array(members.length).fill(false))
     // const [loadedLeaders, setLoadedLeaders] = useState(Array(leaders.length).fill(false))
-    // const [loadedWorkers, setLoadedWorkers] = useState(Array(workers.length).fill(false))
+    const [loadedWorkers, setLoadedWorkers] = useState(Array(workers.length).fill(false))
 
     const handleImageLoad = (index: number) => {
         setLoadedImages((prev) => {
@@ -94,13 +94,13 @@ export default function TeamSection() {
     //         return updated
     //     })
     // }
-    // const handleWorkerImageLoad = (index: number) => {
-    //     setLoadedWorkers((prev) => {
-    //         const updated = [...prev]
-    //         updated[index] = true
-    //         return updated
-    //     })
-    // }
+    const handleWorkerImageLoad = (index: number) => {
+        setLoadedWorkers((prev) => {
+            const updated = [...prev]
+            updated[index] = true
+            return updated
+        })
+    }
 
     return (
         <section id='team' className="py-12 md:py-32">
@@ -162,10 +162,10 @@ export default function TeamSection() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> */}
 
                 <div className="mt-6">
-                    <h3 className="mb-6 text-lg font-medium">Marketing</h3>
+                    <h3 className="mb-6 text-lg font-medium">Administration</h3>
                     <div data-rounded="full" className="grid grid-cols-2 gap-4 border-t py-6 md:grid-cols-4">
                         {workers.map((member, index) => (
                             <div key={index}>
@@ -187,7 +187,8 @@ export default function TeamSection() {
                             </div>
                         ))}
                     </div>
-                </div> */}
+                </div>
+
             </div>
         </section>
     )
