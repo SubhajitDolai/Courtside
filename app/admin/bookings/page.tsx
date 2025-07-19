@@ -24,7 +24,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check, ClipboardList, Search, Loader, Eye } from 'lucide-react'
+import { Copy, Check, ClipboardList, Search, Loader, Eye, X } from 'lucide-react'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import { getTodayDateInIST } from '@/lib/date'
 import BookingDetailsModal from './components/BookingDetailsDialog'
@@ -60,6 +60,16 @@ interface Booking {
 }
 
 export default function AdminBookingsPage() {
+  // Helper to format time in 12hr format (must be above all usages)
+  const formatTime12hr = (time24: string) => {
+    if (!time24) return '';
+    const [hour, minute] = time24.split(':')
+    const date = new Date()
+    date.setHours(Number(hour), Number(minute))
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()
+  }
+
+  const [slotFilter, setSlotFilter] = useState('')
   const supabase = createClient()
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -73,17 +83,12 @@ export default function AdminBookingsPage() {
   const [userTypeFilter, setUserTypeFilter] = useState('')
   const [sportFilter, setSportFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [page, setPage] = useState(1)
   const [showConnectionStatus, setShowConnectionStatus] = useState(false)
   const [debouncedIsConnected, setDebouncedIsConnected] = useState(false)
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
-  const perPage = 50
 
   const fetchBookings = useCallback(async () => {
     const today = getTodayDateInIST() // Get today's date
-    const from = (page - 1) * perPage
-    const to = from + perPage - 1
-
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -94,7 +99,6 @@ export default function AdminBookingsPage() {
       `)
       .eq('booking_date', today) // Filter by today's date(only show todays bookings)
       .order('created_at', { ascending: false })
-      .range(from, to)
 
     if (error) {
       console.error('Error fetching bookings:', error)
@@ -103,7 +107,7 @@ export default function AdminBookingsPage() {
 
     // Cast the response as Booking[]
     return (data || []) as unknown as Booking[]
-  }, [page, supabase])
+  }, [supabase])
 
   // Use our realtime hook
   const { data: bookings, loading: loadingBookings, isConnected, forceReconnect } = useRealtimeSubscription<Booking>(
@@ -111,6 +115,16 @@ export default function AdminBookingsPage() {
     [],             // initial data (empty array)
     fetchBookings   // fetch function
   )
+
+
+  // Helper to format time in 12hr format (must be above uniqueSlots)
+  // ...existing code...
+
+  // Unique slots as "start - end" string (must be after bookings is defined)
+  const uniqueSlots = Array.from(new Set(bookings
+    .filter(b => b.slots?.start_time && b.slots?.end_time)
+    .map(b => `${formatTime12hr(b.slots.start_time)} - ${formatTime12hr(b.slots.end_time)}`)
+  ))
 
   // ✅ Debounce connection status to prevent flickering
   useEffect(() => {
@@ -129,10 +143,6 @@ export default function AdminBookingsPage() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Reset page to 1 when search changes
-  useEffect(() => {
-    setPage(1)
-  }, [search])
 
   // Helper function to get current IST timestamp
   const getCurrentISTTimestamp = () => {
@@ -245,18 +255,13 @@ export default function AdminBookingsPage() {
   const uniqueSports = Array.from(new Set(bookings.filter(b => b.sports?.name).map(b => b.sports.name)))
   const uniqueStatuses = Array.from(new Set(bookings.filter(b => b.status).map(b => b.status)))
 
-  const formatTime12hr = (time24: string) => {
-    if (!time24) return '';
-    const [hour, minute] = time24.split(':')
-    const date = new Date()
-    date.setHours(Number(hour), Number(minute))
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()
-  }
+  // ...existing code...
 
   const filteredBookings = bookings.filter((b) => {
     const query = search.toLowerCase()
     const st12 = formatTime12hr(b.slots?.start_time || '')
     const et12 = formatTime12hr(b.slots?.end_time || '')
+    const slotString = b.slots?.start_time && b.slots?.end_time ? `${st12} - ${et12}` : ''
     const gender = b.profiles?.gender?.toLowerCase() || ''
     const userType = b.profiles?.user_type?.toLowerCase() || ''
     const sport = b.sports?.name?.toLowerCase() || ''
@@ -284,8 +289,9 @@ export default function AdminBookingsPage() {
     const matchesUserType = !userTypeFilter || userType === userTypeFilter.toLowerCase()
     const matchesSport = !sportFilter || sport === sportFilter.toLowerCase()
     const matchesStatus = !statusFilter || status === statusFilter.toLowerCase()
+    const matchesSlot = !slotFilter || slotString === slotFilter
 
-    return matchesSearch && matchesGender && matchesUserType && matchesSport && matchesStatus
+    return matchesSearch && matchesGender && matchesUserType && matchesSport && matchesStatus && matchesSlot
   })
 
   const handleCopy = () => {
@@ -361,6 +367,20 @@ export default function AdminBookingsPage() {
                   />
                 </div>
 
+                <Select value={slotFilter} onValueChange={(val) => setSlotFilter(val === "all" ? "" : val)}>
+                  <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
+                    <SelectValue placeholder="All Slots" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Slots</SelectItem>
+                    {uniqueSlots.map((slot) => (
+                      <SelectItem key={slot} value={slot}>
+                        {slot}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Select value={genderFilter} onValueChange={(val) => setGenderFilter(val === "all" ? "" : val)}>
                   <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
                     <SelectValue placeholder="All Genders" />
@@ -405,7 +425,7 @@ export default function AdminBookingsPage() {
 
                 <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val === "all" ? "" : val)}>
                   <SelectTrigger className="w-full md:w-[180px] border-neutral-200 dark:border-neutral-700">
-                    <SelectValue placeholder="All Statuses" />
+                    <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
@@ -416,6 +436,25 @@ export default function AdminBookingsPage() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                {/* Clear All Filters Icon Button at the end */}
+                <Button
+                  variant='outline'
+                  title="Clear All Filters"
+                  onClick={() => {
+                    setSearch("");
+                    setSlotFilter("");
+                    setGenderFilter("");
+                    setUserTypeFilter("");
+                    setSportFilter("");
+                    setStatusFilter("");
+                  }}
+                >
+                  {/* Lucide X icon for clear */}
+                  <span className="text-neutral-500 dark:text-neutral-400">
+                    <X className="h-5 w-5" />
+                  </span>
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -588,37 +627,6 @@ export default function AdminBookingsPage() {
                         </td>
                       </tr>
                     )}
-                    <tr>
-                      <td colSpan={14} className="text-center">
-                        {/* Pagination */}
-                        <div className="flex flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border-t border-neutral-200 dark:border-neutral-600">
-                          <div className="text-sm text-muted-foreground">
-                            Showing <span className="font-medium text-neutral-900 dark:text-white">{filteredBookings.length}</span> bookings
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                              disabled={page === 1}
-                              variant="outline"
-                              size="sm"
-                              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                            >
-                              Previous
-                            </Button>
-                            <span className="text-sm font-medium text-neutral-900 dark:text-white px-3">Page {page}</span>
-                            <Button
-                              onClick={() => setPage((p) => p + 1)}
-                              disabled={bookings.length < perPage}
-                              variant="outline"
-                              size="sm"
-                              className="border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                            >
-                              Next
-                            </Button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>

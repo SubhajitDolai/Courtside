@@ -5,25 +5,25 @@ const members = [
     {
         name: 'Subhajit Dolai',
         role: 'Creator & Developer',
-        avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQEtFjh7U8JtWg/profile-displayphoto-shrink_800_800/B4DZTRnWotHAAc-/0/1738683543453?e=1752105600&v=beta&t=U72k5Te_vxEaffn2suTLBU8gdA_n1kE4pdfmqjDKkFo',
+        avatar: '/team/subhajit.webp',
         linkedin: 'https://www.linkedin.com/in/subhajit-dolai/',
     },
     {
         name: 'Om Jawanjal',
         role: 'Support & Coordination',
-        avatar: 'https://media.licdn.com/dms/image/v2/D5603AQGLmDWHGeIbFw/profile-displayphoto-shrink_800_800/B56Za5oi07GgAc-/0/1746871137057?e=1752105600&v=beta&t=PVXytCsiCRnJVWzol151xziwoeM8NHpfq0xFtjozYsc',
+        avatar: '/team/om.webp',
         linkedin: 'https://www.linkedin.com/in/om-jawanjal-5606162a4/',
     },
     {
         name: 'Dr. Vaibhav Wagh',
         role: 'Director of Sports',
-        avatar: 'https://media.licdn.com/dms/image/v2/C4E03AQEazrdWnbT7lA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1604901333151?e=1752105600&v=beta&t=aNgxpo7RspVPhqaw9diJEGIt6_khxfFQTDt-yNyae3M',
+        avatar: '/team/vaibhav.webp',
         linkedin: 'https://www.linkedin.com/in/dr-vaibhav-balasaheb-wagh-phd-a1981a68/',
     },
     {
         name: 'Abhay Kachare',
         role: 'Asst. Director of Sports',
-        avatar: 'https://media.licdn.com/dms/image/v2/C5103AQG6lUPH7_kIPA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1549575983482?e=1752105600&v=beta&t=AnRpJjTEnrmevUi-lKUUJ0rdoyQBq3RNh8Yt97RkNi4',
+        avatar: '/team/abhay.webp',
         linkedin: 'https://www.linkedin.com/in/abhay-kachare/',
     },
 ]

@@ -940,9 +940,6 @@ export default function IoTScannerPage() {
             <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent"> Scanner</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground">
-            Professional QR code scanning system for efficient check-in/check-out management
-          </p>
         </div>
 
         <div className="max-w-6xl mx-auto">

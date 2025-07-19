@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from "react";
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,12 +19,70 @@ import {
 } from "@/components/ui/select";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function SlotsTable({ slots }: { slots: any[] }) {
+export default function SlotsTable({ slots: initialSlots }: { slots: any[] }) {
   const [search, setSearch] = useState("");
   const [sportFilter, setSportFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [userTypeFilter, setUserTypeFilter] = useState("all");
   const [statusFilter, setstatusFilter] = useState("all");
+
+  // Track loading state for each slot toggle
+  const [toggleLoading, setToggleLoading] = useState<Record<string, boolean>>({});
+  // Local slots state for auto-refresh
+  const [slots, setSlots] = useState(initialSlots);
+
+  const supabase = createClient();
+
+  // Refetch slots from Supabase
+  const fetchSlots = async () => {
+    const { data, error } = await supabase
+      .from('slots')
+      .select('*, sports(id, name)')
+      .order('start_time', { ascending: true });
+    if (!error && data) {
+      // Sort by sport name, then start_time
+      const sorted = [...data].sort((a, b) => {
+        const nameA = a.sports?.name?.toLowerCase() || '';
+        const nameB = b.sports?.name?.toLowerCase() || '';
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        // If sport names are equal, sort by start_time
+        return a.start_time.localeCompare(b.start_time);
+      });
+      setSlots(sorted);
+    }
+  };
+
+  // Toggle handler
+  const handleToggleActive = async (slotId: string, currentStatus: boolean) => {
+    setToggleLoading((prev) => ({ ...prev, [slotId]: true }));
+    // Optimistically update local state
+    setSlots((prevSlots) =>
+      prevSlots.map((slot) =>
+        slot.id === slotId ? { ...slot, is_active: !currentStatus } : slot
+      )
+    );
+    try {
+      const { error } = await supabase
+        .from('slots')
+        .update({ is_active: !currentStatus })
+        .eq('id', slotId);
+      if (error) throw error;
+      toast.success(`Slot ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
+      await fetchSlots();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to update slot status');
+      // Optionally revert optimistic update on error
+      setSlots((prevSlots) =>
+        prevSlots.map((slot) =>
+          slot.id === slotId ? { ...slot, is_active: currentStatus } : slot
+        )
+      );
+    } finally {
+      setToggleLoading((prev) => ({ ...prev, [slotId]: false }));
+    }
+  };
 
   // ✅ Unique dropdown options
   const uniqueSports = Array.from(new Set(slots.map((s) => s.sports?.name).filter(Boolean)));
@@ -256,15 +317,23 @@ export default function SlotsTable({ slots }: { slots: any[] }) {
                     <td className="p-3 capitalize text-neutral-700 dark:text-neutral-300">{slot.gender}</td>
                     <td className="p-3 capitalize text-neutral-700 dark:text-neutral-300">{slot.allowed_user_type || 'any'}</td>
                     <td className="p-3">
-                      {slot.is_active ? (
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={slot.is_active}
+                          onCheckedChange={() => handleToggleActive(slot.id, slot.is_active)}
+                          disabled={toggleLoading[slot.id]}
+                          id={`active-toggle-${slot.id}`}
+                        />
+                        {slot.is_active ? (
                         <Badge className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-300 dark:from-green-900/50 dark:to-green-800/50 dark:text-green-200 dark:border-green-700 border">
                           Active
                         </Badge>
-                      ) : (
+                        ) : (
                         <Badge className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 border-red-300 dark:from-red-900/50 dark:to-red-800/50 dark:text-red-200 dark:border-red-700 border">
                           Inactive
                         </Badge>
-                      )}
+                        )}
+                      </div>
                     </td>
                     <td className="p-3">
                       <Button 

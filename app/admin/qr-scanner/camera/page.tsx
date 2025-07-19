@@ -1168,9 +1168,6 @@ export default function CameraScannerPage() {
             <span className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent"> Scanner</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground">
-            Scan QR codes to check users in or out
-          </p>
         </div>
 
         <div className="max-w-6xl mx-auto">

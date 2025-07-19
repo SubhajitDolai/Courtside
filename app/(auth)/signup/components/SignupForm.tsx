@@ -12,18 +12,19 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signup } from '@/app/(auth)/login/actions'
-import { Loader, Eye, EyeOff, Mail, CheckCircle2, ArrowRight } from "lucide-react"
+import { Loader, Eye, EyeOff, Mail, CheckCircle2 } from "lucide-react"
 import { useState } from "react"
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { motion } from "framer-motion"
 
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useGlobalLoadingBar } from "@/components/providers/LoadingBarProvider"
 
@@ -35,8 +36,11 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
   const [userEmail, setUserEmail] = useState('')
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [alertTitle, setAlertTitle] = useState("")
+  const [alertDescription, setAlertDescription] = useState("")
+  const [alertAction, setAlertAction] = useState<(() => void) | null>(null)
   const { start, finish } = useGlobalLoadingBar()
-  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -68,14 +72,20 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       if (checkData.exists) {
         setIsLoading(false)
         finish()
-        toast.error('User with this email already exists')
+        setAlertTitle('Signup Error')
+        setAlertDescription('User with this email already exists')
+        setAlertAction(null)
+        setAlertOpen(true)
         return
       }
     } catch (err) {
       console.log("Error:", err)
       setIsLoading(false)
       finish()
-      toast.error('Could not check if user exists. Please try again.')
+      setAlertTitle('Network Error')
+      setAlertDescription('Could not check if user exists. Please try again.')
+      setAlertAction(null)
+      setAlertOpen(true)
       return
     }
 
@@ -85,7 +95,10 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     finish()
 
     if (res.error) {
-      toast.error(res.error)
+      setAlertTitle('Signup Error')
+      setAlertDescription(res.error)
+      setAlertAction(null)
+      setAlertOpen(true)
     } else {
       setShowSuccessDialog(true) // ✅ Open success dialog
     }
@@ -93,6 +106,26 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <>
+      {/* Error AlertDialog for signup errors */}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>{alertDescription}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <button type="button">OK</button>
+            </AlertDialogCancel>
+            {alertAction && (
+              <AlertDialogAction asChild>
+                <button type="button" onClick={() => { setAlertOpen(false); alertAction(); }}>Continue</button>
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
           <CardHeader>
@@ -299,24 +332,6 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
             </motion.div>
           </div>
 
-          {/* Footer with CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            className="relative z-10"
-          >
-            <AlertDialogAction 
-              onClick={() => {
-                start()
-                router.push('/login')
-              }}
-              className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium rounded-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <span>Continue to Login</span>
-              <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />
-            </AlertDialogAction>
-          </motion.div>
         </AlertDialogContent>
       </AlertDialog>
     </>

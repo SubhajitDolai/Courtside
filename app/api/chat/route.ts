@@ -655,7 +655,7 @@ export async function POST(req: Request) {
         // Enhanced AI model configuration for enterprise use
         const aiStartTime = performanceMonitor.startTimer();
         const result = await streamText({
-            model: google("gemini-2.0-flash-exp"),
+            model: google("gemini-2.0-flash"),
             messages,
             system: systemPrompt,
             temperature: 0.7,

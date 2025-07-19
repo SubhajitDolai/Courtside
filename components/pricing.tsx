@@ -42,28 +42,28 @@ export default function Pricing() {
                                 <p className="text-muted-foreground mt-6 text-sm">Perfect for students and faculty. Book any time slot across all available sports facilities:</p>
                                 <div className="mt-12 flex flex-wrap items-center justify-between gap-6">
                                     <Image
-                                        className="h-10 w-fit dark:invert"
+                                        className="mx-auto h-10 w-auto dark:invert"
                                         src="/sports_png/swimming.webp"
                                         alt="Swimming Logo"
                                         height={20}
                                         width={40}
                                     />
                                     <Image
-                                        className="h-10 w-fit dark:invert"
+                                        className="mx-auto h-10 w-auto dark:invert"
                                         src="/sports_png/badminton.webp"
                                         alt="Badminton Logo"
                                         height={20}
                                         width={40}
                                     />
                                     <Image
-                                        className="h-10 w-fit dark:invert"
+                                        className="mx-auto h-10 w-auto dark:invert"
                                         src="/sports_png/table-tennis.webp"
                                         alt="TT Logo"
                                         height={20}
                                         width={40}
                                     />
                                     <Image
-                                        className="h-10 w-fit dark:invert"
+                                        className="mx-auto h-10 w-auto dark:invert"
                                         src="/sports_png/wrestling.webp"
                                         alt="Wrestling Logo"
                                         height={20}
