@@ -2,7 +2,7 @@ name: Activate Sports Cron Job
 
 on:
   schedule:
-    - cron: '30 18 * * 0' # Runs Sunday 6:30 PM UTC = Monday 12:00 AM IST (Activate for Monday)
+    - cron: '30 17 * * 0' # Runs every Sunday at 5:30 PM UTC (Sunday 11:00 PM IST) — Activates sports for Monday
   workflow_dispatch: # Enables manual trigger
 
 jobs:

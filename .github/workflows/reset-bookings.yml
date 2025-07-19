@@ -2,7 +2,7 @@ name: Reset Bookings Cron Job
 
 on:
   schedule:
-    - cron: '0 17 * * *' # Runs every day at 11 PM Asia/Kolkata (UTC+5:30 is 17:00 UTC)
+    - cron: '0 17 * * *' # Runs every day at 5:00 PM UTC (Daily 10:30 PM IST)
   workflow_dispatch: # Enables manual trigger
 
 jobs:

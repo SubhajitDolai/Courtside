@@ -2,7 +2,7 @@ name: Deactivate Sports Cron Job
 
 on:
   schedule:
-    - cron: '30 18 * * 6' # Runs Saturday 6:30 PM UTC = Sunday 12:00 AM IST (Deactivate for Sunday)
+    - cron: '30 17 * * 6' # Runs Saturday at 5:30 PM UTC (Saturday 11:00 PM IST) — Deactivates sports for Sunday
   workflow_dispatch: # Enables manual trigger
 
 jobs:
