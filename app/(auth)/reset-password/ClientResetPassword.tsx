@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader } from 'lucide-react';
-import { resetPassword } from './actions';
+import { createClient } from '@/utils/supabase/client';
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider';
 
 export default function ClientResetPassword() {
@@ -19,7 +19,7 @@ export default function ClientResetPassword() {
   const searchParams = useSearchParams();
   const { start } = useGlobalLoadingBar();
 
-  const code = searchParams.get('code');
+  const code = searchParams.get('token') || searchParams.get('code');
   if (!code) {
     // if someone navigates here with no code, bail out
     if (typeof window !== 'undefined') {
@@ -32,21 +32,16 @@ export default function ClientResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    const formData = new FormData();
-    formData.append('password', password);
-
-    // call your server action
-    const result = await resetPassword(formData, code);
-
+    const supabase = createClient();
+    // Update password using Supabase JS client
+    const { data, error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-
-    if (result.status === 'success') {
+    if (data) {
       toast.success('Password reset successfully.');
       start(); // Start loading bar for redirect
       router.push('/login');
     } else {
-      toast.error(result.status);
+      toast.error(error?.message || 'Something went wrong.');
     }
   };
 
