@@ -38,7 +38,6 @@ async function getAssistantData() {
     const { data: todayBookingCounts } = await supabase
       .from('bookings')
       .select('slot_id, sport_id, status')
-      .eq('booking_date', today)
       .in('status', ['booked', 'checked-in'])
 
     // Get current user info (if authenticated)
