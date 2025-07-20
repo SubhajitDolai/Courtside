@@ -271,7 +271,7 @@ export default function SeatsPage() {
       return
     }
 
-    // ✅ NEW: Check if user already has ANY booking for this sport today (regardless of slot)
+    // // 🟠 OLD: Check if user already has ANY booking for this sport today (regardless of slot)
     // const { data: existingSportBooking } = await supabase
     //   .from('bookings')
     //   .select('id, slot_id')
@@ -282,7 +282,7 @@ export default function SeatsPage() {
     //   .maybeSingle()
 
     // if (existingSportBooking) {
-    //   // ✅ Get slot details separately to avoid join complexity
+    //   // 🟠 Get slot details separately to avoid join complexity
     //   const { data: slotData } = await supabase
     //     .from('slots')
     //     .select('start_time, end_time')
@@ -298,6 +298,45 @@ export default function SeatsPage() {
     //   setIsBooking(false)
     //   return
     // }
+    // // 🟠 1 booking per sport feature enabled
+
+    // // ⭕ NEW: Prevent booking multiple courts of the same sport by comparing first word of sport names
+    // const { data: todaysBookings, error: bookingsError } = await supabase
+    //   .from('bookings')
+    //   .select('id, sport_id')
+    //   .eq('user_id', user.id)
+    //   .eq('booking_date', today)
+    //   .in('status', ['booked', 'checked-in', 'checked-out'])
+
+    // if (bookingsError) {
+    //   toast.error('Unable to check your bookings. Please try again.')
+    //   setIsBooking(false)
+    //   return
+    // }
+
+    // if (todaysBookings && todaysBookings.length > 0) {
+    //   // Fetch all sport names for today's bookings
+    //   const bookedSportIds = todaysBookings.map(b => b.sport_id)
+    //   const { data: bookedSports } = await supabase
+    //     .from('sports')
+    //     .select('id, name')
+    //     .in('id', bookedSportIds)
+
+    //   // Get first word of current sport
+    //   const currentFirstWord = sportName.split(' ')[0].toLowerCase()
+
+    //   // Check if any booked sport matches by first word
+    //   const alreadyBooked = bookedSports?.some(s =>
+    //     s.name.split(' ')[0].toLowerCase() === currentFirstWord
+    //   )
+
+    //   if (alreadyBooked) {
+    //     toast.error(`Booking limit reached! You already have a booking in ${currentFirstWord} today. Try another sport or come back tomorrow!`)
+    //     setIsBooking(false)
+    //     return
+    //   }
+    // }
+    // // ⭕ 1 booking per sport feature enabled
 
     // ✅ Prevent multiple booking by user
     const { data: existing, error: existingError } = await supabase

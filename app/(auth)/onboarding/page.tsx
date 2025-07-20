@@ -40,9 +40,6 @@ export default async function OnboardingPage() {
             <span className="bg-gradient-to-r from-neutral-700 to-neutral-600 dark:from-neutral-400 dark:to-neutral-300 bg-clip-text text-transparent"> Profile</span>
           </h1>
           
-          <p className="text-lg sm:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-            Add your details below to personalize your account and get started with courtside!
-          </p>
         </div>
 
         <OnboardingForm />

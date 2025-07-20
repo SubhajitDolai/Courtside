@@ -15,6 +15,8 @@ export function OnboardingForm() {
   // 🧠 Track selected user type
   const [userType, setUserType] = useState<'' | 'student' | 'faculty'>('')
   const [gender, setGender] = useState('')
+  // Track form error for required dropdowns
+  const [formError, setFormError] = useState<string | null>(null)
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -29,7 +31,18 @@ export function OnboardingForm() {
         </div>
 
         <div className="px-6 sm:px-8 py-6 sm:py-8">
-          <form action={(formData) => startTransition(() => formAction(formData))} className="space-y-6">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!userType || !gender) {
+                setFormError('Please select your account type and gender to continue.');
+                return;
+              }
+              setFormError(null);
+              startTransition(() => formAction(new FormData(event.currentTarget)));
+            }}
+            className="space-y-6"
+          >
             {/* Names Section */}
             <div className="space-y-4">
               <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-700 pb-2">
@@ -69,8 +82,9 @@ export function OnboardingForm() {
                 <Select
                   value={userType}
                   onValueChange={(value) => setUserType(value as 'student' | 'faculty')}
+                  required
                 >
-                  <SelectTrigger className="h-11 w-full border-2 py-5">
+                  <SelectTrigger className="h-11 w-full border-2 py-5" aria-required="true">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -137,8 +151,12 @@ export function OnboardingForm() {
                 </div>
                 <div className="space-y-2">
                   <Label>Gender</Label>
-                  <Select value={gender} onValueChange={setGender}>
-                    <SelectTrigger className="h-11 w-full border-2 py-5">
+                  <Select
+                    value={gender}
+                    onValueChange={setGender}
+                    required
+                  >
+                    <SelectTrigger className="h-11 w-full border-2 py-5" aria-required="true">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -160,6 +178,14 @@ export function OnboardingForm() {
                 </p>
               </div>
             )}
+            {/* Form error for required dropdowns */}
+            {formError && (
+              <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 rounded-lg p-4">
+                <p className="text-rose-600 dark:text-rose-400 text-sm font-medium text-center">
+                  {formError}
+                </p>
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="pt-4">
@@ -172,10 +198,10 @@ export function OnboardingForm() {
                 {pending ? (
                   <>
                     <Loader className="w-5 h-5 animate-spin" />
-                    Setting up your profile...
+                    Saving...
                   </>
                 ) : (
-                  'Complete Setup & Continue'
+                  'Continue'
                 )}
               </Button>
             </div>

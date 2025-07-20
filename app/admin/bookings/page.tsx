@@ -306,7 +306,7 @@ export default function AdminBookingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-orange-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-orange-950/20">
       <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-8 pt-32">
         {/* Header Section */}
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-6">
           <div className="flex items-center justify-center mb-4 sm:mb-6">
             <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-br from-orange-600 to-orange-700 text-white shadow-lg sm:shadow-xl md:shadow-2xl">
               <ClipboardList className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" />
