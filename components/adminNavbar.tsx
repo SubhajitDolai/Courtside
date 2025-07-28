@@ -113,7 +113,7 @@ export default function AdminNavbar() {
       completeLoadingBar();
     }
     setIsOpen(false);
-  }, [pathname]);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {

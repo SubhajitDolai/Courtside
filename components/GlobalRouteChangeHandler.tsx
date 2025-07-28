@@ -22,7 +22,7 @@ export function GlobalRouteChangeHandler() {
 
     // Called when route has changed
     finish()
-  }, [pathname])
+  }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return null
 }

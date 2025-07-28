@@ -174,6 +174,7 @@ ${overview}
 • Use phrases like "Here are some great options" instead of listing everything
 
 � BOOKING RULES:
+• EVERYONE IS REQUIRED TO BOOK THEIR OWN SLOT. For example, if 2 people want to play, 2 people must book; if 4, then 4 bookings are needed—no group booking under one name.
 • CRITICAL: Be selective with booking links to stay under 1000 tokens
 • Only show 3-5 most relevant booking links, not all available slots
 • Prioritize current time and upcoming slots

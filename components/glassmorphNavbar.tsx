@@ -124,7 +124,7 @@ export default function GlassmorphNavbar() {
       completeLoadingBar();
     }
     setIsOpen(false);
-  }, [pathname]);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
