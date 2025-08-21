@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   try {
     const supabase = await createClient()
 
-    // Fetch data in parallel for better performance with appropriate limits
+    // Fetch data in parallel for better performance
     const [
       bookingsResponse,
       bookingHistoryResponse,
@@ -28,19 +28,16 @@ export default async function DashboardPage() {
       supabase
         .from('bookings')
         .select('*, sports:sport_id(name), slots:slot_id(start_time, end_time), profiles:user_id(gender, user_type)')
-        .order('created_at', { ascending: false })
-        .limit(1000),
+        .order('created_at', { ascending: false }),
 
       supabase
         .from('bookings_history')
         .select('*, sports:sport_id(name), slots:slot_id(start_time, end_time), profiles:user_id(gender, user_type)')
-        .order('created_at', { ascending: false })
-        .limit(1000),
+        .order('created_at', { ascending: false }),
 
       supabase
         .from('profiles')
-        .select('id, gender, user_type, created_at')
-        .limit(5000),
+        .select('id, gender, user_type, created_at'),
 
       supabase
         .from('sports')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from "next-themes";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useMemo, useState } from 'react';
 import { BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 
@@ -198,7 +198,7 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend
+              {/* <Legend
                 verticalAlign="bottom"
                 height={36}
                 iconType="circle"
@@ -209,7 +209,7 @@ export function SportsDistribution({ bookings, sports }: { bookings: any[], spor
                 formatter={(value) => (
                   <span className="text-foreground">{value}</span>
                 )}
-              />
+              /> */}
             </PieChart>
           </ResponsiveContainer>
         ) : (

@@ -40,6 +40,7 @@ export const navigationItems = [
       { title: "Sports", href: "/admin/sports", icon: Trophy },
       { title: "Slots", href: "/admin/slots", icon: Clock },
       { title: "Notifications", href: "/admin/notifications", icon: Bell },
+      { title: "Admin Profiles", href: "/admin/profiles", icon: User },
     ]
   },
   {

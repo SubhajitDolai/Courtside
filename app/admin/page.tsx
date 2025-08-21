@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare, Bell } from 'lucide-react'
+import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare, Bell, Shield } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function AdminPage() {
@@ -48,6 +48,12 @@ export default function AdminPage() {
       href: '/admin/bookings',
     },
     {
+      title: 'Admin Profiles',
+      description: 'Manage administrator access',
+      icon: <Shield className="w-full h-full text-purple-600 dark:text-purple-400" />,
+      href: '/admin/profiles',
+    },
+    {
       title: 'QR Scanner',
       description: 'Scan QR codes for check-in/out',
       icon: <QrCode className="w-full h-full text-purple-600 dark:text-purple-400" />,
@@ -67,7 +73,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-800 px-4 py-8">
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl">
+      <div className="lg:pt-20 grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl">
         {cards.map((card, index) => (
           <Card
             key={index}

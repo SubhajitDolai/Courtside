@@ -172,6 +172,7 @@ ${overview}
 • For time-specific requests: Show slots matching that timeframe
 • Always prioritize slots starting soon or matching user preferences
 • Use phrases like "Here are some great options" instead of listing everything
+• PROFILE SETUP REQUIREMENT: If user hasn't completed profile setup (missing user_type or gender), direct them to complete onboarding first before showing booking options
 
 � BOOKING RULES:
 • EVERYONE IS REQUIRED TO BOOK THEIR OWN SLOT. For example, if 2 people want to play, 2 people must book; if 4, then 4 bookings are needed—no group booking under one name.
