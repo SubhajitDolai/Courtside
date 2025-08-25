@@ -63,6 +63,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 📊 **Personal Dashboard** - Comprehensive analytics and booking insights
 - 🚫 **Access Control** - Automatic handling of restricted accounts
 - 📢 **System Announcements** - Instant access to important notifications and updates
+- 🎫 **QR Code Generation** - Download booking confirmations as QR codes
 
 ### For Administrators
 - 🔑 **Role-based Access** - Admin panel access via profile role setting
@@ -71,7 +72,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 🗄️ **Historical Data** - Access to booking history with archived data
 - ⚙️ **Facility Management** - Control sports and slot configurations
 - 📄 **Pagination** - Efficiently navigate through booking records
-- 🔄 **Automated Reset** - Daily clearing of expired bookings at midnight IST
+- 🔄 **Automated Reset** - Daily clearing of expired bookings at 10:30 PM IST
 - 📈 **Analytics Dashboard** - Comprehensive system-wide analytics and insights
 - 📊 **Interactive Charts** - Advanced visualizations with Recharts integration
 - 👥 **User Analytics** - Demographics, growth trends, and user type distribution
@@ -87,10 +88,11 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 - 📱 **Mobile-Optimized** - Full responsive design for all administrative tasks
 - 📢 **Notifications Management** - Create, manage, and broadcast system-wide announcements
 - 🔔 **Real-time Alerts** - Instant notification delivery with live status updates
+- 🛡️ **Super Admin System** - Advanced profile management with dedicated super admin controls
 
 ### 🤖 Automated Systems
 - ⏰ **Institutional Calendar Integration** - Sunday sports deactivation with Monday reactivation
-- 🔄 **Daily Data Management** - Automated booking archival and cleanup at midnight IST
+- 🔄 **Daily Data Management** - Automated booking archival and cleanup at 10:30 PM IST
 - 📅 **Schedule Automation** - GitHub Actions with retry logic and IST timezone support
 - 🔧 **Self-Healing Systems** - Error handling and reliability mechanisms
 
@@ -98,7 +100,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 
 | Category | Technology |
 |----------|------------|
-| **Frontend** | Next.js 15 (App Router) with React 18 |
+| **Frontend** | Next.js 15.3.5 (App Router) with React 19.1.0 |
 | **Language** | TypeScript 5.x with strict type checking |
 | **Backend** | Supabase (PostgreSQL + Auth + Storage + Realtime) |
 | **Styling** | Tailwind CSS 4 + Shadcn/ui + tw-animate-css |
@@ -109,18 +111,18 @@ Courtside is a comprehensive full-stack web application designed to streamline t
 | **Real-time Updates** | Supabase Realtime with custom subscription hooks |
 | **Toast Notifications** | Sonner for user feedback |
 | **Analytics** | Vercel Analytics + Speed Insights |
-| **Animations** | Motion + tw-animate-css for smooth interactions |
+| **Animations** | Motion 12.15.0 + tw-animate-css for smooth interactions |
 | **Theme** | next-themes (dark/light mode with system detection) |
-| **Charts & Visualization** | Recharts (React + D3.js) with responsive design |
+| **Charts & Visualization** | Recharts 2.15.3 (React + D3.js) with responsive design |
 | **Data Processing** | React useMemo for optimized calculations |
 | **Error Handling** | React Error Boundary for robust rendering |
-| **QR Code Scanning** | qr-scanner library + Professional Web Audio API feedback |
-| **QR Code Generation** | qrcode + react-qr-code libraries |
-| **Date Management** | date-fns for timezone handling (IST support) |
+| **QR Code Scanning** | qr-scanner 1.4.2 + Professional Web Audio API feedback |
+| **QR Code Generation** | qrcode 1.5.4 + react-qr-code 2.0.15 libraries |
+| **Date Management** | date-fns 3.6.0 for timezone handling (IST support) |
 | **Deployment** | Vercel (Edge Functions) with ISR |
-| **AI Integration** | Vercel AI SDK + Google Gemini 2.0 Flash |
+| **AI Integration** | Vercel AI SDK 4.3.16 + Google Gemini 2.0 Flash (@ai-sdk/google 1.2.18) |
 | **Automation** | GitHub Actions with cron scheduling (IST timezone) |
-| **Form Handling** | Zod validation with type-safe schemas |
+| **Form Handling** | Zod 3.25.48 validation with type-safe schemas |
 | **Professional UI** | Radix UI primitives with accessibility-first design |
 
 ## 🎨 Advanced Design System
@@ -188,6 +190,7 @@ Courtside is a comprehensive full-stack web application designed to streamline t
     /sports               # Manage sports facilities
     /feedback             # User feedback management system
     /notifications        # System-wide announcements and notifications management
+    /profiles             # Super admin profile management with role controls
     /qr-scanner           # Professional QR code scanning system
       /camera             # Camera-based QR scanning with modern UI
       /iot                # Automated scanner with emerald-themed interface
@@ -196,25 +199,48 @@ Courtside is a comprehensive full-stack web application designed to streamline t
   /api                 # API routes
     /chat               # AI assistant chat functionality with Google Gemini
     /check-profile      # Profile validation endpoints
+    /check-user-exists  # User existence validation
     /reset-bookings     # Daily booking reset functionality (GitHub Actions)
     /sports             # Sports management APIs
       /activate         # Automated sports activation (Monday 12:00 AM IST)
       /deactivate       # Automated sports deactivation (Sunday 12:00 AM IST)
+    /super-admin        # Super admin management endpoints
 /.github
   /workflows           # GitHub Actions for automation
-    /reset-bookings.yml   # Daily booking cleanup at midnight IST
+    /reset-bookings.yml   # Daily booking cleanup at 10:30 PM IST
     /activate-sports.yml  # Monday sports activation
     /deactivate-sports.yml # Sunday sports deactivation
 /components            # Reusable UI components
   /ui                   # Shadcn UI components
-  /providers            # Context providers (LoadingBar, Theme)
+  /providers            # Context providers (LoadingBar, Notifications)
   /motion-primitives    # Animation components
-/utils/supabase        # Supabase client and utilities
-/hooks                 # Custom React hooks (realtime, user management)
+/database              # Database schemas and helpers
+  /schema.sql           # Main database schema
+  /super_admin_helpers.sql # Super admin management functions
+  /super_admin_rls.sql  # Row-level security policies
+  /indexes.sql          # Performance optimization indexes
+  /userExistCheck.sql   # User validation queries
+/hooks                 # Custom React hooks
+  /useCurrentUser.tsx   # User state management
+  /useRealtimeSubscription.tsx # Supabase realtime integration
+  /useSuperAdmin.tsx    # Super admin permission checking
 /lib                   # General utility functions
+  /auth.ts              # Authentication utilities
+  /getUserWithProfile.ts # User data fetching
+  /check-profile.ts     # Profile validation
+  /date.ts              # Date/timezone utilities (IST support)
+  /utils.ts             # General utilities and class name merging
+/utils/supabase        # Supabase client and utilities
+  /client.ts            # Browser client configuration
+  /server.ts            # Server client with SSR support
+  /middleware.ts        # SSR session management
 /public                # Static assets
-  /sports_img           # Sport images (WebP format)
-  /sports_png           # Fallback sport images
+  /logo-dark.webp       # Dark theme logo
+  /logo-light.webp      # Light theme logo
+  /mit.webp             # Institution logo
+  /sports_img/          # Sport images (WebP format)
+  /sports_png/          # Fallback sport images
+  /team/                # Team member photos
 ```
 
 ## 🤖 Automated Scheduling System
@@ -232,9 +258,9 @@ Courtside features a sophisticated automation system that respects institutional
 
 #### **Daily Data Management** (`reset-bookings.yml`)
 - **Booking Archival**: Automatic archival of completed bookings to `bookings_history` table
-- **Data Cleanup**: Daily reset at midnight IST (18:00 UTC) to maintain optimal performance
+- **Data Cleanup**: Daily reset at 10:30 PM IST (17:00 UTC) to maintain optimal performance
 - **Audit Trail**: Complete historical data preservation for reporting and analytics
-- **IST Timezone Support**: `cron: '0 18 * * *'` for precise midnight IST execution
+- **IST Timezone Support**: `cron: '0 17 * * *'` for precise 10:30 PM IST execution
 
 #### **Technical Implementation Details**
 - **GitHub Actions**: Cron-based scheduling with UTC to IST conversion (`cron: '30 18 * * 0'` for Sunday operations)
@@ -242,6 +268,7 @@ Courtside features a sophisticated automation system that respects institutional
 - **Error Handling**: Comprehensive logging with HTTP response code validation and failure notifications
 - **Scalability**: Designed to handle institutional-scale automation with retry mechanisms
 - **Environment Variables**: Secure configuration via GitHub Secrets for API URLs and authentication
+- **Daily Reset**: `cron: '0 17 * * *'` executes at 10:30 PM IST for booking cleanup
 
 ### Benefits
 - **Zero Manual Work**: Complete hands-off institutional schedule management
@@ -356,6 +383,14 @@ Courtside features a sophisticated automation system that respects institutional
 
 ## 🚫 User Access Control & Security
 
+### Super Admin Management System
+- **Profile Management**: Dedicated super admin interface for advanced user management
+- **Role Controls**: Grant/revoke admin privileges with comprehensive role management
+- **Search & Filter**: Advanced search functionality for user profiles and admin management
+- **Permission System**: Granular permission controls with JSONB-based configuration
+- **Audit Trail**: Complete tracking of admin privilege changes and system access
+- **Row-Level Security**: Database-level security policies for super admin operations
+
 ### Banned User Management
 - **Account Restrictions**: Temporary or permanent account suspension capabilities
 - **Automatic Session Termination**: Immediate logout for banned users across all devices
@@ -370,6 +405,7 @@ Courtside features a sophisticated automation system that respects institutional
 - **Session Management**: Secure cookie-based authentication with automatic cleanup
 - **Role-based Permissions**: Granular access control for different user types
 - **API Security**: Secret-based authentication for automated endpoints
+- **Super Admin Protection**: Enhanced security for super admin operations with dedicated RLS policies
 
 ## 🧮 Database Schema
 
@@ -377,72 +413,127 @@ Courtside features a sophisticated automation system that respects institutional
 
 #### `profiles`
 - `id` (UUID, PK, matches auth.uid)
-- `first_name`, `last_name`
-- `gender` ('male', 'female', 'other')
-- `user_type` ('student', 'faculty', etc.)
-- `role` ('user', 'admin')
-- `prn` (Student PRN or Employee ID)
-- `course` (Course/Department)
-- `phone_number`, `email`
-- Strategic indexes for performance optimization
+- `first_name`, `last_name` (text, nullable)
+- `prn` (text, nullable) - Student PRN or Employee ID
+- `email` (text, nullable)
+- `course` (text, nullable) - Course/Department
+- `gender` (text, nullable) - User gender
+- `phone_number` (text, nullable)
+- `user_type` (text, default: 'student') - User type classification
+- `role` (text, default: 'user') - System role ('user', 'admin')
+- `created_at` (timestamptz, default: now())
+- Foreign key constraint to `auth.users` with CASCADE delete
 
 #### `sports`
-- `id` (UUID, PK)
-- `name`, `image_url`
-- `seat_limit` (default: 20)
-- `is_active` (boolean, default: true)
-- `created_at` (timestamp)
-- Optimized for automated activation/deactivation
+- `id` (UUID, PK, default: gen_random_uuid())
+- `name` (text, not null) - Sport name
+- `image_url` (text, nullable) - Sport image URL
+- `seat_limit` (integer, default: 20) - Maximum bookings per slot
+- `is_active` (boolean, default: true) - Sport availability status
+- `created_at` (timestamptz, default: now())
 
 #### `slots`
-- `id` (UUID, PK)
-- `sport_id` (FK to sports)
-- `start_time`, `end_time` (time without timezone)
-- `gender` ('male', 'female', 'any') - Access restriction
-- `allowed_user_type` ('student', 'faculty', 'any') - User type restriction
-- `is_active` (boolean, default: true)
-- `created_at` (timestamp)
-- Multiple strategic indexes for filtering
+- `id` (UUID, PK, default: gen_random_uuid())
+- `sport_id` (UUID, FK to sports) - Associated sport
+- `start_time` (time without timezone, not null) - Slot start time
+- `end_time` (time without timezone, not null) - Slot end time
+- `gender` (text, default: 'any') - Gender restriction ('male', 'female', 'any')
+- `allowed_user_type` (text, default: 'student') - User type restriction
+- `is_active` (boolean, default: true) - Slot availability
+- `created_at` (timestamptz, default: now())
+- Foreign key to sports with CASCADE delete
 
 #### `bookings`
-- `id` (UUID, PK)
-- `user_id` (FK to profiles)
-- `slot_id` (FK to slots)
-- `sport_id` (FK to sports)
-- `booking_date` (date)
-- `seat_number` (integer)
-- `status` ('booked', 'checked-in', 'checked-out')
-- `checked_in_at`, `checked_out_at` (timestamps)
-- `created_at` (timestamp)
-- Unique constraints for seat booking integrity
+- `id` (UUID, PK, default: gen_random_uuid())
+- `user_id` (UUID, FK to profiles) - Booking owner
+- `sport_id` (UUID, FK to sports) - Booked sport
+- `slot_id` (UUID, FK to slots) - Booked time slot
+- `booking_date` (date, not null) - Date of booking
+- `seat_number` (integer, nullable) - Assigned seat number
+- `status` (text, default: 'booked') - Booking status
+- `checked_in_at` (timestamptz, nullable) - Check-in timestamp
+- `checked_out_at` (timestamptz, nullable) - Check-out timestamp
+- `created_at` (timestamptz, default: now())
+- **UNIQUE constraint**: `(sport_id, slot_id, booking_date, seat_number)`
+- Foreign keys with CASCADE delete to slots, sports, profiles
 
 #### `bookings_history`
-- Archived records from bookings table
-- Admin-only access for historical analysis
-- Maintains complete audit trail
-
-#### `user_feedback`
-- `id` (UUID, PK)
-- `user_id` (FK to profiles)
-- `feedback_text`, `rating`
-- `category` (suggestion, complaint, etc.)
-- `status` (pending, reviewed, resolved)
-- `created_at` (timestamp)
+- `id` (UUID, PK, default: gen_random_uuid())
+- `user_id` (UUID, FK to profiles) - Original booking owner
+- `sport_id` (UUID, FK to sports) - Archived sport booking
+- `slot_id` (UUID, FK to slots) - Archived slot booking
+- `booking_date` (date, not null) - Original booking date
+- `seat_number` (integer, nullable) - Original seat assignment
+- `status` (text, not null) - Final booking status
+- `checked_in_at` (timestamptz, nullable) - Check-in record
+- `checked_out_at` (timestamptz, nullable) - Check-out record
+- `created_at` (timestamptz, default: now()) - Archive timestamp
+- Foreign keys with CASCADE delete to slots, sports, profiles
 
 #### `notifications`
-- `id` (UUID, PK)
-- `title`, `message` (notification content)
-- `type` ('urgent', 'maintenance', 'general') - Notification category
+- `id` (UUID, PK, default: gen_random_uuid())
+- `title` (text, not null) - Notification title
+- `message` (text, not null) - Notification content
+- `type` (text, default: 'general') - Type: 'general', 'maintenance', 'urgent'
 - `is_active` (boolean, default: true) - Visibility control
-- `created_by` (FK to profiles) - Admin who created the notification
-- `created_at` (timestamp)
-- Optimized for real-time delivery and admin management
+- `created_by` (UUID, FK to profiles) - Admin creator (SET NULL on delete)
+- `created_at` (timestamptz, default: now())
+- **CHECK constraint**: Type must be 'general', 'maintenance', or 'urgent'
+
+#### `user_feedback`
+- `id` (UUID, PK, default: gen_random_uuid())
+- `note` (text, not null) - Feedback content
+- `email` (text, nullable) - User email
+- `profile_id` (UUID, FK to profiles) - Associated user profile
+- `user_name` (text, nullable) - User display name
+- `user_prn` (text, nullable) - User PRN/ID
+- `created_at` (timestamptz, default: now())
+- Foreign key to profiles (no CASCADE)
+
+#### `super_admins`
+- `id` (UUID, PK, default: gen_random_uuid())
+- `profile_id` (UUID, FK to profiles, UNIQUE) - Linked user profile
+- `first_name` (text, not null) - Cached first name
+- `last_name` (text, not null) - Cached last name
+- `email` (text, not null) - Cached email
+- `prn` (text, not null) - Cached PRN/ID
+- `is_active` (boolean, default: true) - Super admin status
+- `permissions` (JSONB, default: '{"all_apps": true}') - Permission config
+- `created_at` (timestamptz, default: now())
+- Foreign key to profiles with CASCADE delete
+- **Row Level Security (RLS)** enabled with restrictive policies
+
+### Database Functions
+
+#### Super Admin Management Functions
+- **`create_super_admin_by_email(email TEXT)`** - Elevate user to super admin
+- **`remove_super_admin_by_email(email TEXT)`** - Remove super admin privileges  
+- **`list_super_admins()`** - Return all super admin records
+- **`user_exists_by_email(email TEXT)`** - Check if user exists in auth.users
 
 ### Database Optimizations
-- **Strategic Indexing**: 15+ optimized indexes for common query patterns
-- **Composite Indexes**: Multi-column indexes for complex filtering
-- **RLS (Row Level Security)**: Supabase security policies for data protection
-- **Connection Pooling**: Optimized for high-concurrency scenarios
+
+#### Strategic Indexing (50+ Optimized Indexes)
+- **Profiles**: Email, PRN, user_type, role, gender, names, composite indexes
+- **Sports**: Active status, name, seat_limit combinations
+- **Slots**: Sport access control, time ranges, admin queries
+- **Bookings**: User patterns, status tracking, seat management, trends analysis
+- **Bookings History**: Archive queries, date ranges, sport/user patterns
+- **Notifications**: Active status, type filtering, creation order
+- **User Feedback**: Profile lookups, email search, full-text search on notes
+
+#### Security Features
+- **Row Level Security (RLS)**: Enabled on super_admins table
+- **Restrictive Policies**: Read-only access via client, modifications via functions only
+- **Foreign Key Constraints**: Maintain referential integrity with CASCADE deletes
+- **Unique Constraints**: Prevent duplicate bookings and super admin entries
+- **Check Constraints**: Enforce valid notification types
+
+#### Performance Features
+- **Composite Indexes**: Multi-column indexes for complex filtering scenarios
+- **Full-Text Search**: GIN indexes for feedback content searching
+- **Time-based Indexing**: Optimized for booking date ranges and trends
+- **Connection Pooling**: Designed for high-concurrency institutional usage
 
 ## 📚 Core Logic
 
@@ -596,6 +687,9 @@ This is a **production-ready** personal project developed by Subhajit Dolai, sho
 - **Real-time Features**: Enhanced connection management and live updates
 - **Notifications Management**: Complete admin notification system with real-time delivery
 - **AI Notification Integration**: Assistant awareness of system announcements for contextual support
+- **Super Admin System**: Advanced profile management with dedicated super admin controls
+- **Enhanced Database**: Super admin table with RLS policies and helper functions
+- **Updated Automation**: Daily booking reset now runs at 10:30 PM IST for optimal timing
 
 ### 🔮 Future Roadmap
 - **Mobile App**: React Native companion app
@@ -603,6 +697,7 @@ This is a **production-ready** personal project developed by Subhajit Dolai, sho
 - **Integration APIs**: Third-party calendar and notification systems
 - **Multi-institution Support**: Scalable architecture for multiple organizations
 - **Advanced Automation**: Holiday detection and special event scheduling
+- **Enhanced Super Admin**: Advanced permission granularity and audit logging
 
 ## ✨ Acknowledgments
 

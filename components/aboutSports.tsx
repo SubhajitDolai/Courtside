@@ -14,8 +14,8 @@ const sports = [
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {
-        name: 'Wrestling',
-        avatar: '/sports_img/wrestling.webp',
+        name: 'Foosball',
+        avatar: '/sports_img/foosball.webp',
         link: 'https://mitwpu.edu.in/life-wpu/sports',
     },
     {

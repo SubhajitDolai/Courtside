@@ -163,9 +163,9 @@ export default function CameraScannerPage() {
   const TIMEOUTS = {
     DOM_INIT: 100,           // DOM element initialization
     SYSTEM_ERROR: 1000,      // Database/network errors (fast retry)
-    USER_ERROR: 1500,        // User validation errors
-    DATA_ERROR: 2000,        // QR data validation (prevent spam)
-    UI_ANIMATION: 3000       // UI transitions and popups
+    USER_ERROR: 3500,        // User validation errors
+    DATA_ERROR: 3500,        // QR data validation (prevent spam)
+    UI_ANIMATION: 5000       // UI transitions and popups
   } as const
 
   /**
@@ -1510,7 +1510,7 @@ export default function CameraScannerPage() {
                     }}
                   />
                 </div>
-                <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">3s</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">5s</span>
               </div>
             </div>
           </div>

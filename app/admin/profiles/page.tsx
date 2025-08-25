@@ -13,6 +13,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { AdminSearchResult } from './components/AdminSearchResult'
 import AdminToggleButton from './components/AdminToggleButton'
+import { useSuperAdmin } from '@/hooks/useSuperAdmin'
+import { UnauthorizedAccess } from '@/components/UnauthorizedAccess'
 
 interface Profile {
   id: string
@@ -28,6 +30,8 @@ interface Profile {
 }
 
 export default function AdminProfilesPage() {
+  // All hooks must be at the top before any conditional logic
+  const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResult, setSearchResult] = useState<Profile | null>(null)
   const [adminProfiles, setAdminProfiles] = useState<Profile[]>([])
@@ -94,6 +98,49 @@ export default function AdminProfilesPage() {
     }
   }, [supabase])
 
+  const handleRoleChange = useCallback(() => {
+    // Refresh both search result and admin list
+    if (searchResult) {
+      searchProfile(searchResult.email || '')
+    }
+    fetchAdminProfiles()
+  }, [searchResult, searchProfile, fetchAdminProfiles])
+
+  // Memoize admin stats for performance
+  const adminStats = useMemo(() => ({
+    totalAdmins: adminProfiles.length,
+    recentAdmins: adminProfiles.filter(admin => {
+      const createdDate = new Date(admin.created_at)
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      return createdDate > weekAgo
+    }).length
+  }), [adminProfiles])
+
+  // Fetch admin profiles on mount
+  useEffect(() => {
+    if (isSuperAdmin && !superAdminLoading) {
+      fetchAdminProfiles()
+    }
+  }, [fetchAdminProfiles, isSuperAdmin, superAdminLoading])
+
+  // Show loading while checking super admin status
+  if (superAdminLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-neutral-100 to-purple-50/30 dark:from-neutral-950 dark:via-neutral-900 dark:to-purple-950/20 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader className="animate-spin text-purple-600 dark:text-purple-400 h-6 w-6" />
+          <p className="text-muted-foreground font-medium">Verifying permissions...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show unauthorized if not super admin
+  if (!isSuperAdmin) {
+    return <UnauthorizedAccess />
+  }
+
   const handleSearch = () => {
     searchProfile(searchQuery)
   }
@@ -103,19 +150,6 @@ export default function AdminProfilesPage() {
       handleSearch()
     }
   }
-
-  // Fetch admin profiles on mount
-  useEffect(() => {
-    fetchAdminProfiles()
-  }, [fetchAdminProfiles])
-
-  const handleRoleChange = useCallback(() => {
-    // Refresh both search result and admin list
-    if (searchResult) {
-      searchProfile(searchResult.email || '')
-    }
-    fetchAdminProfiles()
-  }, [searchResult, searchProfile, fetchAdminProfiles])
 
   const handleRemoveAdmin = async () => {
     if (!removeAdminId) return
@@ -154,17 +188,6 @@ export default function AdminProfilesPage() {
     setSearchResult(null)
     setSearchPerformed(false)
   }
-
-  // Memoize admin stats for performance
-  const adminStats = useMemo(() => ({
-    totalAdmins: adminProfiles.length,
-    recentAdmins: adminProfiles.filter(admin => {
-      const createdDate = new Date(admin.created_at)
-      const weekAgo = new Date()
-      weekAgo.setDate(weekAgo.getDate() - 7)
-      return createdDate > weekAgo
-    }).length
-  }), [adminProfiles])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

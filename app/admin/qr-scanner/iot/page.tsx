@@ -162,8 +162,8 @@ export default function IoTScannerPage() {
   const TIMEOUTS = {
     DOM_INIT: 100,           // DOM element initialization
     SYSTEM_ERROR: 1000,      // Database/network errors (fast retry)
-    USER_ERROR: 1500,        // User validation errors
-    DATA_ERROR: 2000,        // QR data validation (prevent spam)
+    USER_ERROR: 2500,        // User validation errors
+    DATA_ERROR: 2500,        // QR data validation (prevent spam)
     UI_ANIMATION: 3000       // UI transitions and popups
   } as const
 
