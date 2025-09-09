@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare, Bell, Shield } from 'lucide-react'
+import { Trophy, Clock, ClipboardList, History, QrCode, MessageSquare, Bell, Shield, ActivitySquare } from 'lucide-react'
 import { useGlobalLoadingBar } from '@/components/providers/LoadingBarProvider'
 
 export default function AdminPage() {
@@ -40,6 +40,12 @@ export default function AdminPage() {
       description: 'View all time booking records',
       icon: <History className="w-full h-full text-teal-600 dark:text-teal-400" />,
       href: '/admin/bookings-history',
+    },
+    {
+      title: 'User Activity',
+      description: 'Track user engagement and analytics',
+      icon: <ActivitySquare className="w-full h-full text-cyan-600 dark:text-cyan-400" />,
+      href: '/admin/user-activity',
     },
     {
       title: 'Manage Bookings',

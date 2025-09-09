@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
-
 import {
   Camera,
   QrCode,
@@ -368,6 +367,7 @@ export default function CameraScannerPage() {
         'rear',
         'environment',
         'main',
+        'primary',
         'triple',
         'wide',
         'ultra wide',

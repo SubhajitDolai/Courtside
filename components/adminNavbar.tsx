@@ -58,6 +58,7 @@ export const navigationItems = [
     icon: History,
     items: [
       { title: "Bookings History", href: "/admin/bookings-history", icon: History },
+      { title: "User Activity", href: "/admin/user-activity", icon: User },
       { title: "User Feedback", href: "/admin/feedback", icon: MessageSquare },
     ]
   },
