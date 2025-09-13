@@ -37,7 +37,8 @@ import {
   MapPin,
   Activity,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Download
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -269,6 +270,73 @@ export default function UserActivityPage() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
+    }
+  }
+
+  const exportToCSV = () => {
+    if (!selectedUser || allActivities.length === 0) {
+      toast.error('No data to export')
+      return
+    }
+
+    try {
+      // Prepare CSV headers
+      const headers = [
+        'Sport Name',
+        'Booking Date',
+        'Start Time',
+        'End Time',
+        'Seat Number',
+        'Status',
+        'Check-in Time',
+        'Check-out Time',
+        'Created At'
+      ]
+
+      // Prepare CSV data
+      const csvData = allActivities.map(activity => [
+        activity.sport_name,
+        format(new Date(activity.booking_date), 'yyyy-MM-dd'),
+        activity.start_time,
+        activity.end_time,
+        activity.seat_number || 'N/A',
+        activity.status,
+        activity.checked_in_at ? format(new Date(activity.checked_in_at), 'yyyy-MM-dd HH:mm:ss') : 'Not checked in',
+        activity.checked_out_at ? format(new Date(activity.checked_out_at), 'yyyy-MM-dd HH:mm:ss') : 'Not checked out',
+        format(new Date(activity.created_at), 'yyyy-MM-dd HH:mm:ss')
+      ])
+
+      // Convert to CSV format
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => row.map(field => 
+          // Escape commas and quotes in data
+          typeof field === 'string' && (field.includes(',') || field.includes('"')) 
+            ? `"${field.replace(/"/g, '""')}"` 
+            : field
+        ).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      const userName = getDisplayName(selectedUser).replace(/[^a-zA-Z0-9]/g, '_')
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+      const filename = `user_activity_${userName}_${timestamp}.csv`
+      
+      link.setAttribute('href', url)
+      link.setAttribute('download', filename)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast.success('User activity exported successfully!')
+    } catch (error) {
+      console.error('Error exporting CSV:', error)
+      toast.error('Failed to export user activity')
     }
   }
 
@@ -823,15 +891,27 @@ export default function UserActivityPage() {
                           </Avatar>
                           
                           <div className="flex-1 text-center sm:text-left">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                              <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
-                                {getDisplayName(selectedUser)}
-                              </h2>
-                              {selectedUser.role === 'admin' && (
-                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 self-center sm:self-auto">
-                                  Admin
-                                </Badge>
-                              )}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
+                                  {getDisplayName(selectedUser)}
+                                </h2>
+                                {selectedUser.role === 'admin' && (
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 self-center sm:self-auto">
+                                    Admin
+                                  </Badge>
+                                )}
+                              </div>
+                              {/* {stats.totalBookings > 0 && (
+                                <Button
+                                  onClick={exportToCSV}
+                                  size="sm"
+                                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white self-center sm:self-auto"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  Download CSV
+                                </Button>
+                              )} */}
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
@@ -909,10 +989,23 @@ export default function UserActivityPage() {
                     {/* Activity History */}
                     <Card className="border border-neutral-200 dark:border-neutral-700">
                       <CardHeader>
+                        <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
                           <Activity className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                           Booking History ({totalCount})
                         </CardTitle>
+                        {totalCount > 0 && (
+                            <Button
+                              onClick={exportToCSV}
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:border-green-800 dark:text-green-300"
+                            >
+                              <Download className="w-4 h-4" />
+                              Export CSV
+                            </Button>
+                          )}
+                        </div>
                       </CardHeader>
                       <CardContent>
                         {totalCount === 0 ? (
